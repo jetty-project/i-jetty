@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src-generated"/>
 	<classpathentry kind="lib" path="/java/android_sdk_linux_m3-rc37a/android.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/java/android_sdk_linux_m3-rc37a/docs/reference"/>

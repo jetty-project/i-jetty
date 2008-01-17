@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="i-jetty" default="generate" basedir=".">
+
+  <property name="src"            value="${basedir}/src" />
+  <property name="src.gen"        value="${basedir}/src-generated" />
+  <property name="jetty"          value="${basedir}/jetty" />
+
+  <!-- ====================================================================== -->
+  <!-- Help target                                                            -->
+  <!-- ====================================================================== -->
+  <target name="help">
+    <echo message="Please run: $ant generate"/>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- generate target                                                        -->
+  <!-- ====================================================================== -->
+  <target name="generate">
+    <echo message="Generating src-generated"/>
+    
+    <copy todir="${src.gen}">
+      <fileset dir="${jetty}/modules/servlet-api-2.5/src/main/java">
+        <include name="**/*.java"/>
+      </fileset>
+      <fileset dir="${jetty}/modules/util/src/main/java">
+        <include name="org/mortbay/component/**/*.java"/>
+        <include name="org/mortbay/thread/**/*.java"/>
+        <include name="org/mortbay/util/**/*.java"/>
+        <include name="org/mortbay/log/**/*.java"/>
+        <exclude name="org/mortbay/log/**/Slf4jLog.java"/>
+        <include name="org/mortbay/servlet/**/*.java"/>
+      </fileset>
+      <fileset dir="${jetty}/modules/jetty/src/main/java">
+        <include name="org/mortbay/**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+
+</project>
