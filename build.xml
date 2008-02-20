@@ -23,6 +23,9 @@
       <fileset dir="${jetty}/modules/servlet-api-2.5/src/main/java">
         <include name="**/*.java"/>
       </fileset>
+      <fileset dir="${jetty}/modules/servlet-api-2.5/src/main/resources">
+        <include name="**/**"/>
+      </fileset>
       <fileset dir="${jetty}/modules/util/src/main/java">
         <include name="org/mortbay/component/**/*.java"/>
         <include name="org/mortbay/thread/**/*.java"/>
@@ -33,6 +36,9 @@
       </fileset>
       <fileset dir="${jetty}/modules/jetty/src/main/java">
         <include name="org/mortbay/**/*.java"/>
+      </fileset>
+      <fileset dir="${jetty}/modules/jetty/src/main/resources">
+        <include name="**/**"/>
       </fileset>
     </copy>
   </target>

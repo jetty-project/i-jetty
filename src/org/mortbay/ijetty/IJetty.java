@@ -2,20 +2,15 @@ package org.mortbay.ijetty;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.AbstractHandler;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class IJetty extends Activity {
@@ -23,46 +18,36 @@ public class IJetty extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        TextView tv = new TextView(this);
-        
-        Server server = new Server();
-        Connector connector=new SocketConnector();
-        connector.setPort(8080);
-        server.setConnectors(new Connector[]{connector});
-        
-        Handler handler=new HelloHandler();
-        server.setHandler(handler);
+        setContentView(R.layout.jetty_controller);
 
-        
-        String msg="Hello";
-        try
-        {
-            server.start();
-            tv.setText(msg+" from I-Jetty: "+connector.getConnection());
-        }
-        catch (Exception e)
-        {
-            msg=e.toString();
-            e.printStackTrace();
-            tv.setText(msg+" from I-Jetty! ");
-        }
-
-        setContentView(tv);
-        
-    }
-    
-
-    public static class HelloHandler extends AbstractHandler
-    {
-        public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
-        {
-            Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-            base_request.setHandled(true);
-            
-            response.setContentType("text/html");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().println("<h1>Hello OneHandler</h1>");
-        }
+        // Watch for button clicks.
+        Button button = (Button)findViewById(R.id.start);
+        button.setOnClickListener(
+                new OnClickListener()
+                {
+                    public void onClick(View v)
+                    {
+                        // Make sure the service is started.  It will continue running
+                        // until someone calls stopService().
+                        startService(new Intent(IJetty.this,
+                                IJettyService.class), null);
+                    }
+                }
+        );
+        button = (Button)findViewById(R.id.stop);
+        button.setOnClickListener(
+                new OnClickListener()
+                {
+                    public void onClick(View v)
+                    {
+                        // Cancel a previous call to startService().  Note that the
+                        // service will not actually stop at this point if there are
+                        // still bound clients.
+                        stopService(new Intent(IJetty.this,
+                                IJettyService.class));
+                    }
+                }
+        );
     }
 
 }
