@@ -28,13 +28,13 @@
         android:paddingBottom="4dip"
         android:text="@string/jetty_controller"/>
 
-    <Button id="@+id/start"
+    <Button android:id="@+id/start"
         android:layout_width="wrap_content" android:layout_height="wrap_content" 
         android:text="@string/start_jetty">
         <requestFocus />
     </Button>
 
-    <Button id="@+id/stop"
+    <Button android:id="@+id/stop"
         android:layout_width="wrap_content" android:layout_height="wrap_content" 
         android:text="@string/stop_jetty">
     </Button>

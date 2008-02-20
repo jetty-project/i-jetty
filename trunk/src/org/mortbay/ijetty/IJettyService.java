@@ -3,6 +3,7 @@ package org.mortbay.ijetty;
 import java.io.IOException;
 import java.io.InputStream;
 
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -11,6 +12,7 @@ import android.content.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -59,14 +61,19 @@ public class IJettyService extends Service
         // notification.
         Intent intent = new Intent(this, IJetty.class);
 
-        // Display a notification about us starting.
+        Toast.makeText(IJettyService.this, R.string.jetty_started, Toast.LENGTH_SHORT).show();
         mNM.notify(R.string.jetty_started,
                    new Notification(
+                       this,
                        R.drawable.jicon,
                        getText(R.string.manage_jetty),
+                       System.currentTimeMillis(),
+                       getText(R.string.manage_jetty),
+                       getText(R.string.manage_jetty),
                        intent,
-                       getText(R.string.jetty_started),
-                       null));
+                       R.drawable.jicon,
+                       getText(R.string.manage_jetty),
+                       intent));
         server = new Server();
         Connector connector=new SocketConnector();
         //Connector connector=new SelectChannelConnector();
@@ -100,10 +107,8 @@ public class IJettyService extends Service
                 mNM.cancel(R.string.jetty_started);
 
                 // Tell the user we stopped.
-                mNM.notifyWithText(R.string.jetty_stopped,
-                           getText(R.string.jetty_stopped),
-                           NotificationManager.LENGTH_SHORT,
-                           null);
+                Toast.makeText(this, getText(R.string.jetty_stopped), Toast.LENGTH_SHORT).show();
+             
 
                 Log.i("Jetty", "Jetty stopping");
                 server.stop();
@@ -123,17 +128,7 @@ public class IJettyService extends Service
         }  
     }
 
-	/** 
-	 * Do not allow clients to bind to the jetty service for now.
-	 * TODO investigate binding
-	 * @see android.app.Service#getBinder()
-	 */
-	@Override
-	public IBinder getBinder() 
-	{
-		return null; 
-	}
-	
+
 	
 	
 	/**
@@ -148,4 +143,11 @@ public class IJettyService extends Service
 	    else
 	        return null;
 	}
+
+    @Override
+    public IBinder onBind(Intent intent)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
