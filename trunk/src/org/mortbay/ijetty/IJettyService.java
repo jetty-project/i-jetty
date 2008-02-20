@@ -1,11 +1,13 @@
 package org.mortbay.ijetty;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -21,12 +23,14 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.AbstractHandler;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 
-public class IJettyService extends Service 
+public class IJettyService extends Service
 {
 
     private NotificationManager mNM;
     private Server server;
+    private static Resources __resources;
     
 
     public static class HelloHandler extends AbstractHandler
@@ -42,11 +46,13 @@ public class IJettyService extends Service
         }
     }
 
+  
     
     
     @Override
     protected void onCreate() 
     {
+        __resources = getResources();
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
         // This is who should be launched if the user selects our persistent
@@ -61,23 +67,21 @@ public class IJettyService extends Service
                        intent,
                        getText(R.string.jetty_started),
                        null));
-        
-        
         server = new Server();
         Connector connector=new SocketConnector();
+        //Connector connector=new SelectChannelConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
-        
         Handler handler=new HelloHandler();
         server.setHandler(handler);
-        
         try
         {
+            // TODO Auto-generated method stub
             System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
             Log.i("Jetty", "Jetty starting");
             org.mortbay.log.Log.setLog(new AndroidLog());
             server.start();
-            server.join();
+            Log.i("Jetty", "Jetty started");
         }
         catch (Exception e)
         {
@@ -87,20 +91,31 @@ public class IJettyService extends Service
 
     @Override
     protected void onDestroy() {
-        // Cancel the persistent notification.
-        mNM.cancel(R.string.jetty_started);
-
-        // Tell the user we stopped.
-        mNM.notifyWithText(R.string.jetty_stopped,
-                   getText(R.string.jetty_stopped),
-                   NotificationManager.LENGTH_SHORT,
-                   null);
 
         try
         {
-            server.stop();
-            server=null;
-            Log.i("Jetty", "Jetty stopped");
+            if (server != null)
+            {
+                // Cancel the persistent notification.
+                mNM.cancel(R.string.jetty_started);
+
+                // Tell the user we stopped.
+                mNM.notifyWithText(R.string.jetty_stopped,
+                           getText(R.string.jetty_stopped),
+                           NotificationManager.LENGTH_SHORT,
+                           null);
+
+                Log.i("Jetty", "Jetty stopping");
+                server.stop();
+                Log.i("Jetty", "About to do join");
+                server.join();
+                server=null;
+                Log.i("Jetty", "****Jetty stopped");
+                __resources=null;
+            }
+            else
+                Log.i("Jetty", "Jetty not running");
+
         }
         catch (Exception e)
         {
@@ -119,4 +134,18 @@ public class IJettyService extends Service
 		return null; 
 	}
 	
+	
+	
+	/**
+	 * Hack to get around bug in ResourceBundles
+	 * @param id
+	 * @return
+	 */
+	public static InputStream getStreamToRawResource (int id)
+	{
+	    if (__resources != null)
+	        return __resources.openRawResource(id);  
+	    else
+	        return null;
+	}
 }

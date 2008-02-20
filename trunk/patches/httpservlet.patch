@@ -1,0 +1,46 @@
+--- /home/janb/src/jetty-6.1/modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpServlet.java	2007-12-21 13:53:55.000000000 +1100
++++ javax/servlet/http/HttpServlet.java	2008-02-20 11:49:33.000000000 +1100
+@@ -36,6 +36,7 @@
+ import java.text.MessageFormat;
+ import java.util.Enumeration;
+ import java.util.Locale;
++import java.util.PropertyResourceBundle;
+ import java.util.ResourceBundle;
+ 
+ import javax.servlet.GenericServlet;
+@@ -44,6 +45,11 @@
+ import javax.servlet.ServletRequest;
+ import javax.servlet.ServletResponse;
+ 
++import org.mortbay.ijetty.IJettyService;
++import org.mortbay.ijetty.R;
++
++import android.content.Resources;
++
+ 
+ /**
+  *
+@@ -104,9 +110,20 @@
+     private static final String HEADER_LASTMOD = "Last-Modified";
+     
+     private static final String LSTRING_FILE =
+-	"javax.servlet.http.LocalStrings";
+-    private static ResourceBundle lStrings =
+-	ResourceBundle.getBundle(LSTRING_FILE);
++	"javax_servlet_http_localstrings";
++    private static ResourceBundle lStrings;
++    
++    {
++        try
++        {
++            lStrings = new PropertyResourceBundle(IJettyService.getStreamToRawResource(R.raw.javax_servlet_http_localstrings));
++        }
++        catch (Exception e)
++        {
++            e.printStackTrace();
++        }
++    }
++	
+    
+    
+    

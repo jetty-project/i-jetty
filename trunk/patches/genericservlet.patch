@@ -1,0 +1,37 @@
+--- /home/janb/src/jetty-6.1/modules/servlet-api-2.5/src/main/java/javax/servlet/GenericServlet.java	2007-12-21 13:53:55.000000000 +1100
++++ javax/servlet/GenericServlet.java	2008-02-20 11:53:51.000000000 +1100
+@@ -29,8 +29,12 @@
+ 
+ import java.io.IOException;
+ import java.util.Enumeration;
++import java.util.PropertyResourceBundle;
+ import java.util.ResourceBundle;
+ 
++import org.mortbay.ijetty.IJettyService;
++import org.mortbay.ijetty.R;
++
+ /**
+  *
+  * Defines a generic, protocol-independent
+@@ -61,8 +65,19 @@
+     implements Servlet, ServletConfig, java.io.Serializable
+ {
+     private static final String LSTRING_FILE = "javax.servlet.LocalStrings";
+-    private static ResourceBundle lStrings =
+-        ResourceBundle.getBundle(LSTRING_FILE);
++    private static ResourceBundle lStrings;
++    
++    {
++        try
++        {
++            lStrings = new PropertyResourceBundle(IJettyService.getStreamToRawResource(R.raw.javax_servlet_localstrings));
++        }
++        catch (Exception e)
++        {
++            e.printStackTrace();
++        }
++    }
++   
+ 
+     private transient ServletConfig config;
+     
