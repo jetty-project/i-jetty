@@ -5,6 +5,7 @@
   <property name="src"            value="${basedir}/src" />
   <property name="src.gen"        value="${basedir}/src-generated" />
   <property name="jetty"          value="${basedir}/jetty" />
+  <property name="patches"        value="${basedir}/patches" />
 
   <!-- ====================================================================== -->
   <!-- Help target                                                            -->
@@ -41,6 +42,12 @@
         <include name="**/**"/>
       </fileset>
     </copy>
+    <patch dir="${src.gen}" patchfile="${patches}/cookie.patch" ignorewhitespace="true" strip="0"/>
+    <patch dir="${src.gen}" patchfile="${patches}/genericservlet.patch" ignorewhitespace="true" strip="0"/>
+    <patch dir="${src.gen}" patchfile="${patches}/httpservlet.patch" ignorewhitespace="true" strip="0"/>
+    <patch dir="${src.gen}" patchfile="${patches}/httputils.patch" ignorewhitespace="true" strip="0"/>
+    <patch dir="${src.gen}" patchfile="${patches}/servletoutputstream.patch" ignorewhitespace="true" strip="0"/>
+    <patch dir="${src.gen}" patchfile="${patches}/mimetypes.patch" ignorewhitespace="true" strip="0"/>
   </target>
 
 </project>

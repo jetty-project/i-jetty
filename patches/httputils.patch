@@ -1,0 +1,39 @@
+--- /home/janb/src/jetty-6.1/modules/servlet-api-2.5/src/main/java/javax/servlet/http/HttpUtils.java	2007-12-21 13:53:55.000000000 +1100
++++ javax/servlet/http/HttpUtils.java	2008-02-20 11:48:37.000000000 +1100
+@@ -29,7 +29,12 @@
+ package javax.servlet.http;
+ 
+ import javax.servlet.ServletInputStream;
++
++import org.mortbay.ijetty.IJettyService;
++import org.mortbay.ijetty.R;
++
+ import java.util.Hashtable;
++import java.util.PropertyResourceBundle;
+ import java.util.ResourceBundle;
+ import java.util.StringTokenizer;
+ import java.io.IOException;
+@@ -46,9 +51,20 @@
+ public class HttpUtils {
+ 
+     private static final String LSTRING_FILE =
+-	"javax.servlet.http.LocalStrings";
+-    private static ResourceBundle lStrings =
+-	ResourceBundle.getBundle(LSTRING_FILE);
++	"javax_servlet_http_localstrings";
++    private static ResourceBundle lStrings;
++    
++    {
++        try
++        {
++            lStrings = new PropertyResourceBundle (IJettyService.getStreamToRawResource(R.raw.javax_servlet_http_localstrings));
++        }
++        catch (Exception e)
++        {
++            e.printStackTrace();
++        }
++    }
++        
+         
+     
+     
