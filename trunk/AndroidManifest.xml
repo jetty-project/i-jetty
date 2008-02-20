@@ -2,11 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.mortbay.ijetty">
     <application android:icon="@drawable/icon">
-        <activity class=".IJetty" android:label="@string/app_name">
+        <activity class=".IJetty" android:label="@string/manage_jetty">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
                 <category android:value="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <service class=".IJettyService" android:process=":remote" />
+        
     </application>
 </manifest> 
