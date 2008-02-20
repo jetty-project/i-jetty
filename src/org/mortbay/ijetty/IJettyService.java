@@ -75,8 +75,8 @@ public class IJettyService extends Service
                        getText(R.string.manage_jetty),
                        intent));
         server = new Server();
-        Connector connector=new SocketConnector();
-        //Connector connector=new SelectChannelConnector();
+        //Connector connector=new SocketConnector();
+        Connector connector=new SelectChannelConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         Handler handler=new HelloHandler();
