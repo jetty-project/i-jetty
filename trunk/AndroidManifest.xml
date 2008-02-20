@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.mortbay.ijetty">
-    <application android:icon="@drawable/icon">
+    <application android:icon="@drawable/jetty">
         <activity class=".IJetty" android:label="@string/manage_jetty">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
