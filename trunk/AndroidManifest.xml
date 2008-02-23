@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.mortbay.ijetty">
     <application>
-        <activity android:name=".IJetty" android:label="@string/manage_jetty" android:icon="@drawable/jetty">
+        <activity android:name=".IJetty" android:label="@string/manage_jetty" android:icon="@drawable/jetty" android:multiprocess="false" android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -12,4 +12,6 @@
         <service android:name=".IJettyService" android:process=":remote"/>
         
     </application>
-</manifest> 
+<uses-permission android:name="android.permission.READ_CONTACTS">
+</uses-permission><uses-permission android:name="android.permission.WRITE_SETTINGS">
+</uses-permission></manifest> 
