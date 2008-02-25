@@ -14,8 +14,6 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-
-import org.mortbay.ijetty.servlet.StaticContentServlet;
 import org.mortbay.ijetty.servlet.InfoServlet;
 import org.mortbay.ijetty.servlet.StreamServlet;
 import org.mortbay.jetty.Connector;
@@ -138,9 +136,6 @@ public class IJettyService extends Service
         InfoServlet infoServlet = new InfoServlet();
         infoServlet.setContentResolver(getContentResolver());
         context.addServlet(new ServletHolder(infoServlet), "/");
-        context.addServlet(new ServletHolder(new StreamServlet()), "/media/*");
-        StaticContentServlet staticServlet = new StaticContentServlet();
-        staticServlet.setResources(__resources);
         //context.addServlet(new ServletHolder(staticServlet), "/css/*");
         
         //Bridge jetty logging to Android logging
