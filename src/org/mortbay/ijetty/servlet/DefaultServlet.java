@@ -32,7 +32,7 @@ import android.util.Log;
 import android.content.Resources;
 
 
-public class AbstractDefaultServlet extends HttpServlet
+public class DefaultServlet extends HttpServlet
 {
 
     private Resources _resources;
