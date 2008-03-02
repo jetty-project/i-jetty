@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,25 +20,37 @@ import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Response;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
 
 import org.mortbay.util.URIUtil;
-
-import android.content.Resources;
 import android.util.Log;
 
 
 public class DefaultServlet extends HttpServlet
 {
-
-    private Resources _resources;
+    private String[] _welcomes =  {"index.html", "index.htm"};   
+    private boolean _redirectWelcome=false;
+    private boolean _dirAllowed=true;
+    private ContextHandler.SContext _context;
+    
+    public DefaultServlet ()
+    {}
     
     
-    
-    public void setResources (Resources resources)
+    public void init()
     {
-        _resources=resources;
+       String tmp = getInitParameter("redirectWelcome");
+       if (tmp!=null)
+           _redirectWelcome=Boolean.valueOf(tmp.trim());
+       tmp = getInitParameter("dirAllowed");
+       if (tmp!=null)
+           _dirAllowed=Boolean.valueOf(tmp.trim());
+       ServletContext config=getServletContext();
+       _context = (ContextHandler.SContext)config;
     }
+    
+   
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -65,27 +79,78 @@ public class DefaultServlet extends HttpServlet
         
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
         boolean endsWithSlash=pathInContext.endsWith(URIUtil.SLASH);
-        AndroidResource ar = AndroidResource.getResource(pathInContext);
+        AndroidFileResource androidFileResource = new AndroidFileResource(pathInContext);
         
-        if (ar.exists())
-            Log.d("Jetty", "Exists AndroidFileResource "+ar.toString());
-        else
-            Log.d("Jetty", "Not exists AndroidFileResource "+ar.toString());
-        
-        Log.d("Jetty", "Length: "+((AndroidFileResource)ar).length());
-       
-        if (ar==null || !ar.exists())
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        else if (!ar.isDirectory())
-        {   
-            if (included.booleanValue() || passConditionalHeaders(request,response, ar))  
+        if (androidFileResource.isDirectory() && !endsWithSlash)
+        {
+            //if url has no final /, then add trailing / and redirect
+                StringBuffer buf=request.getRequestURL();
+                int param=buf.lastIndexOf(";");
+                if (param<0)
+                    buf.append('/');
+                else
+                    buf.insert(param,'/');
+                String q=request.getQueryString();
+                if (q!=null&&q.length()!=0)
+                {
+                    buf.append('?');
+                    buf.append(q);
+                }
+                response.setContentLength(0);
+                response.sendRedirect(response.encodeRedirectURL(buf.toString()));
+        }
+        else if (androidFileResource.isDirectory() && endsWithSlash)
+        {
+            //check for welcome file
+            String welcome=getWelcomeFile(androidFileResource);
+            if (welcome!=null)
             {
-                sendData(request,response,included.booleanValue(),ar);  
+                String ipath=URIUtil.addPaths(pathInContext,welcome);
+                if (_redirectWelcome)
+                {
+                    // Redirect to the index
+                    response.setContentLength(0);
+                    String q=request.getQueryString();
+                    if (q!=null&&q.length()!=0)
+                        response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath)+"?"+q);
+                    else
+                        response.sendRedirect(URIUtil.addPaths( _context.getContextPath(),ipath));
+                }
+                else
+                {
+                    // Forward to the index
+                    RequestDispatcher dispatcher=request.getRequestDispatcher(ipath);
+                    if (dispatcher!=null)
+                    {
+                        if (included.booleanValue())
+                            dispatcher.include(request,response);
+                        else
+                        {
+                            request.setAttribute("org.mortbay.jetty.welcome",ipath);
+                            dispatcher.forward(request,response);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //else do a directory listing    
+                if (included.booleanValue() || passConditionalHeaders(request,response, androidFileResource))
+                    sendDirectory(request,response,androidFileResource,pathInContext.length()>1);
             }
         }
-        else if (included.booleanValue() || passConditionalHeaders(request,response, ar))
-            sendDirectory(request,response,(AndroidFileResource)ar,pathInContext.length()>1);
-            
+        else
+        {
+            if (androidFileResource.exists())
+            {
+                if (included.booleanValue() || passConditionalHeaders(request,response, androidFileResource))  
+                {
+                    sendData(request,response,included.booleanValue(),androidFileResource);  
+                }
+            }
+            else
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }   
     }
 
     @Override
@@ -100,22 +165,10 @@ public class DefaultServlet extends HttpServlet
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
     
-    /*
-     * consider mapping urls like:
-     * 
-     * content/authority/path/id
-     * ==
-     * content://authority/path/id
-     * eg
-     * content://contacts/people/23
-     * content/contacts/people/23
-     * 
-     * sdcard/this/is/my/xyz.file
-     */
     
     /* Check modification date headers.
      */
-    protected boolean passConditionalHeaders(HttpServletRequest request,HttpServletResponse response, AndroidResource androidResource)
+    protected boolean passConditionalHeaders(HttpServletRequest request,HttpServletResponse response, AndroidFileResource androidResource)
     throws IOException
     {
         if (!request.getMethod().equals(HttpMethods.HEAD) )
@@ -199,7 +252,7 @@ public class DefaultServlet extends HttpServlet
     protected void sendData (HttpServletRequest request,
             HttpServletResponse response,
             boolean include,
-            AndroidResource ar)
+            AndroidFileResource afr)
     throws IOException
     {
         // Get the output stream (or writer)
@@ -209,24 +262,23 @@ public class DefaultServlet extends HttpServlet
         
         if (include)
         {
-            ar.writeTo(out);
+            afr.writeTo(out);
         }
         else
         {
             // Write content normally
-            writeHeaders(response,ar);
-            ar.writeTo(out);
+            writeHeaders(response,afr);
+            afr.writeTo(out);
         }
     }
 
-    protected void writeHeaders(HttpServletResponse response, AndroidResource ar)
+    protected void writeHeaders(HttpServletResponse response, AndroidFileResource afr)
     throws IOException
     {
 
-        if (!(ar instanceof AndroidFileResource))
+        if (afr==null)
             return;
-        
-        AndroidFileResource afr = (AndroidFileResource)ar;
+    
         long lml=afr.lastModified();
         if (response instanceof Response)
         {
@@ -240,6 +292,21 @@ public class DefaultServlet extends HttpServlet
             if (lml>0)
                 response.setDateHeader(HttpHeaders.LAST_MODIFIED,lml);
         }
+    }
+    
+    private String getWelcomeFile(AndroidFileResource dir) throws IOException
+    {
+        if (!dir.isDirectory() || _welcomes==null)
+            return null;
+
+        for (int i=0;i<_welcomes.length;i++)
+        {
+            AndroidFileResource welcome=dir.addPath(_welcomes[i]);
+            if (welcome.exists())
+                return _welcomes[i];
+        }
+
+        return null;
     }
 
 }

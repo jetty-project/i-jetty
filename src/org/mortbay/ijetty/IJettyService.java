@@ -135,8 +135,8 @@ public class IJettyService extends Service
         Context context = new Context(server, "/", Context.SESSIONS);
         InfoServlet infoServlet = new InfoServlet();
         infoServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(infoServlet), "/");
-        //context.addServlet(new ServletHolder(new org.mortbay.ijetty.servlet.DefaultServlet()) ,"/");
+        context.addServlet(new ServletHolder(infoServlet), "/app");
+        context.addServlet(new ServletHolder(new org.mortbay.ijetty.servlet.DefaultServlet()) ,"/");
         
         
         //Bridge jetty logging to Android logging
