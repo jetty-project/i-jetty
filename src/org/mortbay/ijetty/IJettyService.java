@@ -14,12 +14,14 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.mortbay.ijetty.servlet.InfoFilter;
 import org.mortbay.ijetty.servlet.InfoServlet;
-import org.mortbay.ijetty.servlet.StreamServlet;
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 public class IJettyService extends Service
@@ -137,7 +139,7 @@ public class IJettyService extends Service
         infoServlet.setContentResolver(getContentResolver());
         context.addServlet(new ServletHolder(infoServlet), "/app");
         context.addServlet(new ServletHolder(new org.mortbay.ijetty.servlet.DefaultServlet()) ,"/");
-        
+        context.addFilter(new FilterHolder(new InfoFilter()), "/", Handler.REQUEST);
         
         //Bridge jetty logging to Android logging
         System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
