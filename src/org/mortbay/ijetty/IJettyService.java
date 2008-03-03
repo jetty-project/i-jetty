@@ -14,8 +14,13 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.mortbay.ijetty.servlet.CallLogServlet;
+import org.mortbay.ijetty.servlet.ContactsServlet;
+import org.mortbay.ijetty.servlet.CssServlet;
+import org.mortbay.ijetty.servlet.IndexServlet;
 import org.mortbay.ijetty.servlet.InfoFilter;
 import org.mortbay.ijetty.servlet.InfoServlet;
+import org.mortbay.ijetty.servlet.SettingsServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
@@ -135,9 +140,19 @@ public class IJettyService extends Service
        
         //Deploy a servlet to serve on--phone information
         Context context = new Context(server, "/", Context.SESSIONS);
-        InfoServlet infoServlet = new InfoServlet();
-        infoServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(infoServlet), "/app");
+        ContactsServlet contactsServlet = new ContactsServlet();
+        contactsServlet.setContentResolver(getContentResolver());
+        context.addServlet(new ServletHolder(contactsServlet), "/app/contacts");
+        CallLogServlet callLogServlet = new CallLogServlet();
+        callLogServlet.setContentResolver(getContentResolver());
+        context.addServlet(new ServletHolder(callLogServlet), "/app/calls");
+        SettingsServlet settingsServlet = new SettingsServlet();
+        settingsServlet.setContentResolver(getContentResolver());
+        context.addServlet(new ServletHolder(settingsServlet), "/app/settings");
+        IndexServlet indexServlet = new IndexServlet();
+        context.addServlet(new ServletHolder(indexServlet), "/app");
+        CssServlet cssServlet = new CssServlet();
+        context.addServlet(new ServletHolder(cssServlet), "/app/css");
         context.addServlet(new ServletHolder(new org.mortbay.ijetty.servlet.DefaultServlet()) ,"/");
         context.addFilter(new FilterHolder(new InfoFilter()), "/", Handler.REQUEST);
         
