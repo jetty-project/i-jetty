@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -21,6 +22,8 @@ import android.provider.Settings;
 public abstract class InfoServlet extends HttpServlet
 {
     private ContentResolver _resolver;
+    private String[] _navBarLabels = {"Contacts","Call Log", "Settings"};
+    private String[] _navBarItems = {"/app/contacts/", "/app/calls/","/app/settings/"};
 
     public void setContentResolver (ContentResolver resolver)
     {
@@ -42,6 +45,23 @@ public abstract class InfoServlet extends HttpServlet
         writer.println("</html>");
     }
     
+    protected void doMenuBar (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        writer.println("<table id='navbar'><tr>");
+        for (int i=0; i<_navBarItems.length; i++)
+        {
+            String pathInContext=URIUtil.addPaths(request.getServletPath(),request.getPathInfo());
+            if (pathInContext.startsWith(_navBarItems[i]))
+                writer.println("<td class='sel'>");
+            else
+                writer.println("<td>");
+            
+            writer.println("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
+            writer.println("</td>");
+        }
+        writer.println("</tr></table>");
+    }
+    
     protected abstract void doContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
     
     
@@ -54,6 +74,7 @@ public abstract class InfoServlet extends HttpServlet
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();
         doHeader(writer, request, response);
+        doMenuBar(writer, request, response);
         doContent(writer, request, response);
         doFooter (writer, request, response);
     }

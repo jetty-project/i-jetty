@@ -142,13 +142,13 @@ public class IJettyService extends Service
         Context context = new Context(server, "/", Context.SESSIONS);
         ContactsServlet contactsServlet = new ContactsServlet();
         contactsServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(contactsServlet), "/app/contacts");
+        context.addServlet(new ServletHolder(contactsServlet), "/app/contacts/*");
         CallLogServlet callLogServlet = new CallLogServlet();
         callLogServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(callLogServlet), "/app/calls");
+        context.addServlet(new ServletHolder(callLogServlet), "/app/calls/*");
         SettingsServlet settingsServlet = new SettingsServlet();
         settingsServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(settingsServlet), "/app/settings");
+        context.addServlet(new ServletHolder(settingsServlet), "/app/settings/*");
         IndexServlet indexServlet = new IndexServlet();
         context.addServlet(new ServletHolder(indexServlet), "/app");
         CssServlet cssServlet = new CssServlet();
