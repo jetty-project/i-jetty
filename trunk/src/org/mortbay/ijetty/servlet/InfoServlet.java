@@ -38,10 +38,18 @@ public abstract class InfoServlet extends HttpServlet
         writer.println("<html>");
         writer.println("<head><META http-equiv=\"Pragma\" content=\"no-cache\"> <META http-equiv=\"Cache-Control\" content=\"no-cache,no-store\">");
         writer.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"/app/css\" /></head>");
+        writer.println("<body>");
+        writer.println("<center>");
+        writer.println("<table>");
+        writer.println("<tr><td>");
     }
     
     protected void doFooter (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+    	writer.println("</td></tr>");
+    	writer.println("</table>");
+    	writer.println("</center>");
+    	writer.println("</body>");
         writer.println("</html>");
     }
     
