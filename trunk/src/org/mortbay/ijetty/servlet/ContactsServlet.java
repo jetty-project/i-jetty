@@ -270,7 +270,7 @@ public class ContactsServlet extends InfoServlet
             {  
                 String style = getRowStyle(row);
                 
-                writer.println("<tr>");
+                writer.println("<tr class='"+style+"'>");
                 String id = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));  
                 String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NAME));
                 String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));
@@ -332,7 +332,7 @@ public class ContactsServlet extends InfoServlet
     	while (cursor.next())
     	{  
     		String style = getRowStyle(row);
-    		writer.println("<tr>");
+    		writer.println("<tr class='"+style+"'>");
     		String label = cursor.getString(cursor.getColumnIndex(Contacts.PhonesColumns.LABEL));
     		String number = cursor.getString(cursor.getColumnIndex(Contacts.PhonesColumns.NUMBER));
     		int type = cursor.getInt(cursor.getColumnIndex(Contacts.PhonesColumns.TYPE));
@@ -371,7 +371,7 @@ public class ContactsServlet extends InfoServlet
         while (cursor.next())
         { 
         	String style = getRowStyle(row);
-            writer.println("<tr>");
+            writer.println("<tr class='"+style+"'>");
             String data = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.DATA));
             String auxData = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.AUX_DATA));
             int kind = -99;
