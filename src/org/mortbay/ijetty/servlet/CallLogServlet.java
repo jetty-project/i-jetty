@@ -47,7 +47,7 @@ public class CallLogServlet extends InfoServlet
             while (cursor.next())
             {  
                 String style = getRowStyle(row);
-                writer.println("<tr>");
+                writer.println("<tr class='"+style+"'>");
                 for (int i=0;i<colNames.length;i++)
                 {
                     writer.println("<td class=\""+style+"\">");

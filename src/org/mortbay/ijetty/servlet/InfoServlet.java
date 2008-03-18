@@ -47,6 +47,9 @@ public abstract class InfoServlet extends HttpServlet
     protected void doFooter (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
     	writer.println("</td></tr>");
+    	writer.println("<tr><td class='promo'>");
+    	writer.println("<span class='promo'>This page served by <a href='http://jetty.mortbay.org'>Jetty</a></span>");
+    	writer.println("</td></tr>");
     	writer.println("</table>");
     	writer.println("</center>");
     	writer.println("</body>");
@@ -106,7 +109,7 @@ public abstract class InfoServlet extends HttpServlet
                 else
                     style = "odd";
 
-                writer.println("<tr>");
+                writer.println("<tr class='"+style+"'>");
                 for (int i=0;i<colNames.length;i++)
                 {
                     String val=cursor.getString(i);

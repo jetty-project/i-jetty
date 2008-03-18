@@ -24,6 +24,8 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
 
 import org.mortbay.util.URIUtil;
+
+import android.content.Resources;
 import android.util.Log;
 
 
@@ -33,6 +35,8 @@ public class DefaultServlet extends HttpServlet
     private boolean _redirectWelcome=false;
     private boolean _dirAllowed=true;
     private ContextHandler.SContext _context;
+    private Resources _resources;
+    
     
     public DefaultServlet ()
     {}
@@ -307,6 +311,11 @@ public class DefaultServlet extends HttpServlet
         }
 
         return null;
+    }
+    
+    public void setResources (Resources resources)
+    {
+    	_resources = resources;
     }
 
 }
