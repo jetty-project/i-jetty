@@ -1,7 +1,10 @@
 package org.mortbay.ijetty;
 
 
+import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -17,6 +20,7 @@ import android.widget.Toast;
 import org.mortbay.ijetty.servlet.CallLogServlet;
 import org.mortbay.ijetty.servlet.ContactsServlet;
 import org.mortbay.ijetty.servlet.CssServlet;
+import org.mortbay.ijetty.servlet.IPServlet;
 import org.mortbay.ijetty.servlet.IndexServlet;
 import org.mortbay.ijetty.servlet.InfoFilter;
 import org.mortbay.ijetty.servlet.InfoServlet;
@@ -149,6 +153,8 @@ public class IJettyService extends Service
         SettingsServlet settingsServlet = new SettingsServlet();
         settingsServlet.setContentResolver(getContentResolver());
         context.addServlet(new ServletHolder(settingsServlet), "/app/settings/*");
+        IPServlet ipServlet = new IPServlet();
+        context.addServlet(new ServletHolder(ipServlet), "/app/network/*");
         IndexServlet indexServlet = new IndexServlet();
         context.addServlet(new ServletHolder(indexServlet), "/app");
         CssServlet cssServlet = new CssServlet();
