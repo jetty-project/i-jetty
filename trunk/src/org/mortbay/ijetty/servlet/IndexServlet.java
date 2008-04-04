@@ -2,6 +2,7 @@ package org.mortbay.ijetty.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ public class IndexServlet extends InfoServlet
         writer.println("<li><a href='/app/contacts'>Contacts</a></li>");
         writer.println("<li><a href='/app/settings'>System Settings</a></li>");
         writer.println("<li><a href='/app/calls'>Call Log</a></li>");
+        writer.println("<li><a href='/app/network'>Network Addresses</a></li>");
         writer.println("</ul>");
     }
 

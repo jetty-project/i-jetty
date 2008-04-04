@@ -22,7 +22,6 @@ public class SettingsServlet extends InfoServlet
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, null, null, null, null);
         String[] cols = cursor.getColumnNames();
         formatTable(cols, cursor, writer);
-
     }
 
 }
