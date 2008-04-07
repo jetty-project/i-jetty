@@ -16,6 +16,7 @@ public final class R {
         public static final int jicon=0x7f020002;
     }
     public static final class id {
+        public static final int list=0x7f060002;
         public static final int start=0x7f060000;
         public static final int stop=0x7f060001;
     }
@@ -31,6 +32,7 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f050000;
+        public static final int interfaces=0x7f050009;
         public static final int jetty_controller=0x7f050006;
         public static final int jetty_not_started=0x7f050002;
         public static final int jetty_not_stopped=0x7f050004;

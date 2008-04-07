@@ -1,10 +1,8 @@
 package org.mortbay.ijetty;
 
 
-import java.io.File;
+
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -23,7 +21,6 @@ import org.mortbay.ijetty.servlet.CssServlet;
 import org.mortbay.ijetty.servlet.IPServlet;
 import org.mortbay.ijetty.servlet.IndexServlet;
 import org.mortbay.ijetty.servlet.InfoFilter;
-import org.mortbay.ijetty.servlet.InfoServlet;
 import org.mortbay.ijetty.servlet.SettingsServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
@@ -42,7 +39,7 @@ public class IJettyService extends Service
     private SharedPreferences preferences;
 
 
-    @Override
+
     protected void onCreate() 
     {
         try
@@ -81,9 +78,9 @@ public class IJettyService extends Service
         }  
     }
 
-    @Override
-    protected void onDestroy() {
-
+ 
+    protected void onDestroy() 
+    {
         try
         {
             if (server != null)
@@ -126,7 +123,7 @@ public class IJettyService extends Service
 	        return null;
 	}
 
-    @Override
+
     public IBinder onBind(Intent intent)
     {
         // TODO Auto-generated method stub
