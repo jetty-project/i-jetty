@@ -56,19 +56,19 @@ public abstract class InfoServlet extends HttpServlet
     
     protected void doMenuBar (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        writer.println("<table id='navbar'><tr>");
+        writer.println("<table width='100%'><tr><td><ul id='ulnavbar'>");
         for (int i=0; i<_navBarItems.length; i++)
         {
             String pathInContext=URIUtil.addPaths(request.getServletPath(),request.getPathInfo());
             if (pathInContext.startsWith(_navBarItems[i]))
-                writer.println("<td class='sel'>");
+                writer.println("<li class='sel'>");
             else
-                writer.println("<td>");
+                writer.println("<li>");
             
             writer.println("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
-            writer.println("</td>");
+            writer.println("</li>");
         }
-        writer.println("</tr></table>");
+        writer.println("</td></tr></table>");
     }
     
     protected abstract void doContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
@@ -93,7 +93,7 @@ public abstract class InfoServlet extends HttpServlet
     {   
         if (colNames!=null && cursor!=null && writer!=null)
         {
-            writer.println("<table>");
+            writer.println("<table class='generic'>");
             writer.println("<tr>");
             for (int i=0;i<colNames.length;i++)
                 writer.println("<th>"+colNames[i]+"</th>");

@@ -245,7 +245,9 @@ public class ContactsServlet extends InfoServlet
         cursor = getContentResolver().query(Contacts.ContactMethods.CONTENT_URI, contactMethodsProjection, "people."+android.provider.BaseColumns._ID+" = ?", whereArgs, Contacts.ContactMethodsColumns.KIND +" DESC");
         formatContactMethods (who, cursor, writer);
         cursor.close(); 
-       
+        
+        //TODO - implement buttons
+        writer.println("<tr><td><button id='edit'>Edit</button>&nbsp;<button id='del'>Delete</button></td></tr>");  
     }
 
 
@@ -254,17 +256,6 @@ public class ContactsServlet extends InfoServlet
         if (cursor!=null && writer!=null)
         {
             writer.println("<table id='user'>");
-//            writer.println("<tr>");
-//            
-//            String[] colNames = {Contacts.PeopleColumns.STARRED,
-//                  Contacts.PeopleColumns.PHOTO,
-//            		Contacts.PeopleColumns.NAME,
-//            		Contacts.PeopleColumns.COMPANY
-//            };
-//            
-//            for (int i=0;i<colNames.length;i++)
-//                printCellHeader(writer, colNames[i], null);
-//            writer.println("</tr>");
             int row = 0;
             while (cursor.next())
             {  
@@ -309,14 +300,14 @@ public class ContactsServlet extends InfoServlet
                writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(photo==null?"&nbsp;":"<a href='/app/contacts/"+id+"/photo'><img src=\"/app/contacts/"+id+"/photo\""+"/></a>&nbsp;")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
                if (company!=null)
             	   writer.println("<h3>"+company+"</h3>");
+               writer.println("<h2>Notes</h2>");
                writer.println("<table id='notes'>");
-               writer.println("<tr>");
-               writer.println("<th>Notes</th>");
-               writer.println("</tr>"); 
                writer.println("<tr>"); 
                writer.println("<td>"); 
                if (notes!=null)
             	   writer.println(notes);
+               else
+            	   writer.println("&nbsp;");
                writer.println("</td>");
                writer.println("</tr>");
                writer.println("</table>");
@@ -347,7 +338,7 @@ public class ContactsServlet extends InfoServlet
     		{
     			Log.w("Jetty", "Encoding telephone number failed");
     		}
-    		printCell(writer, (number==null?"&nbsp;":"<a href=\"/app/contacts/"+who+"?call="+encodedNumber+"\">"+number+"</a>&nbsp;("+phoneType+")"), style);
+    		printCell(writer, (number==null?"&nbsp;":"<a href=\"/app/contacts/"+who+"?call="+encodedNumber+"\">"+number+"</a>&nbsp;<span class='qualifier'>["+phoneType+"]</span>"), style);
     		writer.println("</tr>");
     		row++;
     	}
@@ -358,15 +349,6 @@ public class ContactsServlet extends InfoServlet
     {
     	writer.println("<h2>Addresses</h2>");
     	writer.println("<table id='addresses'>");
-//        writer.println("<tr>");
-//      
-//        String[] colNames = {
-//        		Contacts.ContactMethodsColumns.DATA,
-//        		Contacts.ContactMethodsColumns.AUX_DATA,
-//        };
-//        for (int i=0;i<colNames.length;i++)
-//            printCellHeader(writer, colNames[i], null);
-//        writer.println("</tr>");
         int row = 0;
         while (cursor.next())
         { 
@@ -387,7 +369,7 @@ public class ContactsServlet extends InfoServlet
             	{
             		printCell(writer, "<span class='label'>"+__EMAIL+":</span>", style);
             		if (type==Contacts.ContactMethodsColumns.EMAIL_KIND_PRIMARY_TYPE)
-            			printCell(writer, "<a class='primary' href=\"mailto:"+data+"\">"+data+"</a>", style);
+            			printCell(writer, "<a href=\"mailto:"+data+"\">"+data+"</a>", style);
             		else
             		{
             			String typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
@@ -407,7 +389,7 @@ public class ContactsServlet extends InfoServlet
             	{
             		printCell(writer, "<span class='label'>"+__POSTAL+":</span>", style);
             		String typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
-        			printCell(writer, "("+typeStr+")&nbsp;"+data, style);
+        			printCell(writer, "<span class='qualifier'>["+typeStr+"]</span>&nbsp;"+data, style);
         			printCell(writer, "", style);
             		break;
             	}
@@ -415,7 +397,7 @@ public class ContactsServlet extends InfoServlet
             	{
             		printCell(writer, "<span class='label'>"+__GEO_LOCATION+":</span>", style);
             		String typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
-            		printCell(writer, "("+typeStr+")&nbsp;"+data, style);
+            		printCell(writer, "<span class='qualifier'>["+typeStr+"]</span>&nbsp;"+data, style);
             		printCell(writer, auxData, style);
             		break;
             	}

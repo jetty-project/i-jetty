@@ -26,6 +26,7 @@
         android:layout_width="fill_parent" android:layout_height="wrap_content"
         android:layout_weight="0"
         android:paddingBottom="4dip"
+        android:textStyle="bold"
         android:text="@string/jetty_controller"/>
 
     <Button android:id="@+id/start"
@@ -38,6 +39,21 @@
         android:layout_width="wrap_content" android:layout_height="wrap_content" 
         android:text="@string/stop_jetty">
     </Button>
+
+    <TextView
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"        
+        android:textStyle="bold"
+        android:paddingTop="4dip"
+        android:paddingBottom="2dip"
+        android:text="@string/interfaces"/>
+
+    <ListView android:id="@+id/list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0">
+    </ListView>
+
 
 </LinearLayout>
 
