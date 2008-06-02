@@ -1,7 +1,7 @@
+
 How to do Port Forwarding
 ==========================
-adb shell
-# forward tcp:8888 tcp:8080
+adb forward tcp:8888 tcp:8080
 
 
 How to Add Files to removable storage device
@@ -14,8 +14,10 @@ sudo mount /dev/loop0 ~/src/i-jetty/sdcard
 gksudo nautilus ~/src/i-jetty/sdcard
 
 Load into emulator:
-emulator -sdcard ~src/i-jetty/sdcard.img
 
+How to Start Emulator with removable storage device
+===================================================
+emulator -sdcard ~src/i-jetty/sdcard.img
 
 
 How to Access Onboard Database
