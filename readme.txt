@@ -1,3 +1,15 @@
+How to Build
+============
+Check out the project from code.google.com:
+ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
+
+Do an ant build FIRST, to download some jetty classes that need to be
+compiled for dalvik vm:
+ cd i-jetty-read-only; ant
+
+Use the eclipse plugin or apk tool to build the project and deploy
+to the emulator.
+
 
 How to do Port Forwarding
 ==========================
