@@ -16,11 +16,7 @@
 package org.mortbay.ijetty;
 
 
-
-import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -43,10 +39,12 @@ import org.mortbay.ijetty.servlet.SettingsServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.jetty.webapp.WebAppContext;
 
 public class IJettyService extends Service
 {
@@ -57,7 +55,7 @@ public class IJettyService extends Service
     private SharedPreferences preferences;
 
 
-
+    @Override
     protected void onCreate() 
     {
         try
@@ -96,9 +94,9 @@ public class IJettyService extends Service
         }  
     }
 
- 
-    protected void onDestroy() 
-    {
+    @Override
+    protected void onDestroy() {
+
         try
         {
             if (server != null)
@@ -141,7 +139,7 @@ public class IJettyService extends Service
 	        return null;
 	}
 
-
+    @Override
     public IBinder onBind(Intent intent)
     {
         // TODO Auto-generated method stub
@@ -151,103 +149,60 @@ public class IJettyService extends Service
     private void startJetty()
     throws Exception
     {
-    	
-    	
-        //DO TEST
-      
-        
-        final Constructor m_dexFileClassConstructor;
-        final Method m_dexFileClassLoadClass;
-        //File file = new File("/data/dalvik-cache/data@app@i-jetty.apk@classes.dex");
-        File file = new File ("/data/mystuff/jetty.jar");
-
-        Log.d("Jetty", "File exists: "+file.exists());
-        Log.d("Jetty", "Path to file: "+file.getPath());
-
-
-        Constructor dexFileClassConstructor = null;
-        Method dexFileClassLoadClass = null;
-        try
-        {
-        	Class dexFileClass =  Class.forName("android.dalvik.DexFile");
-        	dexFileClassConstructor = dexFileClass.getConstructor(
-        			new Class[] { java.io.File.class });
-        	dexFileClassLoadClass = dexFileClass.getMethod("loadClass", 
-        			new Class[] { String.class, ClassLoader.class });
-        }
-        catch (Exception ex)
-        {
-        	Log.e("Jetty", "problem loading dexfile");
-        }
-        m_dexFileClassConstructor = dexFileClassConstructor;
-        m_dexFileClassLoadClass = dexFileClassLoadClass;
-
-
-
-        Object m_dexFile = null;
-
-        try
-        {
-        	if (m_dexFile == null) 
-        	{
-        		if ((m_dexFileClassConstructor != null) &&
-        				(m_dexFileClassLoadClass != null))
-        		{
-        			m_dexFile = m_dexFileClassConstructor.newInstance(
-        					new Object[] { file });
-        		}
-        	}
-        }
-        catch (Exception e)
-        {
-        	Log.e("Jetty", "Problem loading via dalvik loader", e);
-        }
-
-        try
-        {
-        	Class c =  (Class) m_dexFileClassLoadClass.invoke(m_dexFile, 
-        			new Object[] { "org.mortbay.util.ajax.AjaxFilter".replace('.','/'), getClass().getClassLoader() });
-
-        	Log.d("Jetty", "SUCCESS!!!!"+c.getName());
-        }
-        catch (Exception e)
-        {
-        	Log.e("Jetty", "Problem loading test class",e);
-        }
-
-
-
-
-        
-        //TODO - get ports and types of connector from SharedPrefs?
+        // TODO - get ports and types of connector from SharedPrefs?
         server = new Server();
         Connector connector=new SelectChannelConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
-       
-        //Deploy a servlet to serve on--phone information
-        Context context = new Context(server, "/", Context.SESSIONS);
+        
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        server.setHandler(contexts);
+        
+        // Try to load our "Hello SimpleServlet" application off the SD card
+        // Don't throw an exception if we can't find it.
+        /*
+            WebAppContext wac = new WebAppContext ();
+            wac.setWar("/sdcard/jetty/webapps/hello");
+            wac.setClassLoader(new AndroidClassLoader ("/sdcard/jetty/webapps/hello/WEB-INF/lib/hello.jar"));
+            wac.setContextPath("/hello");
+            wac.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+            
+            contexts.addHandler(wac);
+        } catch (Exception ex) {
+            Log.d("Jetty", "Not loading Hello application.", ex);
+        }
+        */
+        
+        // Deploy some servlets to serve on--phone information
+        Context context = new Context(contexts, "/", Context.SESSIONS);
+        
         ContactsServlet contactsServlet = new ContactsServlet();
         contactsServlet.setContentResolver(getContentResolver());
         context.addServlet(new ServletHolder(contactsServlet), "/app/contacts/*");
+        
         CallLogServlet callLogServlet = new CallLogServlet();
         callLogServlet.setContentResolver(getContentResolver());
         context.addServlet(new ServletHolder(callLogServlet), "/app/calls/*");
+        
         SettingsServlet settingsServlet = new SettingsServlet();
         settingsServlet.setContentResolver(getContentResolver());
         context.addServlet(new ServletHolder(settingsServlet), "/app/settings/*");
+        
         IPServlet ipServlet = new IPServlet();
         context.addServlet(new ServletHolder(ipServlet), "/app/network/*");
+        
         IndexServlet indexServlet = new IndexServlet();
         context.addServlet(new ServletHolder(indexServlet), "/app");
+        
         CssServlet cssServlet = new CssServlet();
         context.addServlet(new ServletHolder(cssServlet), "/app/css");
         context.addServlet(new ServletHolder(new org.mortbay.ijetty.servlet.DefaultServlet()) ,"/");
         context.addFilter(new FilterHolder(new InfoFilter()), "/", Handler.REQUEST);
         
-        //Bridge jetty logging to Android logging
+        // Bridge Jetty logging to Android logging
         System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
         org.mortbay.log.Log.setLog(new AndroidLog());
+        
         server.start();
     }
     
