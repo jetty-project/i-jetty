@@ -44,7 +44,6 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
 
 public class IJettyService extends Service
 {
@@ -159,19 +158,20 @@ public class IJettyService extends Service
         server.setHandler(contexts);
         
         // Try to load our "Hello SimpleServlet" application off the SD card
-        // Don't throw an exception if we can't find it.
-        /*
-            WebAppContext wac = new WebAppContext ();
-            wac.setWar("/sdcard/jetty/webapps/hello");
-            wac.setClassLoader(new AndroidClassLoader ("/sdcard/jetty/webapps/hello/WEB-INF/lib/hello.jar"));
-            wac.setContextPath("/hello");
-            wac.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+        // Only attempt to add the WebAppContext if we could find the JAR on the card
+        AndroidClassLoader classLoader = new AndroidClassLoader ();
+        
+        if (classLoader.addDexFile("/sdcard/jetty/webapps/hello/WEB-INF/lib/hello.jar")) {            
+            AndroidWebAppDeployer deployer = new AndroidWebAppDeployer ();
+            deployer.setWebAppDir("/sdcard/jetty/webapps");
+            deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+            deployer.setContexts (contexts);
+            deployer.doStart (classLoader);
             
-            contexts.addHandler(wac);
-        } catch (Exception ex) {
-            Log.d("Jetty", "Not loading Hello application.", ex);
+            Log.d("Jetty", "Added Hello application from /sdcard/jetty/webapps!");
+        } else {
+            Log.w("Jetty", "Not loading Hello application - couldn't find on SD card.");
         }
-        */
         
         // Deploy some servlets to serve on--phone information
         Context context = new Context(contexts, "/", Context.SESSIONS);
