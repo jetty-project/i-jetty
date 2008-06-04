@@ -61,7 +61,6 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
     private boolean _parentLoaderPriority;
     private boolean _allowDuplicates;
     private ArrayList _deployed;
-    private AndroidClassLoader _classLoader;
 
     public String[] getConfigurationClasses()
     {
@@ -141,10 +140,9 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
     /**
      * @throws Exception 
      */
-    public void doStart(AndroidClassLoader loader) throws Exception
+    public void doStart() throws Exception
     {
         _deployed=new ArrayList();
-        _classLoader = loader;
         scan();
         
     }
@@ -236,7 +234,7 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
                 wah=new WebAppContext();
             }
             
-            wah.setClassLoader (_classLoader);
+            wah.setClassLoader (new AndroidClassLoader());
             
             // configure it
             wah.setContextPath(context);

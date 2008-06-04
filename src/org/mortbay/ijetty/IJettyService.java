@@ -159,15 +159,16 @@ public class IJettyService extends Service
         server.setHandler(contexts);
         
         // Load any webapps we find on the card.
-        if (new File("/sdcard/jetty/").exists()) {            
+        if (new File("/sdcard/jetty/").exists()) 
+        {            
             AndroidWebAppDeployer deployer = new AndroidWebAppDeployer();
             deployer.setWebAppDir("/sdcard/jetty/webapps");
             deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
             deployer.setContexts (contexts);
-            deployer.doStart (new AndroidClassLoader());
-            
-            Log.d("Jetty", "Added webapps from /sdcard/jetty/webapps!");
-        } else {
+            server.addLifeCycle(deployer);
+        } 
+        else
+        {
             Log.w("Jetty", "Not loading any webapps - none on SD card.");
         }
         
