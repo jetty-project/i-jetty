@@ -158,8 +158,7 @@ public class IJettyService extends Service
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         server.setHandler(contexts);
         
-        // Try to load our "Hello SimpleServlet" application off the SD card
-        // Only attempt to add the WebAppContext if we could find the JAR on the card        
+        // Load any webapps we find on the card.
         if (new File("/sdcard/jetty/").exists()) {            
             AndroidWebAppDeployer deployer = new AndroidWebAppDeployer();
             deployer.setWebAppDir("/sdcard/jetty/webapps");
@@ -167,9 +166,9 @@ public class IJettyService extends Service
             deployer.setContexts (contexts);
             deployer.doStart (new AndroidClassLoader());
             
-            Log.d("Jetty", "Added Hello application from /sdcard/jetty/webapps!");
+            Log.d("Jetty", "Added webapps from /sdcard/jetty/webapps!");
         } else {
-            Log.w("Jetty", "Not loading Hello application - couldn't find on SD card.");
+            Log.w("Jetty", "Not loading any webapps - none on SD card.");
         }
         
         // Deploy some servlets to serve on--phone information
