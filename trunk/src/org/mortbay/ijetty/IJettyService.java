@@ -17,6 +17,7 @@ package org.mortbay.ijetty;
 
 
 import java.io.InputStream;
+import java.io.File;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -158,15 +159,13 @@ public class IJettyService extends Service
         server.setHandler(contexts);
         
         // Try to load our "Hello SimpleServlet" application off the SD card
-        // Only attempt to add the WebAppContext if we could find the JAR on the card
-        AndroidClassLoader classLoader = new AndroidClassLoader ();
-        
-        if (classLoader.addDexFile("/sdcard/jetty/webapps/hello/WEB-INF/lib/hello.jar")) {            
-            AndroidWebAppDeployer deployer = new AndroidWebAppDeployer ();
+        // Only attempt to add the WebAppContext if we could find the JAR on the card        
+        if (new File("/sdcard/jetty/").exists()) {            
+            AndroidWebAppDeployer deployer = new AndroidWebAppDeployer();
             deployer.setWebAppDir("/sdcard/jetty/webapps");
             deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
             deployer.setContexts (contexts);
-            deployer.doStart (classLoader);
+            deployer.doStart (new AndroidClassLoader());
             
             Log.d("Jetty", "Added Hello application from /sdcard/jetty/webapps!");
         } else {
