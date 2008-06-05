@@ -1,6 +1,20 @@
+//========================================================================
+//$Id$
+//Copyright 2008 Mort Bay Consulting Pty. Ltd.
+//------------------------------------------------------------------------
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at 
+//http://www.apache.org/licenses/LICENSE-2.0
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+//========================================================================
+
 package org.mortbay.ijetty;
 
-import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.jetty.webapp.WebInfConfiguration;
 import org.mortbay.resource.Resource;
 
@@ -9,8 +23,7 @@ import android.util.Log;
 public class AndroidWebInfConfiguration extends WebInfConfiguration
 {
     @Override
-    public void configureClassLoader ()
-    throws Exception
+    public void configureClassLoader() throws Exception
     {
         if (getWebAppContext().isStarted()) {
             //if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
@@ -18,35 +31,20 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
         }
         
         Resource web_inf=_context.getWebInf();
-
-        Log.d ("Jetty", "web_inf context: " + web_inf.toString ());
         
-        // Add WEB-INF classes and lib classpaths
+        // Add WEB-INF lib classpaths
         if (web_inf != null && web_inf.isDirectory() && _context.getClassLoader() instanceof ClassLoader)
         {
-            // Look for classes directory
-            // FIXME: I doubt this would actually work; test this?
-            // ALSO: Remember to change instanceof check to WebAppClassLoader! :)
-            /*Resource classes= web_inf.addPath("classes/");
-            if (classes.exists())
-                ((WebAppClassLoader)_context.getClassLoader()).addClassPath(classes.toString());*/
-
             // Look for jars
             Resource lib= web_inf.addPath("lib/");
             Log.d ("Jetty", "Library resource: " + lib.toString ());
             if (lib.exists() || lib.isDirectory()) {
-                Log.d ("Jetty", "Yes, lib/ path exists. Trying to list...");
                 AndroidClassLoader loader = ((AndroidClassLoader)_context.getClassLoader());
                 for (String dex : lib.list()) {
                     String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
-                    if (loader.addDexFile (fullpath)) {
-                        Log.d ("Jetty", "Added DEX file to class loader: " + fullpath);
-                    } else {
+                    if (!loader.addDexFile (fullpath)) {
                         Log.w ("Jetty", "Failed to add DEX file from path: " + fullpath);
                     }
-                    
-                    // This is retarded, but we need to set it back after we're done.
-                    _context.setClassLoader (loader);
                 }
             }
         }

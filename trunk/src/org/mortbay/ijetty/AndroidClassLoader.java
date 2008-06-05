@@ -122,10 +122,10 @@ public class AndroidClassLoader extends ClassLoader {
                         new Object[] { name.replace('.','/'), getClass ().getClassLoader () });
                 
                 return c;
+                Log.d ("Jetty", "Found class! Returning.")
             } catch (Exception ex) {
                 // Silenty ignore any exceptions, as not all DEX files might have
                 // the class we're after - wait until we're done.
-                Log.d ("Jetty", "FYI, we had an exception while looking up the class", ex);
             }
         }
         
