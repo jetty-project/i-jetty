@@ -26,7 +26,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
-import android.util.Log;
+import android.content.ContentResolver;
 
 /**
  * Web Application Deployer.
@@ -47,7 +47,18 @@ import android.util.Log;
 public class AndroidWebAppDeployer extends WebAppDeployer
 {
     private ArrayList _deployed;
+    private ContentResolver _resolver = null;
 
+    public void setContentResolver(ContentResolver resolver)
+    {
+        _resolver = resolver;
+    }
+    
+    public ContentResolver getContentResolver()
+    {
+        return _resolver;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @throws Exception
@@ -180,6 +191,8 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             wah.setExtractWAR(isExtract());
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(isParentLoaderPriority());
+            if (_resolver != null)
+                wah.setAttribute("contentResolver", _resolver);
             // add it
             contexts.addHandler(wah);
             _deployed.add(wah);

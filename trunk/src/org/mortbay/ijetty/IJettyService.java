@@ -167,6 +167,7 @@ public class IJettyService extends Service
             deployer.setWebAppDir("/sdcard/jetty/webapps");
             deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
             deployer.setContexts(contexts);
+            deployer.setContentResolver (getContentResolver());
             server.addLifeCycle(deployer);
         }
         else
