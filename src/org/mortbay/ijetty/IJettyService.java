@@ -149,7 +149,6 @@ public class IJettyService extends Service
     private void startJetty()
     throws Exception
     {
-        Log.w ("Jetty", "HOLY SMOKES BATMAN! THIS IS NEW!");
         // TODO - get ports and types of connector from SharedPrefs?
         server = new Server();
         Connector connector=new SelectChannelConnector();
@@ -171,8 +170,6 @@ public class IJettyService extends Service
             deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
             deployer.setContexts (contexts);
             server.addLifeCycle(deployer);
-            
-            Log.i ("Jetty", "Added deployer to server lifecycle.");
         } 
         else
         {

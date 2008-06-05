@@ -130,9 +130,6 @@ public class AndroidWebAppDeployer extends WebAppDeployer
    
                 }
             }
-            
-            Log.i (TAG, "app resource was: " + app.getFile().getAbsolutePath());
-            Log.i (TAG, "app was: " + app.toString());
 
             // create a webapp
             WebAppContext wah=null;
@@ -162,6 +159,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             if (getConfigurationClasses()!=null) {
                 wah.setConfigurationClasses(getConfigurationClasses());
             } else {
+                // Defaults stolen from WebAppContext.
                 wah.setConfigurationClasses (new String [] {
                         "org.mortbay.ijetty.AndroidWebInfConfiguration",
                         "org.mortbay.jetty.webapp.WebXmlConfiguration", 
