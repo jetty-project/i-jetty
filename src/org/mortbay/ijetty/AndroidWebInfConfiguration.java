@@ -25,25 +25,34 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
     @Override
     public void configureClassLoader() throws Exception
     {
-        if (getWebAppContext().isStarted()) {
-            //if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");}
+        if (getWebAppContext().isStarted())
+        {
+            // if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp
+            // after it is started");}
             return;
         }
-        
-        Resource web_inf=_context.getWebInf();
-        
+
+        Resource web_inf = _context.getWebInf();
+
         // Add WEB-INF lib classpaths
-        if (web_inf != null && web_inf.isDirectory() && _context.getClassLoader() instanceof ClassLoader)
+        if (web_inf != null && web_inf.isDirectory()
+                && _context.getClassLoader() instanceof ClassLoader)
         {
             // Look for jars
-            Resource lib= web_inf.addPath("lib/");
-            Log.d ("Jetty", "Library resource: " + lib.toString ());
-            if (lib.exists() || lib.isDirectory()) {
-                AndroidClassLoader loader = ((AndroidClassLoader)_context.getClassLoader());
-                for (String dex : lib.list()) {
-                    String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
-                    if (!loader.addDexFile (fullpath)) {
-                        Log.w ("Jetty", "Failed to add DEX file from path: " + fullpath);
+            Resource lib = web_inf.addPath("lib/");
+            Log.d("Jetty", "Library resource: " + lib.toString());
+            if (lib.exists() || lib.isDirectory())
+            {
+                AndroidClassLoader loader = ((AndroidClassLoader) _context
+                        .getClassLoader());
+                for (String dex : lib.list())
+                {
+                    String fullpath = web_inf.addPath("lib/").addPath(dex)
+                            .getFile().getAbsolutePath();
+                    if (!loader.addDexFile(fullpath))
+                    {
+                        Log.w("Jetty", "Failed to add DEX file from path: "
+                                + fullpath);
                     }
                 }
             }

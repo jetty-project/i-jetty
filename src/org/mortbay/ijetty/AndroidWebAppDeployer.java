@@ -31,115 +31,120 @@ import android.util.Log;
 /**
  * Web Application Deployer.
  * 
- * The class searches a directory for and deploys standard web application.
- * At startup, the directory specified by {@link #setWebAppDir(String)} is searched 
- * for subdirectories (excluding hidden and CVS) or files ending with ".zip"
- * or "*.war".  For each webapp discovered is passed to a new instance
- * of {@link WebAppContext} (or a subclass specified by {@link #getContexts()}.
+ * The class searches a directory for and deploys standard web application. At
+ * startup, the directory specified by {@link #setWebAppDir(String)} is searched
+ * for subdirectories (excluding hidden and CVS) or files ending with ".zip" or
+ * "*.war". For each webapp discovered is passed to a new instance of
+ * {@link WebAppContext} (or a subclass specified by {@link #getContexts()}.
  * {@link ContextHandlerCollection#getContextClass()}
  * 
- * This deployer does not do hot deployment or undeployment. Nor does
- * it support per webapplication configuration. For these features 
- * see {@link ContextDeployer}.
+ * This deployer does not do hot deployment or undeployment. Nor does it support
+ * per webapplication configuration. For these features see
+ * {@link ContextDeployer}.
  * 
  * @see {@link ContextDeployer}
  */
 public class AndroidWebAppDeployer extends WebAppDeployer
 {
-    // TODO: Remove me! :)
-    private static final String TAG = "Jetty";
-    
-    private ArrayList _deployed; 
+    private ArrayList _deployed;
 
     /* ------------------------------------------------------------ */
     /**
-     * @throws Exception 
+     * @throws Exception
      */
     public void doStart() throws Exception
     {
-        _deployed=new ArrayList();
-        Log.i ("Jetty", "Scanning via AndroidWebAppDeployer");
+        _deployed = new ArrayList();
         scan();
-        
+
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Scan for webapplications.
+    /**
+     * Scan for webapplications.
      * 
      * @throws Exception
      */
     public void scan() throws Exception
     {
-        if (getContexts()==null)
+        if (getContexts() == null)
             throw new IllegalArgumentException("No HandlerContainer");
 
-        Resource r=Resource.newResource(getWebAppDir());
+        Resource r = Resource.newResource(getWebAppDir());
         if (!r.exists())
-            throw new IllegalArgumentException("No such webapps resource "+r);
+            throw new IllegalArgumentException("No such webapps resource " + r);
 
         if (!r.isDirectory())
-            throw new IllegalArgumentException("Not directory webapps resource "+r);
+            throw new IllegalArgumentException(
+                    "Not directory webapps resource " + r);
 
-        String[] files=r.list();
+        String[] files = r.list();
 
-        files: for (int f=0; files!=null&&f<files.length; f++)
+        files: for (int f = 0; files != null && f < files.length; f++)
         {
-            String context=files[f];
+            String context = files[f];
 
-            if (context.equalsIgnoreCase("CVS/")||context.equalsIgnoreCase("CVS")||context.startsWith("."))
-                continue;
+            if (context.equalsIgnoreCase("CVS/")
+                    || context.equalsIgnoreCase("CVS")
+                    || context.startsWith(".")) continue;
 
-            Resource app=r.addPath(r.encode(context));
+            Resource app = r.addPath(r.encode(context));
 
-            if (context.toLowerCase().endsWith(".war")||context.toLowerCase().endsWith(".jar"))
+            if (context.toLowerCase().endsWith(".war")
+                    || context.toLowerCase().endsWith(".jar"))
             {
-                context=context.substring(0,context.length()-4);
-                Resource unpacked=r.addPath(context);
-                if (unpacked!=null&&unpacked.exists()&&unpacked.isDirectory())
-                    continue;
+                context = context.substring(0, context.length() - 4);
+                Resource unpacked = r.addPath(context);
+                if (unpacked != null && unpacked.exists()
+                        && unpacked.isDirectory()) continue;
             }
-            else if (!app.isDirectory())
-                continue;
+            else if (!app.isDirectory()) continue;
 
-            if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
-                context=URIUtil.SLASH;
+            if (context.equalsIgnoreCase("root")
+                    || context.equalsIgnoreCase("root/"))
+                context = URIUtil.SLASH;
             else
-                context="/"+context;
-            if (context.endsWith("/")&&context.length()>0)
-                context=context.substring(0,context.length()-1);
+                context = "/" + context;
+            if (context.endsWith("/") && context.length() > 0)
+                context = context.substring(0, context.length() - 1);
 
-            // Check the context path has not already been added or the webapp itself is not already deployed
+            // Check the context path has not already been added or the webapp
+            // itself is not already deployed
             if (!getAllowDuplicates())
             {
-                Handler[] installed=getContexts().getChildHandlersByClass(ContextHandler.class);
-                for (int i=0; i<installed.length; i++)
+                Handler[] installed = getContexts().getChildHandlersByClass(
+                        ContextHandler.class);
+                for (int i = 0; i < installed.length; i++)
                 {
-                    ContextHandler c=(ContextHandler)installed[i];
-        
-                    if (context.equals(c.getContextPath()))
-                        continue files;
-                    
-                   String path;
-                   if (c instanceof WebAppContext)
-                       path = ((WebAppContext)c).getWar();
-                   else
-                       path = (c.getBaseResource()==null?"":c.getBaseResource().getFile().getAbsolutePath());
+                    ContextHandler c = (ContextHandler) installed[i];
+
+                    if (context.equals(c.getContextPath())) continue files;
+
+                    String path;
+                    if (c instanceof WebAppContext)
+                        path = ((WebAppContext) c).getWar();
+                    else
+                        path = (c.getBaseResource() == null ? "" : c
+                                .getBaseResource().getFile().getAbsolutePath());
 
                     if (path.equals(app.getFile().getAbsolutePath()))
                         continue files;
-   
+
                 }
             }
 
             // create a webapp
-            WebAppContext wah=null;
+            WebAppContext wah = null;
             HandlerContainer contexts = getContexts();
-            if (contexts instanceof ContextHandlerCollection && 
-                WebAppContext.class.isAssignableFrom(((ContextHandlerCollection)contexts).getContextClass()))
+            if (contexts instanceof ContextHandlerCollection
+                    && WebAppContext.class
+                            .isAssignableFrom(((ContextHandlerCollection) contexts)
+                                    .getContextClass()))
             {
                 try
                 {
-                    wah=(WebAppContext)((ContextHandlerCollection)contexts).getContextClass().newInstance();
+                    wah = (WebAppContext) ((ContextHandlerCollection) contexts)
+                            .getContextClass().newInstance();
                 }
                 catch (Exception e)
                 {
@@ -148,27 +153,29 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             }
             else
             {
-                wah=new WebAppContext();
+                wah = new WebAppContext();
             }
-            
-            wah.setClassLoader (new AndroidClassLoader());
-            
+
+            wah.setClassLoader(new AndroidClassLoader());
+
             // configure it
             wah.setContextPath(context);
-            
-            if (getConfigurationClasses()!=null) {
+
+            if (getConfigurationClasses() != null)
+            {
                 wah.setConfigurationClasses(getConfigurationClasses());
-            } else {
-                // Defaults stolen from WebAppContext.
-                wah.setConfigurationClasses (new String [] {
-                        "org.mortbay.ijetty.AndroidWebInfConfiguration",
-                        "org.mortbay.jetty.webapp.WebXmlConfiguration", 
-                        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
-                        "org.mortbay.jetty.webapp.TagLibConfiguration"
-                });
             }
-            
-            if (getDefaultsDescriptor()!=null)
+            else
+            {
+                // Defaults stolen from WebAppContext.
+                wah.setConfigurationClasses(new String[] {
+                        "org.mortbay.ijetty.AndroidWebInfConfiguration",
+                        "org.mortbay.jetty.webapp.WebXmlConfiguration",
+                        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+                        "org.mortbay.jetty.webapp.TagLibConfiguration" });
+            }
+
+            if (getDefaultsDescriptor() != null)
                 wah.setDefaultsDescriptor(getDefaultsDescriptor());
             wah.setExtractWAR(isExtract());
             wah.setWar(app.toString());
@@ -176,19 +183,18 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             // add it
             contexts.addHandler(wah);
             _deployed.add(wah);
-            
-            if (contexts.isStarted())
-                contexts.start();  // TODO Multi exception
-            
-            setContexts (contexts);
+
+            if (contexts.isStarted()) contexts.start(); // TODO Multi exception
+
+            setContexts(contexts);
         }
     }
-    
+
     public void doStop() throws Exception
     {
-        for (int i=_deployed.size();i-->0;)
+        for (int i = _deployed.size(); i-- > 0;)
         {
-            ContextHandler wac = (ContextHandler)_deployed.get(i);
+            ContextHandler wac = (ContextHandler) _deployed.get(i);
             wac.stop();// TODO Multi exception
         }
     }
