@@ -28,81 +28,95 @@ import android.util.Log;
 
 /**
  * AndroidClassLoader
- *
+ * 
  * Loads classes dynamically from dex files wrapped inside a jar.
  * 
  * 
- *   Example:
- *   
- *   <pre>
- *   try 
- *   {
- *          AndroidClassLoader classLoader = new AndroidClassLoader ();
- *          classLoader.addDexFile ("/sdcard/jetty.jar");   
- *          Class<Object> c = classLoader.findClass ("org.mortbay.jetty.Connector");
- *   }
- *   catch (Exception e)
- *   {
- *          Log.e ("Jetty", "Problem with AndroidClassLoader", e);
- *   }
- *   </pre>        
+ * Example:
+ * 
+ * <pre>
+ * try
+ * {
+ *     AndroidClassLoader classLoader = new AndroidClassLoader();
+ *     classLoader.addDexFile(&quot;/sdcard/jetty.jar&quot;);
+ *     Class&lt;Object&gt; c = classLoader.findClass(&quot;org.mortbay.jetty.Connector&quot;);
+ * }
+ * catch (Exception e)
+ * {
+ *     Log.e(&quot;Jetty&quot;, &quot;Problem with AndroidClassLoader&quot;, e);
+ * }
+ * </pre>
  */
-public class AndroidClassLoader extends ClassLoader {   
+public class AndroidClassLoader extends ClassLoader
+{
     private Constructor<DexFile> dexFileClassConstructor = null;
+
     private Method dexFileClassLoadClass = null;
-    
+
     private List<File> dexFiles;
-    
-    public AndroidClassLoader ()
-    throws ClassNotFoundException, NoSuchMethodException  {
-        Class<DexFile> dexFileClass =  (Class<DexFile>) Class.forName("android.dalvik.DexFile");
-        dexFileClassConstructor = dexFileClass.getConstructor (new Class[] { java.io.File.class });
-        dexFileClassLoadClass = dexFileClass.getMethod ("loadClass", new Class[] { String.class, ClassLoader.class });
-        
-        dexFiles = new ArrayList <File> ();
+
+    public AndroidClassLoader() throws ClassNotFoundException,
+            NoSuchMethodException
+    {
+        Class<DexFile> dexFileClass = (Class<DexFile>) Class
+                .forName("android.dalvik.DexFile");
+        dexFileClassConstructor = dexFileClass
+                .getConstructor(new Class[] { java.io.File.class });
+        dexFileClassLoadClass = dexFileClass.getMethod("loadClass",
+                new Class[] { String.class, ClassLoader.class });
+
+        dexFiles = new ArrayList<File>();
     }
-    
+
     /**
-     * Convenience constructor. Creates a new instance of the AndroidClassLoader,
-     * and adds a path to the list of searchable DEX files. Note that this file
-     * <strong>must</strong> exist, otherwise a FileNotFoundException will be thrown.
+     * Convenience constructor. Creates a new instance of the
+     * AndroidClassLoader, and adds a path to the list of searchable DEX files.
+     * Note that this file <strong>must</strong> exist, otherwise a
+     * FileNotFoundException will be thrown.
+     * 
      * @param path Path to the DEX file.
      * @throws ClassNotFoundException
      * @throws NoSuchMethodException
      * @throws FileNotFoundException
      */
-    public AndroidClassLoader (String path)
-    throws ClassNotFoundException, NoSuchMethodException, FileNotFoundException { 
-        this ();
-        if (!addDexFile (path)) {
-            throw new FileNotFoundException ();
-        }
+    public AndroidClassLoader(String path) throws ClassNotFoundException,
+            NoSuchMethodException, FileNotFoundException
+    {
+        this();
+        if (!addDexFile(path)) { throw new FileNotFoundException(); }
     }
-    
+
     /**
      * Adds a compiled DEX file to the list of files to be searched for classes.
+     * 
      * @param path The path to the DEX file.
      * @return True if the file was added successfully, false otherwise.
      */
-    public Boolean addDexFile (String path) {
-        File file = new File (path);
-        return addDexFile (file);
+    public Boolean addDexFile(String path)
+    {
+        File file = new File(path);
+        return addDexFile(file);
     }
-    
+
     /**
      * Adds a compiled DEX file to the list of files to be searched for classes.
+     * 
      * @param file The path to the DEX file.
      * @return True if the file was added successfully, false otherwise.
      */
-    public Boolean addDexFile (File file) {
-        if (file.exists()) {
+    public Boolean addDexFile(File file)
+    {
+        if (file.exists())
+        {
             dexFiles.add(file);
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
-    
+
     public Class findClass (String name)
     throws ClassNotFoundException {
         if (dexFileClassConstructor == null || dexFileClassLoadClass == null) {
@@ -121,10 +135,11 @@ public class AndroidClassLoader extends ClassLoader {
                 Class c =  (Class) dexFileClassLoadClass.invoke (dexFile, 
                         new Object[] { name.replace('.','/'), getClass ().getClassLoader () });
                 
+                Log.d ("Jetty", "Found class! Returning.");
                 return c;
-                Log.d ("Jetty", "Found class! Returning.")
             } catch (Exception ex) {
-                // Silenty ignore any exceptions, as not all DEX files might have
+                // Silenty ignore any exceptions, as not all DEX files might
+                // have
                 // the class we're after - wait until we're done.
             }
         }
