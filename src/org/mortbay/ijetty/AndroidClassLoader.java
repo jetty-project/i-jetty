@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import android.dalvik.DexFile;
+import android.util.Log;
 
 /**
  * AndroidClassLoader
@@ -108,10 +109,13 @@ public class AndroidClassLoader extends ClassLoader {
             return null;
         }
         
+        Log.d ("Jetty", "Attempting to locate class: " + name);
+        
         Object dexFile = null;
         
         for (File file : dexFiles) {
             try {
+                Log.d ("Jetty", "Searching in: " + file);
                 dexFile = dexFileClassConstructor.newInstance (new Object[] { file });
                 
                 Class c =  (Class) dexFileClassLoadClass.invoke (dexFile, 
@@ -121,6 +125,7 @@ public class AndroidClassLoader extends ClassLoader {
             } catch (Exception ex) {
                 // Silenty ignore any exceptions, as not all DEX files might have
                 // the class we're after - wait until we're done.
+                Log.d ("Jetty", "FYI, we had an exception while looking up the class", ex);
             }
         }
         

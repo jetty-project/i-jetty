@@ -149,23 +149,30 @@ public class IJettyService extends Service
     private void startJetty()
     throws Exception
     {
+        Log.w ("Jetty", "HOLY SMOKES BATMAN! THIS IS NEW!");
         // TODO - get ports and types of connector from SharedPrefs?
         server = new Server();
         Connector connector=new SelectChannelConnector();
         connector.setPort(8080);
         server.setConnectors(new Connector[]{connector});
         
+        // Bridge Jetty logging to Android logging
+        System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
+        org.mortbay.log.Log.setLog(new AndroidLog());
+        
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         server.setHandler(contexts);
         
         // Load any webapps we find on the card.
         if (new File("/sdcard/jetty/").exists()) 
-        {            
+        {
             AndroidWebAppDeployer deployer = new AndroidWebAppDeployer();
             deployer.setWebAppDir("/sdcard/jetty/webapps");
             deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
             deployer.setContexts (contexts);
             server.addLifeCycle(deployer);
+            
+            Log.i ("Jetty", "Added deployer to server lifecycle.");
         } 
         else
         {
@@ -197,10 +204,6 @@ public class IJettyService extends Service
         context.addServlet(new ServletHolder(cssServlet), "/app/css");
         context.addServlet(new ServletHolder(new org.mortbay.ijetty.servlet.DefaultServlet()) ,"/");
         context.addFilter(new FilterHolder(new InfoFilter()), "/", Handler.REQUEST);
-        
-        // Bridge Jetty logging to Android logging
-        System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
-        org.mortbay.log.Log.setLog(new AndroidLog());
         
         server.start();
     }

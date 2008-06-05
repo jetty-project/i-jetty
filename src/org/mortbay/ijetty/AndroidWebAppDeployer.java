@@ -13,20 +13,11 @@
 //limitations under the License.
 //========================================================================
 
-// This is kinda overkill, and I don't really like it.
-// But it sure works. :)
-//
-// It'd be nicer just to have setClassLoader on the regular
-// WebAppDeployer class, and not have to worry with all this
-// extra class.
-//
-// -- Alex
-
 package org.mortbay.ijetty;
 
 import java.util.ArrayList;
 
-import org.mortbay.component.AbstractLifeCycle;
+import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -34,6 +25,8 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
+
+import android.util.Log;
 
 /**
  * Web Application Deployer.
@@ -51,90 +44,12 @@ import org.mortbay.util.URIUtil;
  * 
  * @see {@link ContextDeployer}
  */
-public class AndroidWebAppDeployer extends AbstractLifeCycle
+public class AndroidWebAppDeployer extends WebAppDeployer
 {
-    private HandlerContainer _contexts;
-    private String _webAppDir;
-    private String _defaultsDescriptor;
-    private String[] _configurationClasses;
-    private boolean _extract;
-    private boolean _parentLoaderPriority;
-    private boolean _allowDuplicates;
-    private ArrayList _deployed;
-
-    public String[] getConfigurationClasses()
-    {
-        return _configurationClasses;
-    }
-
-    public void setConfigurationClasses(String[] configurationClasses)
-    {
-        _configurationClasses=configurationClasses;
-    }
-
-    public HandlerContainer getContexts()
-    {
-        return _contexts;
-    }
-
-    public void setContexts(HandlerContainer contexts)
-    {
-        _contexts=contexts;
-    }
-
-    public String getDefaultsDescriptor()
-    {
-        return _defaultsDescriptor;
-    }
-
-    public void setDefaultsDescriptor(String defaultsDescriptor)
-    {
-        _defaultsDescriptor=defaultsDescriptor;
-    }
-
-    public boolean isExtract()
-    {
-        return _extract;
-    }
-
-    public void setExtract(boolean extract)
-    {
-        _extract=extract;
-    }
-
-    public boolean isParentLoaderPriority()
-    {
-        return _parentLoaderPriority;
-    }
-
-    public void setParentLoaderPriority(boolean parentPriorityClassLoading)
-    {
-        _parentLoaderPriority=parentPriorityClassLoading;
-    }
-
-    public String getWebAppDir()
-    {
-        return _webAppDir;
-    }
-
-    public void setWebAppDir(String dir)
-    {
-        _webAppDir=dir;
-    }
-
-    public boolean getAllowDuplicates()
-    {
-        return _allowDuplicates;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param allowDuplicates If false, do not deploy webapps that have already been deployed or duplicate context path
-     */
-    public void setAllowDuplicates(boolean allowDuplicates)
-    {
-        _allowDuplicates=allowDuplicates;
-    }
+    // TODO: Remove me! :)
+    private static final String TAG = "Jetty";
+    
+    private ArrayList _deployed; 
 
     /* ------------------------------------------------------------ */
     /**
@@ -143,6 +58,7 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
     public void doStart() throws Exception
     {
         _deployed=new ArrayList();
+        Log.i ("Jetty", "Scanning via AndroidWebAppDeployer");
         scan();
         
     }
@@ -154,10 +70,10 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
      */
     public void scan() throws Exception
     {
-        if (_contexts==null)
+        if (getContexts()==null)
             throw new IllegalArgumentException("No HandlerContainer");
 
-        Resource r=Resource.newResource(_webAppDir);
+        Resource r=Resource.newResource(getWebAppDir());
         if (!r.exists())
             throw new IllegalArgumentException("No such webapps resource "+r);
 
@@ -193,9 +109,9 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
                 context=context.substring(0,context.length()-1);
 
             // Check the context path has not already been added or the webapp itself is not already deployed
-            if (!_allowDuplicates)
+            if (!getAllowDuplicates())
             {
-                Handler[] installed=_contexts.getChildHandlersByClass(ContextHandler.class);
+                Handler[] installed=getContexts().getChildHandlersByClass(ContextHandler.class);
                 for (int i=0; i<installed.length; i++)
                 {
                     ContextHandler c=(ContextHandler)installed[i];
@@ -214,15 +130,19 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
    
                 }
             }
+            
+            Log.i (TAG, "app resource was: " + app.getFile().getAbsolutePath());
+            Log.i (TAG, "app was: " + app.toString());
 
             // create a webapp
             WebAppContext wah=null;
-            if (_contexts instanceof ContextHandlerCollection && 
-                WebAppContext.class.isAssignableFrom(((ContextHandlerCollection)_contexts).getContextClass()))
+            HandlerContainer contexts = getContexts();
+            if (contexts instanceof ContextHandlerCollection && 
+                WebAppContext.class.isAssignableFrom(((ContextHandlerCollection)contexts).getContextClass()))
             {
                 try
                 {
-                    wah=(WebAppContext)((ContextHandlerCollection)_contexts).getContextClass().newInstance();
+                    wah=(WebAppContext)((ContextHandlerCollection)contexts).getContextClass().newInstance();
                 }
                 catch (Exception e)
                 {
@@ -238,19 +158,31 @@ public class AndroidWebAppDeployer extends AbstractLifeCycle
             
             // configure it
             wah.setContextPath(context);
-            if (_configurationClasses!=null)
-                wah.setConfigurationClasses(_configurationClasses);
-            if (_defaultsDescriptor!=null)
-                wah.setDefaultsDescriptor(_defaultsDescriptor);
-            wah.setExtractWAR(_extract);
+            
+            if (getConfigurationClasses()!=null) {
+                wah.setConfigurationClasses(getConfigurationClasses());
+            } else {
+                wah.setConfigurationClasses (new String [] {
+                        "org.mortbay.ijetty.AndroidWebInfConfiguration",
+                        "org.mortbay.jetty.webapp.WebXmlConfiguration", 
+                        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+                        "org.mortbay.jetty.webapp.TagLibConfiguration"
+                });
+            }
+            
+            if (getDefaultsDescriptor()!=null)
+                wah.setDefaultsDescriptor(getDefaultsDescriptor());
+            wah.setExtractWAR(isExtract());
             wah.setWar(app.toString());
-            wah.setParentLoaderPriority(_parentLoaderPriority);
+            wah.setParentLoaderPriority(isParentLoaderPriority());
             // add it
-            _contexts.addHandler(wah);
+            contexts.addHandler(wah);
             _deployed.add(wah);
             
-            if (_contexts.isStarted())
-                _contexts.start();  // TODO Multi exception
+            if (contexts.isStarted())
+                contexts.start();  // TODO Multi exception
+            
+            setContexts (contexts);
         }
     }
     
