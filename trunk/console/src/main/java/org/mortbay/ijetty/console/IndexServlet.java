@@ -33,10 +33,10 @@ public class IndexServlet extends InfoServlet
     {
         writer.println("<h1>Options</h1>");
         writer.println("<ul>");
-        writer.println("<li><a href='/app/contacts'>Contacts</a></li>");
-        writer.println("<li><a href='/app/settings'>System Settings</a></li>");
-        writer.println("<li><a href='/app/calls'>Call Log</a></li>");
-        writer.println("<li><a href='/app/network'>Network Addresses</a></li>");
+        writer.println("<li><a href='/console/contacts'>Contacts</a></li>");
+        writer.println("<li><a href='/console/settings'>System Settings</a></li>");
+        writer.println("<li><a href='/console/calls'>Call Log</a></li>");
+        writer.println("<li><a href='/console/network'>Network Addresses</a></li>");
         writer.println("</ul>");
     }
 

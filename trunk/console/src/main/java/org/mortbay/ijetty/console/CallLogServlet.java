@@ -119,7 +119,7 @@ public class CallLogServlet extends InfoServlet
                         int nameIndex = cursor.getColumnIndex(CallLog.Calls.NAME);
                         String name=(nameIndex>=0?cursor.getString(nameIndex):null);
                         if (val!=null && name!=null)
-                                writer.println(name==null?"&nbsp;":"<a href='/app/contacts/"+val+"'>"+name+"</a>");     
+                                writer.println(name==null?"&nbsp;":"<a href='/console/contacts/"+val+"'>"+name+"</a>");     
                         else
                                 writer.println("&nbsp;");
                     }
