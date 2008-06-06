@@ -32,7 +32,7 @@ import android.database.Cursor;
 public abstract class InfoServlet extends HttpServlet
 {
     private String[] _navBarLabels = {"Contacts","Call Log", "Settings"};
-    private String[] _navBarItems = {"/app/contacts/", "/app/calls/","/app/settings/"};
+    private String[] _navBarItems = {"/console/contacts/", "/console/calls/","/console/settings/"};
 
     public ContentResolver getContentResolver ()
     {
@@ -42,7 +42,7 @@ public abstract class InfoServlet extends HttpServlet
     {
         writer.println("<html>");
         writer.println("<head><META http-equiv=\"Pragma\" content=\"no-cache\"> <META http-equiv=\"Cache-Control\" content=\"no-cache,no-store\">");
-        writer.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"/app/css\"></link></head>");
+        writer.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"/console/css\"></link></head>");
         writer.println("<body>");
         writer.println("<table>");
         writer.println("<tr><td>");

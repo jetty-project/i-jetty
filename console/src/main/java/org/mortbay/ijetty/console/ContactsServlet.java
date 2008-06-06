@@ -133,7 +133,7 @@ public class ContactsServlet extends InfoServlet
         
         if (pathInfo==null)
         {
-            //redirect any requests for /app/contacts to be /app/contacts/
+            //redirect any requests for /console/contacts to be /console/contacts/
             RequestDispatcher dispatcher = request.getRequestDispatcher(pathInContext+"/");
             dispatcher.forward(request, response);
         }
@@ -281,11 +281,11 @@ public class ContactsServlet extends InfoServlet
                 String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));
                 boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
-                printCell(writer, (photo==null?"&nbsp;":"<a href='/app/contacts/"+id+"/'><img src=\"/app/contacts/"+id+"/photo\""+"/></a>"), style);
+                printCell(writer, (photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>"), style);
                 if (title!=null)
-                        printCell(writer, "["+title+"]&nbsp;<a href=\"/app/contacts/"+id+"/\">"+name+"</a>", style);
+                        printCell(writer, "["+title+"]&nbsp;<a href=\"/console/contacts/"+id+"/\">"+name+"</a>", style);
                 else
-                        printCell(writer, "<a href=\"/app/contacts/"+id+"\">"+name+"</a>", style);
+                        printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 printCell(writer, (company==null?"":company), style);
                
                 writer.println("</tr>");
@@ -308,7 +308,7 @@ public class ContactsServlet extends InfoServlet
                String notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
                String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));
                boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
-               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(photo==null?"&nbsp;":"<a href='/app/contacts/"+id+"/photo'><img src=\"/app/contacts/"+id+"/photo\""+"/></a>&nbsp;")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
+               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>&nbsp;")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
                if (company!=null)
                    writer.println("<h3>"+company+"</h3>");
                writer.println("<h2>Notes</h2>");
@@ -349,7 +349,7 @@ public class ContactsServlet extends InfoServlet
                 {
                         Log.w("Jetty", "Encoding telephone number failed");
                 }
-                printCell(writer, (number==null?"&nbsp;":"<a href=\"/app/contacts/"+who+"?call="+encodedNumber+"\">"+number+"</a>&nbsp;<span class='qualifier'>["+phoneType+"]</span>"), style);
+                printCell(writer, (number==null?"&nbsp;":"<a href=\"/console/contacts/"+who+"?call="+encodedNumber+"\">"+number+"</a>&nbsp;<span class='qualifier'>["+phoneType+"]</span>"), style);
                 writer.println("</tr>");
                 row++;
         }

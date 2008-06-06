@@ -54,7 +54,7 @@ public class InfoFilter implements Filter
             if (!endsWithSlash)
                 pathInContext+="/";
             
-            RequestDispatcher dispatcher = httpRequest.getRequestDispatcher(pathInContext+"app");
+            RequestDispatcher dispatcher = httpRequest.getRequestDispatcher(pathInContext+"console");
             dispatcher.forward(request, response);
         
         }

@@ -50,26 +50,26 @@
 	
 	<servlet-mapping>
 		<servlet-name>ContactsServlet</servlet-name>
-		<url-pattern>/app/contacts/*</url-pattern>
+		<url-pattern>/console/contacts/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CallLogServlet</servlet-name>
-		<url-pattern>/app/calls/*</url-pattern>
+		<url-pattern>/console/calls/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>SettingsServlet</servlet-name>
-		<url-pattern>/app/settings/*</url-pattern>
+		<url-pattern>/console/settings/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>IPServlet</servlet-name>
-		<url-pattern>/app/network/*</url-pattern>
+		<url-pattern>/console/network/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>IndexServlet</servlet-name>
-		<url-pattern>/app</url-pattern>
+		<url-pattern>/console</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CssServlet</servlet-name>
-		<url-pattern>/app/css</url-pattern>
+		<url-pattern>/console/css</url-pattern>
 	</servlet-mapping>
 </web-app>
