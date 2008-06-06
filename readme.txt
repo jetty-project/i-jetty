@@ -1,26 +1,52 @@
 How to build
 ============
 Check out the project from code.google.com:
- svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
+$ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
 
 Do an ant build FIRST, to download some jetty classes that need to be
 compiled for dalvik vm:
- cd i-jetty-read-only; ant
+$ cd i-jetty-read-only; ant
 
 Use the eclipse plugin or apk tool to build the project and deploy
 to the emulator.
 
-Then, follow the steps below:
+This should mean you now have i-jetty working! Well done!
+Now comes the slightly harder bit; getting the i-jetty console servlet
+built. Note that this is _optional_, but recommended so you can see
+something happening (you will need Maven installed):
+
+$ cd console; mvn install
+
+Now, we need to create a JAR with the dex file for the DalvikVM in it:
+$ aapt add console.jar bin/classes.dex
+
+Follow the instructions in readme.sdcard.txt on how to create an SD
+card image, then copy console.jar into the following directory:
+
+root of image (/)
+ \ jetty
+   \ etc
+   |  \ webdefault.xml
+   |
+   \ webapps
+   |  \ console
+   |  |  \ web-inf
+   |  |  |  \ web.xml
+   |  |  |  \ lib
+   |  |  |  |  \ console.jar         <= Goes here! :)
+
+
+Once you've done that, unmount the SD card image and follow
+the steps below:
 
 Adding photos to contacts
 =========================
 
-* Close the emulator started by Jetty after deployment.
 * Open a new emulator from your SDK directory (optionally, you can enable an
   SD card now - check out readme.sdcard.txt). You might want to run this as a
   background process, eg:
   
-  $ ./emulator &
+  $ ./emulator -sdcard ~/src/i-jetty/sdcard.img &
 
 * On the emulator, start the Contacts activity and add a few people you know.
 * Still inside the SDK directory, open a shell to the Android device by using
