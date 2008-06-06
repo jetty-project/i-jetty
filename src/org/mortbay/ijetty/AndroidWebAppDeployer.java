@@ -145,19 +145,18 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                 }
             }
 
+            Log.d("Jetty", "AndroidWebAppDeployer, context="+context);
             // create a webapp
             WebAppContext wah = null;
             HandlerContainer contexts = getContexts();
-            if (contexts instanceof ContextHandlerCollection
-                    && WebAppContext.class
-                            .isAssignableFrom(((ContextHandlerCollection) contexts)
-                                    .getContextClass()))
-            {
-                try
-                {
-                    wah = (WebAppContext) ((ContextHandlerCollection) contexts)
-                            .getContextClass().newInstance();
-                }
+			if (contexts instanceof ContextHandlerCollection
+				&& 
+				WebAppContext.class.isAssignableFrom(((ContextHandlerCollection) contexts).getContextClass()))
+			{
+				try
+				{
+					wah = (WebAppContext) ((ContextHandlerCollection) contexts).getContextClass().newInstance();
+				}
                 catch (Exception e)
                 {
                     throw new Error(e);
@@ -198,10 +197,6 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             Log.d ("Jetty", "Deployed: " + app.toString());
             contexts.addHandler(wah);
             _deployed.add(wah);
-
-            if (contexts.isStarted()) contexts.start(); // TODO Multi exception
-
-            setContexts(contexts);
         }
     }
 

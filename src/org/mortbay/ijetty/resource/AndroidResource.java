@@ -19,6 +19,8 @@ package org.mortbay.ijetty.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.mortbay.util.IO;
 
@@ -40,8 +42,10 @@ public abstract class AndroidResource
         }
         
         public static AndroidResource getResource (String path)
+        throws MalformedURLException
         {
             Log.i("Jetty", "Getting resource for path="+path);
+            /*
             if (path.startsWith("contacts"))
             {
                 //return new AndroidContactResource
@@ -53,6 +57,7 @@ public abstract class AndroidResource
                 return null;
             }
             else 
-                return new AndroidFileResource(path);
+            */
+            return new AndroidFileResource(new URL(path));
         }
 }

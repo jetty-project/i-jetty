@@ -22,6 +22,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -35,18 +38,18 @@ public class AndroidFileResource extends AndroidResource
 {
     private File _file;
     
-    public AndroidFileResource (String file)
+   
+    public AndroidFileResource (URL url)
     {
-        try
-        {
-            _file = new File("/sdcard"+(file.startsWith("/")?"":"/")+file);
-            Log.d("Jetty", "Made AndroidFileResource for "+_file.getCanonicalPath());
-           
-        }
-        catch (Exception e)
-        {
-            Log.e("Jetty","Problem getting AndroidFileResource", e);
-        }
+    	try
+    	{    		
+    		_file = new File (new URI(url.toString()));
+    		Log.d("Jetty", "Made AndroidFileResource for "+ _file.getCanonicalPath());
+    	}
+    	catch (Exception e)
+    	{
+    		Log.e("Jetty","Problem getting AndroidFileResource", e);
+    	}
     }
     
     public  boolean exists()
@@ -83,12 +86,13 @@ public class AndroidFileResource extends AndroidResource
     }
     
     public AndroidFileResource addPath (String path)
+    throws MalformedURLException
     {
         
         if (!isDirectory())
         {
             String cp = URIUtil.canonicalPath(path);
-            return new AndroidFileResource(URIUtil.addPaths(_file.getAbsolutePath(),cp));
+            return new AndroidFileResource(new URL(URIUtil.addPaths(_file.getAbsolutePath(),cp)));
         }
         else
         {
@@ -96,13 +100,14 @@ public class AndroidFileResource extends AndroidResource
             if (path.startsWith("/"))
                 rel = path.substring(1);
             
-            return new AndroidFileResource(URIUtil.addPaths(_file.getAbsolutePath(), URIUtil.encodePath(rel)));
+            return new AndroidFileResource(new URL(URIUtil.addPaths(_file.getAbsolutePath(), URIUtil.encodePath(rel))));
         }
     }
     
     
     
     public String getListHTML(String base, boolean parent)
+    throws IOException
     {
         if (!isDirectory())
             return null;
