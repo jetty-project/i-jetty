@@ -29,21 +29,10 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.mortbay.ijetty.servlet.CallLogServlet;
-import org.mortbay.ijetty.servlet.ContactsServlet;
-import org.mortbay.ijetty.servlet.CssServlet;
-import org.mortbay.ijetty.servlet.IPServlet;
-import org.mortbay.ijetty.servlet.IndexServlet;
-import org.mortbay.ijetty.servlet.InfoFilter;
-import org.mortbay.ijetty.servlet.SettingsServlet;
 import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.servlet.ServletHolder;
 
 public class IJettyService extends Service
 {
@@ -176,7 +165,7 @@ public class IJettyService extends Service
         }
 
         // Deploy some servlets to serve on--phone information
-        Context context = new Context(contexts, "/", Context.SESSIONS);
+        /*Context context = new Context(contexts, "/", Context.SESSIONS);
 
         ContactsServlet contactsServlet = new ContactsServlet();
         contactsServlet.setContentResolver(getContentResolver());
@@ -203,7 +192,7 @@ public class IJettyService extends Service
         context.addServlet(new ServletHolder(
                 new org.mortbay.ijetty.servlet.DefaultServlet()), "/");
         context.addFilter(new FilterHolder(new InfoFilter()), "/",
-                Handler.REQUEST);
+                Handler.REQUEST);*/
 
         server.start();
     }

@@ -135,15 +135,36 @@ public class AndroidClassLoader extends ClassLoader
                 Class c =  (Class) dexFileClassLoadClass.invoke (dexFile, 
                         new Object[] { name.replace('.','/'), getClass ().getClassLoader () });
                 
-                Log.d ("Jetty", "Found class! Returning.");
-                return c;
+                if (c != null)
+                {
+                	if (c.getClassLoader() != null)
+                	{
+                		Log.d ("Jetty", "Found class! Loaded by: " + c.getClassLoader().toString() +  ". Returning.");
+                	}
+                	else
+                	{
+                		Log.d ("Jetty", "Found class! Just no loader. :(");
+                	}
+                	return c;
+                }
+                else
+                {
+                	Log.w ("Jetty", "Returning null class!");
+                	return null;
+                }
             } catch (Exception ex) {
                 // Silenty ignore any exceptions, as not all DEX files might
-                // have
-                // the class we're after - wait until we're done.
+                // have the class we're after - wait until we're done.
+            	Log.d ("Jetty", "Exception trying to load class from file!", ex);
             }
         }
         
         throw new ClassNotFoundException ();
+    }
+    
+    @Override
+    public String toString()
+    {
+    	return "(AndroidClassLoader, dexFileSize=" + dexFiles.size() + ")";
     }
 }
