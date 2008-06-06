@@ -17,8 +17,19 @@ something happening (you will need Maven installed):
 
 $ cd console; mvn install
 
+If you get a "Failed to resolve artifact error" with
+android:android:jar:m3-rc20a missing, you'll need to follow the
+instructions provided and install the Android JAR that comes with the
+SDK. For example:
+
+$ mvn install:install-file -DgroupId=android -DartifactId=android \
+  -Dversion=m3-rc20a -Dpackaging=jar \
+  -Dfile=/home/alex/Desktop/Downloads/android-sdk_m5-rc15_linux-x86/android.jar
+
+You should then be able to run 'mvn install' again and it should build.
+
 Now, we need to create a JAR with the dex file for the DalvikVM in it:
-$ aapt add console.jar bin/classes.dex
+$ dx --dex --output=console.jar target/classes/
 
 Follow the instructions in readme.sdcard.txt on how to create an SD
 card image, then copy console.jar into the following directory:
@@ -36,8 +47,8 @@ root of image (/)
    |  |  |  |  \ console.jar         <= Goes here! :)
 
 
-Once you've done that, unmount the SD card image and follow
-the steps below:
+Once you've done that, unmount the SD card image from the loopback
+and follow the steps below:
 
 Adding photos to contacts
 =========================
