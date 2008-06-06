@@ -27,6 +27,7 @@ import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
+import android.util.Log;
 
 /**
  * Web Application Deployer.
@@ -194,6 +195,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             if (_resolver != null)
                 wah.setAttribute("contentResolver", _resolver);
             // add it
+            Log.d ("Jetty", "Deployed: " + app.toString());
             contexts.addHandler(wah);
             _deployed.add(wah);
 
