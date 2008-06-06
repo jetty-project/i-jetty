@@ -24,8 +24,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
 import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
@@ -83,9 +81,6 @@ public abstract class InfoServlet extends HttpServlet
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-        base_request.setHandled(true);
-
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();

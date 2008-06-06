@@ -1,5 +1,7 @@
-#Fri Jun 06 10:16:33 GMT 2008
+#Fri Jun 06 17:20:36 EST 2008
 eclipse.preferences.version=1
+instance/org.eclipse.core.net/org.eclipse.core.net.hasMigrated=true
+org.eclipse.jdt.core.builder.cleanOutputFolder=ignore
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
 org.eclipse.jdt.core.compiler.compliance=1.5
 org.eclipse.jdt.core.compiler.problem.assertIdentifier=error

@@ -31,8 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
 import org.mortbay.util.IO;
 import org.mortbay.util.URIUtil;
 
@@ -128,8 +126,6 @@ public class ContactsServlet extends InfoServlet
     
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-        base_request.setHandled(true);
         String pathInfo = request.getPathInfo();
         String servletPath=request.getServletPath();
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);

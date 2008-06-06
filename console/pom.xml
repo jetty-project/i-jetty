@@ -4,8 +4,20 @@
   <groupId>org.mortbay.ijetty.console</groupId>
   <artifactId>console</artifactId>
   <packaging>war</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <name>console</name>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+          <verbose>false</verbose>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -15,13 +27,13 @@
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
+      <artifactId>jetty-util</artifactId>
       <version>7.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>android</groupId>
-      <artifactId>android</artifactId>
-      <version>m4-rc15</version>
+     <groupId>android</groupId>
+     <artifactId>android</artifactId>
+     <version>m5-rc15</version>
     </dependency>
   </dependencies>
 </project>
