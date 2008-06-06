@@ -32,10 +32,6 @@
 		<servlet-class>org.mortbay.ijetty.console.CssServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>DefaultServlet</servlet-name>
-		<servlet-class>org.mortbay.ijetty.console.DefaultServlet</servlet-class>
-	</servlet>
-	<servlet>
 		<servlet-name>IndexServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.IndexServlet</servlet-class>
 	</servlet>
@@ -75,9 +71,5 @@
 	<servlet-mapping>
 		<servlet-name>CssServlet</servlet-name>
 		<url-pattern>/app/css</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>DefaultServlet</servlet-name>
-		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 </web-app>
