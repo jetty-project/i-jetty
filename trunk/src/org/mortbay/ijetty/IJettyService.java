@@ -30,8 +30,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
 public class IJettyService extends Service
@@ -146,8 +149,10 @@ public class IJettyService extends Service
                 "org.mortbay.log.AndroidLog");
         org.mortbay.log.Log.setLog(new AndroidLog());
 
+        HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        server.setHandler(contexts);
+        handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
+        server.setHandler(handlers);
 
         // Load any webapps we find on the card.
         if (new File("/sdcard/jetty/").exists())
@@ -163,37 +168,7 @@ public class IJettyService extends Service
         {
             Log.w("Jetty", "Not loading any webapps - none on SD card.");
         }
-
-        // Deploy some servlets to serve on--phone information
-        /*Context context = new Context(contexts, "/", Context.SESSIONS);
-
-        ContactsServlet contactsServlet = new ContactsServlet();
-        contactsServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(contactsServlet),
-                "/app/contacts/*");
-
-        CallLogServlet callLogServlet = new CallLogServlet();
-        callLogServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(callLogServlet), "/app/calls/*");
-
-        SettingsServlet settingsServlet = new SettingsServlet();
-        settingsServlet.setContentResolver(getContentResolver());
-        context.addServlet(new ServletHolder(settingsServlet),
-                "/app/settings/*");
-
-        IPServlet ipServlet = new IPServlet();
-        context.addServlet(new ServletHolder(ipServlet), "/app/network/*");
-
-        IndexServlet indexServlet = new IndexServlet();
-        context.addServlet(new ServletHolder(indexServlet), "/app");
-
-        CssServlet cssServlet = new CssServlet();
-        context.addServlet(new ServletHolder(cssServlet), "/app/css");
-        context.addServlet(new ServletHolder(
-                new org.mortbay.ijetty.servlet.DefaultServlet()), "/");
-        context.addFilter(new FilterHolder(new InfoFilter()), "/",
-                Handler.REQUEST);*/
-
+        
         server.start();
     }
 

@@ -27,8 +27,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
     {
         if (getWebAppContext().isStarted())
         {
-            // if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp
-            // after it is started");}
+            Log.d("Jetty", "Cannot configure webapp after it is started");
             return;
         }
 
@@ -36,7 +35,8 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
 
         // Add WEB-INF lib classpaths
         if (web_inf != null && web_inf.isDirectory()
-                && _context.getClassLoader() instanceof ClassLoader)
+            && 
+            _context.getClassLoader() instanceof ClassLoader)
         {
             // Look for jars
             Resource lib = web_inf.addPath("lib/");
@@ -51,8 +51,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
                             .getFile().getAbsolutePath();
                     if (!loader.addDexFile(fullpath))
                     {
-                        Log.w("Jetty", "Failed to add DEX file from path: "
-                                + fullpath);
+                        Log.w("Jetty", "Failed to add DEX file from path: "+ fullpath);
                     }
                 }
             }
