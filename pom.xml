@@ -181,7 +181,7 @@
               </execution>
               
               <!-- Uploads and installs the package on the emulator. -->
-              <execution>
+              <!--<execution>
                 <id>adb-install</id>
                 <phase>install</phase>
                 <goals>
@@ -194,7 +194,7 @@
                     <argument>${project.build.directory}/${artifactId}.apk</argument>
                   </arguments>
                 </configuration>
-              </execution>
+              </execution>-->
             </executions>
           </plugin>
       </plugins>
