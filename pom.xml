@@ -108,11 +108,95 @@
                <target>1.5</target>
             </configuration>
          </plugin>
-         <!-- plugin>
-            <groupId>org.jvending.masa.plugins</groupId>
-            <artifactId>maven-dx-plugin</artifactId>
-            <extensions>true</extensions>
-         </plugin -->
+         
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <!-- Convert the compiled classes into a clases.dex. -->
+              <execution>
+                <id>generate-dex</id>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${android.home}/tools/dx</executable>
+                  <arguments>
+                    <argument>--dex</argument>
+                    <argument>--output=${project.build.directory}/classes.dex</argument>
+                    <argument>--locals=full</argument>
+                    <argument>--positions=lines</argument>
+                    <argument>${project.build.directory}/classes/</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              
+              <!-- Put the project's resources into the output package file. -->
+              <execution>
+                <id>aapt-initial-package</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${android.home}/tools/aapt</executable>
+                  <arguments>
+                    <argument>package</argument>
+                    <argument>-f</argument>
+                    <argument>-c</argument>
+                    <argument>-M</argument>
+                    <argument>${basedir}/AndroidManifest.xml</argument>
+                    <argument>-S</argument>
+                    <argument>${basedir}/res/</argument>
+                    <argument>-I</argument>
+                    <argument>${android.home}/android.jar</argument>
+                    <argument>${project.build.directory}/${artifactId}.apk</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              
+              <!-- Adds the .dex to the Android package (apk) file. -->
+              <execution>
+                <id>aapt-dex-package</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <!-- NOTE: Must keep this as working directory, otherwise
+                       item will be added to the apk with the whole path; eg:
+                       just doing "add /path/to/file" results in the whole
+                       directory path being recreated, whereas "add file" does
+                       not. -->
+                  <workingDirectory>${project.build.directory}</workingDirectory>
+                  <executable>${android.home}/tools/aapt</executable>
+                  <arguments>
+                    <argument>add</argument>
+                    <argument>${project.build.directory}/${artifactId}.apk</argument>
+                    <argument>classes.dex</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              
+              <!-- Uploads and installs the package on the emulator. -->
+              <execution>
+                <id>adb-install</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${android.home}/tools/adb</executable>
+                  <arguments>
+                    <argument>install</argument>
+                    <argument>${project.build.directory}/${artifactId}.apk</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
       </plugins>
    </build>
 </project>

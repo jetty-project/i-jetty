@@ -1,29 +1,29 @@
 How to build
 ============
+
 Check out the project from code.google.com:
 $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
 
-Do an ant build FIRST, to download some jetty classes that need to be
-compiled for dalvik vm:
+Do an ant build FIRST, to download some jetty classes that need to be compiled
+for dalvik vm:
 $ cd i-jetty-read-only; ant
 
-Use the eclipse plugin or apk tool to build the project and deploy
-to the emulator.
+Use the eclipse plugin or apk tool to build the project and deploy to the
+emulator.
 
 This should mean you now have i-jetty working! Well done!
-Now comes the slightly harder bit; getting the i-jetty console servlet
-built. Note that this is _optional_, but recommended so you can see
-something happening (you will need Maven installed):
+Now comes the slightly harder bit; getting the i-jetty console servlet built.
+Note that this is _optional_, but recommended so you can see something
+happening (you will need Maven installed):
 
 $ cd console; mvn install
 
 If you get a "Failed to resolve artifact error" with
-android:android:jar:m3-rc20a missing, you'll need to follow the
-instructions provided and install the Android JAR that comes with the
-SDK. For example:
+android:android:jar:m5-rc15 missing, you'll need to follow the instructions
+provided and install the Android JAR that comes with the SDK. For example:
 
 $ mvn install:install-file -DgroupId=android -DartifactId=android \
-  -Dversion=m3-rc20a -Dpackaging=jar \
+  -Dversion=m5-rc15 -Dpackaging=jar \
   -Dfile=/home/alex/Desktop/Downloads/android-sdk_m5-rc15_linux-x86/android.jar
 
 You should then be able to run 'mvn install' again and it should build.
@@ -31,8 +31,8 @@ You should then be able to run 'mvn install' again and it should build.
 Now, we need to create a JAR with the dex file for the DalvikVM in it:
 $ dx --dex --output=console.jar target/classes/
 
-Follow the instructions in readme.sdcard.txt on how to create an SD
-card image, then copy console.jar into the following directory:
+Follow the instructions in readme.sdcard.txt on how to create an SD card image,
+then copy console.jar into the following directory:
 
 root of image (/)
  \ jetty
@@ -47,8 +47,8 @@ root of image (/)
    |  |  |  |  \ console.jar         <= Goes here! :)
 
 
-Once you've done that, unmount the SD card image from the loopback
-and follow the steps below:
+Once you've done that, unmount the SD card image from the loopback and follow
+the steps below:
 
 Adding photos to contacts
 =========================
