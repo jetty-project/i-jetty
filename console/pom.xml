@@ -32,9 +32,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-     <groupId>android</groupId>
-     <artifactId>android</artifactId>
-     <version>m5-rc15</version>
+      <groupId>android</groupId>
+      <artifactId>android</artifactId>
+      <version>m5-rc15</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
