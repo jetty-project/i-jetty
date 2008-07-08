@@ -7,17 +7,6 @@
 
   	<display-name>IJetty Console</display-name>
   	
-	<filter>
-		<filter-name>InfoFilter</filter-name>
-		<filter-class>org.mortbay.ijetty.console.InfoFilter</filter-class>
-	</filter>
-	
-	<filter-mapping>
-		<filter-name>InfoFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
-	</filter-mapping>
-	
 	<servlet>
 		<servlet-name>ContactsServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.ContactsServlet</servlet-class>
@@ -30,10 +19,6 @@
 	<servlet>
 		<servlet-name>CssServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.CssServlet</servlet-class>
-	</servlet>
-	<servlet>
-		<servlet-name>IndexServlet</servlet-name>
-		<servlet-class>org.mortbay.ijetty.console.IndexServlet</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>InfoServlet</servlet-name>
@@ -50,26 +35,22 @@
 	
 	<servlet-mapping>
 		<servlet-name>ContactsServlet</servlet-name>
-		<url-pattern>/console/contacts/*</url-pattern>
+		<url-pattern>/contacts/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CallLogServlet</servlet-name>
-		<url-pattern>/console/calls/*</url-pattern>
+		<url-pattern>/calls/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>SettingsServlet</servlet-name>
-		<url-pattern>/console/settings/*</url-pattern>
+		<url-pattern>/settings/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>IPServlet</servlet-name>
-		<url-pattern>/console/network/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>IndexServlet</servlet-name>
-		<url-pattern>/console</url-pattern>
+		<url-pattern>/network/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CssServlet</servlet-name>
-		<url-pattern>/console/css</url-pattern>
+		<url-pattern>/css</url-pattern>
 	</servlet-mapping>
 </web-app>
