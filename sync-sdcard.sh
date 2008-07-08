@@ -37,5 +37,8 @@ else
     echo "SD image already mounted; only syncing directories..."
 fi
 
+# Nuke the entire SD card so we have a clean slate.
+rm sdcard-mount/* -Rf
+
 # Copy it all in (again, root, eugh)
 sudo cp -Rvf sdcard-layout/* sdcard-mount/
