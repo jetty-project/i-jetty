@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # sync-sdcard.sh
 # Mounts sdcard.img, copies across a directory structure, and umounts.

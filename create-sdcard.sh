@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # create-sdcard.sh
 # Creates a new small sdcard.img file, for use as an SD card.
