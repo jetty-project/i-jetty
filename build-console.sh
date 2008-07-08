@@ -10,11 +10,11 @@ if (( $? )); then
 fi
 
 # Build seemed OK, copy stuff into sdcard-layout
-mkdir -v ../sdcard-layout/jetty/console
-cp target/console-*.war ../sdcard-layout/jetty/console/
+mkdir -v ../sdcard-layout/jetty/webapps/console
+cp target/console-*.war ../sdcard-layout/jetty/webapps/console/
 
 # Unzip for i-jetty.
 # XXX: Do we need this? TEST FIRST!
-cd ../sdcard-layout/jetty/console/
+cd ../sdcard-layout/jetty/webapps/console/
 unzip console-*.war
 rm console-*.war
