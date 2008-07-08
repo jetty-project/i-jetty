@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # deploy.sh
 # Deploys the i-jetty package to the emulator.
