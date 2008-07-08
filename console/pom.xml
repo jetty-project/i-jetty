@@ -17,58 +17,6 @@
         </configuration>
       </plugin>
       
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.1</version>
-        <executions>
-          <!-- Convert the compiled classes into a JAR file with a classes.dex
-               contained within. -->
-          <execution>
-            <id>generate-dex</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${android.home}/tools/dx</executable>
-              <arguments>
-                <argument>--dex</argument>
-                <argument>--output=${project.build.directory}/${build.finalName}-android.jar</argument>
-                <argument>--locals=full</argument>
-                <argument>--positions=lines</argument>
-                <argument>${project.build.directory}/classes/</argument>
-              </arguments>
-            </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        
-        <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <!-- XXX: This should *actually* be running in the prepage-package
-                 phase, however, not everyone is running Maven 2.1+, so run it
-                 in the phase beforehand, so it actually executes. -->
-            <phase>test</phase>
-            <configuration>
-              <!-- Copies the magical Android JAR created in the previous step
-                   to our WEB-INF/lib directory so that it gets included when
-                   Maven packages up the WAR. We need it so that i-jetty can
-                   load the classes when it's on the phone. -->
-              <tasks>
-                <mkdir dir="${project.build.directory}/${build.finalName}/WEB-INF/lib/" />
-                <copy file="${project.build.directory}/${build.finalName}-android.jar"
-                      todir="${project.build.directory}/${build.finalName}/WEB-INF/lib/" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -82,6 +30,12 @@
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-util</artifactId>
       <version>6.1.11</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay</groupId>
+      <artifactId>i-jetty</artifactId>
+      <version>1.0-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

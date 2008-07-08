@@ -1,0 +1,35 @@
+        html {font-size:0.8em;font-family:helvetica, sans-serif;}
+        table {border-width:0px;}
+        
+        h1 img {border:0px;}
+        h1,h2,h3 {color: #000099;font-family:arial;}
+        h1 {margin-top:0.2em;border-bottom: 1px dashed #000099;}
+        #navbar td {background-color:#000099;padding:6px;margin:6px;}
+        #navbar td.sel {background-color:#0000cc;}
+        #navbar a {font-family:sans-serif;font-weight:bold;font-size:12pt;text-align:center;text-decoration:none}
+        #navbar a:link {color:#ffffff;}
+        #navbar a:active {color:#ff6600;}
+        #navbar a:visited {color:#ffffff;}
+        #navbar a:hover {color:#ff6600;}
+         img {border:0px}
+        th {font-variant:small-caps;text-align:left;}
+        .odd {background:#efefef;}
+        .even {background:#ffffff;}
+        .primary {font-weight:bold;}
+        .big {font-size:2em;}
+        .label {font-variant:small-caps;font-weight:bold;}
+        .promo {font-style:italic;font-size:0.7em;background-color:#000099;color:#ffffff;}
+        .promo a:link,.promo a:visited,.promo a:hover,.promo a:active {color:#ff6600;font-weight:bold;}
+        table #user, table #notes, table #phones, table #addresses, table .generic {border: 1px solid #efefef; border-collapse:collapse;}
+        #user td, #notes td, #phones td, #addresses td {padding: 0.5em;}
+        #addresses td {padding-left:0.5em; padding-right:0.5em;}
+        .qualifier {font-style:italic;font-family:"Times New Roman"; font-size:0.8em;}
+        #ulnavbar {color:#000000; border-bottom: 4px solid #000099; margin 0.5em 0em 0em 0em; padding:0em; padding-left:0.5em;z-index:1;}
+        #ulnavbar li {display:inline; overflow:hidden;list-style-type:none;}
+        #ulnavbar a {background-color:#000099; border:1px solid #000099;padding:0.5em 1em 0em 1em;;margin:0em;font-family:arial;font-weight:bold;font-size:0.8em;text-align:center;text-decoration:none}
+        #ulnavbar a:link {color:#ffffff;}
+        #ulnavbar a:active {color:#ffffff;}
+        #ulnavbar a:visited {color:#ffffff;}
+        #ulnavbar a:hover {background-color:#ff6600;}
+        #ulnavbar a.sel {border-bottom: 5px solid  #ffffff; background-color:#ffffff; color:#000099;}
+        button {color: #000099;}
