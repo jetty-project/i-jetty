@@ -17,10 +17,6 @@
 		<servlet-class>org.mortbay.ijetty.console.CallLogServlet</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>CssServlet</servlet-name>
-		<servlet-class>org.mortbay.ijetty.console.CssServlet</servlet-class>
-	</servlet>
-	<servlet>
 		<servlet-name>InfoServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.InfoServlet</servlet-class>
 	</servlet>
@@ -48,9 +44,5 @@
 	<servlet-mapping>
 		<servlet-name>IPServlet</servlet-name>
 		<url-pattern>/network/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>CssServlet</servlet-name>
-		<url-pattern>/css</url-pattern>
 	</servlet-mapping>
 </web-app>
