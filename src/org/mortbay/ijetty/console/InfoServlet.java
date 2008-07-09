@@ -42,7 +42,7 @@ public abstract class InfoServlet extends HttpServlet
     {
         writer.println("<html>");
         writer.println("<head><META http-equiv=\"Pragma\" content=\"no-cache\"> <META http-equiv=\"Cache-Control\" content=\"no-cache,no-store\">");
-        writer.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"/console/css\"></link></head>");
+        writer.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"/console/console.css\"></link></head>");
         writer.println("<body>");
         writer.println("<table>");
         writer.println("<tr><td>");
