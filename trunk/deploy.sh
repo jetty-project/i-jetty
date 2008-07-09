@@ -111,4 +111,8 @@ if (( $? )); then
     exit 1
 fi
 
+# Setup port forwarding so we can check in our browser instead of only the phone
+echo -e "\033[1m******* Setting up port forwarding...\033[0m"
+${ANDROID_SDK_TOOLS}adb forward tcp:8888 tcp:8080
+
 echo -e "\033[1m******* Done!\033[0m"
