@@ -77,9 +77,20 @@ echo "Syncing SD card against sdcard-layout directory..."
 # We *must* unmount our SD card otherwise we crash poor ol' qemu
 sudo umount sdcard-mount
 
+# and free the loopback device - IMPORTANT!
+sudo losetup -f /dev/loop1
+
 # Start ze emulator! (in the background)
 echo "Starting emulator..."
 ${ANDROID_SDK_TOOLS}emulator -sdcard sdcard.img &
+
+if (( $? )); then
+    echo
+    echo "======================== [ ERROR ] ========================"
+    echo "Failed to start emulator. "
+    echo "======================== [ ERROR ] ========================"
+    exit 1
+fi
 
 # Wait for it to start
 ${ANDROID_SDK_TOOLS}adb wait-for-device
@@ -87,5 +98,13 @@ ${ANDROID_SDK_TOOLS}adb wait-for-device
 # Upload the package to the emulator when it's started
 echo "Uploading i-jetty..."
 ${ANDROID_SDK_TOOLS}adb install target/i-jetty.apk
+
+if (( $? )); then
+    echo
+    echo "======================== [ ERROR ] ========================"
+    echo "Failed to upload i-jetty to the device."
+    echo "======================== [ ERROR ] ========================"
+    exit 1
+fi
 
 echo "Done!"
