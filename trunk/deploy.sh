@@ -31,12 +31,12 @@ else
 fi
 
 # Create sdcard.img if we don't already have one.
-if [ ! -a "sdcard.img" ]; then
-    echo "Creating SD card image..."
-    ./create-sdcard.sh
+if [ ! -e "sdcard.img" ]; then
+    echo -e "\033[1m******* Creating SD card image...\033[0m"
+    scripts/create-sdcard.sh
 fi
 
-echo "Buidling i-jetty..."
+echo -e "\033[1m******* Buidling i-jetty...\033[0m"
 mvn -v > /dev/null
 if (( $? )); then
     echo
@@ -59,7 +59,8 @@ if (( $? )); then
 fi
 
 # Heck, why not - build the console!
-./build-console.sh
+echo -e "\033[1m******* Building console application...\033[0m"
+scripts/build-console.sh
 if (( $? )); then
     echo
     echo "======================== [ WARN ] ========================"
@@ -71,17 +72,20 @@ fi
 
 # Sync up the sdcard folder with the actual image
 # (console should be in here already)
-echo "Syncing SD card against sdcard-layout directory..."
-./sync-sdcard.sh
+echo -e "\033[1m******* Syncing SD card against sdcard-layout directory...\033[0m"
+scripts/sync-sdcard.sh
 
 # We *must* unmount our SD card otherwise we crash poor ol' qemu
-sudo umount sdcard-mount
+echo -e "\033[1m******* Unmounting image...\033[0m"
+sudo umount sdcard-mount/
+rm -Rfv sdcard-mount/
 
 # and free the loopback device - IMPORTANT!
-sudo losetup -f /dev/loop1
+echo -e "\033[1m******* Freeing loopback device...\033[0m"
+sudo losetup -f /dev/loop2 || echo " FAILED!"
 
 # Start ze emulator! (in the background)
-echo "Starting emulator..."
+echo -e "\033[1m******* Starting emulator...\033[0m"
 ${ANDROID_SDK_TOOLS}emulator -sdcard sdcard.img &
 
 if (( $? )); then
@@ -96,7 +100,7 @@ fi
 ${ANDROID_SDK_TOOLS}adb wait-for-device
 
 # Upload the package to the emulator when it's started
-echo "Uploading i-jetty..."
+echo -e "\033[1m******* Uploading i-jetty to emulator...\033[0m"
 ${ANDROID_SDK_TOOLS}adb install target/i-jetty.apk
 
 if (( $? )); then
@@ -107,4 +111,4 @@ if (( $? )); then
     exit 1
 fi
 
-echo "Done!"
+echo -e "\033[1m******* Done!\033[0m"
