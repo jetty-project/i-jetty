@@ -83,6 +83,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             throw new IllegalArgumentException("No HandlerContainer");
 
         Resource r = Resource.newResource(getWebAppDir());
+        Log.i ("Jetty", "Web application directory: " + getWebAppDir());
         if (!r.exists())
             throw new IllegalArgumentException("No such webapps resource " + r);
 
@@ -95,11 +96,13 @@ public class AndroidWebAppDeployer extends WebAppDeployer
         files: for (int f = 0; files != null && f < files.length; f++)
         {
             String context = files[f];
+            Log.d ("Jetty", "Have file: " + context);
 
             if (context.equalsIgnoreCase("CVS/")
                     || context.equalsIgnoreCase("CVS")
                     || context.startsWith(".")) continue;
 
+            Log.d ("Jetty", "Adding resource to path.");
             Resource app = r.addPath(r.encode(context));
 
             if (context.toLowerCase().endsWith(".war")
@@ -107,10 +110,19 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             {
                 context = context.substring(0, context.length() - 4);
                 Resource unpacked = r.addPath(context);
+                Log.d ("Jetty", "Want to unpack!");
                 if (unpacked != null && unpacked.exists()
-                        && unpacked.isDirectory()) continue;
+                        && unpacked.isDirectory())
+                {
+                    Log.d ("Jetty", "already exists.");
+                    continue;
+                }
             }
-            else if (!app.isDirectory()) continue;
+            else if (!app.isDirectory())
+            {
+                Log.d ("Jetty", "Is directory, so skipping...");
+                continue;
+            }
 
             if (context.equalsIgnoreCase("root")
                     || context.equalsIgnoreCase("root/"))
@@ -130,7 +142,10 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                 {
                     ContextHandler c = (ContextHandler) installed[i];
 
-                    if (context.equals(c.getContextPath())) continue files;
+                    if (context.equals(c.getContextPath())){
+                        Log.d ("Jetty", "Context were equal; duplicate!");
+                        continue files;
+                    }
 
                     String path;
                     if (c instanceof WebAppContext)
@@ -140,7 +155,10 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                                 .getBaseResource().getFile().getAbsolutePath());
 
                     if (path.equals(app.getFile().getAbsolutePath()))
+                    {
+                        Log.d ("Jetty", "Paths were equal; duplicate!");
                         continue files;
+                    }
 
                 }
             }
@@ -164,6 +182,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             }
             else
             {
+                Log.d ("Jetty", "Created new AppContext with empty contexts.");
                 wah = new WebAppContext();
             }
 
@@ -174,6 +193,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
 
             if (getConfigurationClasses() != null)
             {
+                Log.d ("Jetty", "Set configuration classes to " + getConfigurationClasses());
                 wah.setConfigurationClasses(getConfigurationClasses());
             }
             else
@@ -186,9 +206,11 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                         "org.mortbay.jetty.webapp.TagLibConfiguration" });
             }
 
-            if (getDefaultsDescriptor() != null)
+            if (getDefaultsDescriptor() != null) {
+                Log.d ("Jetty", "Setting defaults descriptor to: " + getDefaultsDescriptor());
                 wah.setDefaultsDescriptor(getDefaultsDescriptor());
-            wah.setExtractWAR(isExtract());
+            }
+            wah.setExtractWAR(isExtract()); 
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(isParentLoaderPriority());
             if (_resolver != null)
