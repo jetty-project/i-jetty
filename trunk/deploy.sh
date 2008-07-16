@@ -9,18 +9,13 @@
 
 # Setup any environment variables as required
 if [ -z "$ANDROID_SDK" ]; then
-    aapt v
-    if (( $? )); then
-        echo
-        echo "======================== [ ERROR ] ========================"
-        echo "SDK not found in PATH, and ANDROID_SDK isn't set."
-        echo "Please actually set one of the above correctly, then re-run"
-        echo "the tool."
-        echo "======================== [ ERROR ] ========================"
-        exit 1
-    else
-        export ANDROID_SDK=""
-    fi
+    echo
+    echo "======================== [ ERROR ] ========================"
+    echo "ANDROID_SDK isn't set."
+    echo "Please actually set one of the above correctly, then re-run"
+    echo "the tool."
+    echo "======================== [ ERROR ] ========================"
+    exit 1
 else
     # Make sure it ends with a slash.
     if [ ${ANDROID_SDK: -1} != "/" ]; then
@@ -48,7 +43,7 @@ if (( $? )); then
     exit 1
 fi
 
-mvn -Dandroid.home=${ANDROID_SDK} clean install 
+mvn -Dandroid.home=${ANDROID_SDK} install 
 if (( $? )); then
     echo
     echo "======================== [ ERROR ] ========================"
