@@ -92,15 +92,15 @@ public class AndroidFileResource extends AndroidResource
         if (!isDirectory())
         {
             String cp = URIUtil.canonicalPath(path);
-            return new AndroidFileResource(new URL(URIUtil.addPaths(_file.getAbsolutePath(),cp)));
+            return new AndroidFileResource(new URL(URIUtil.addPaths(_file.toURL().toExternalForm(), cp)));
         }
         else
         {
-            String rel=path;
-            if (path.startsWith("/"))
+            String rel=URIUtil.canonicalPath(path);
+            if (rel.startsWith("/"))
                 rel = path.substring(1);
             
-            return new AndroidFileResource(new URL(URIUtil.addPaths(_file.getAbsolutePath(), URIUtil.encodePath(rel))));
+            return new AndroidFileResource(new URL(URIUtil.addPaths(_file.toURL().toString(), URIUtil.encodePath(rel))));
         }
     }
     
