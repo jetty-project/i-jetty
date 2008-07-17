@@ -18,7 +18,7 @@ if [ `mount -l | grep "sdcard-mount"` == ""]; then
     echo "This step requires root permissions to setup the"
     echo "loopback device and mount the image."
     
-    sudo losetup /dev/loop2 sdcard.img
+    sudo losetup /dev/loop0 sdcard.img
     if (( $? )); then
         echo "Failed to setup loopback device."
         # Not being able to setup loopback is not fatal.
@@ -26,7 +26,7 @@ if [ `mount -l | grep "sdcard-mount"` == ""]; then
     fi
     
     mkdir sdcard-mount
-    sudo mount /dev/loop2 sdcard-mount
+    sudo mount /dev/loop0 sdcard-mount
     if (( $? )); then
         echo "Failed to mount image."
         exit 1

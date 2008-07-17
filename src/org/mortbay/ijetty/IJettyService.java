@@ -35,6 +35,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 
 public class IJettyService extends Service
@@ -157,12 +158,23 @@ public class IJettyService extends Service
         // Load any webapps we find on the card.
         if (new File("/sdcard/jetty/").exists())
         {
-            AndroidWebAppDeployer deployer = new AndroidWebAppDeployer();
-            deployer.setWebAppDir("/sdcard/jetty/webapps");
-            deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
-            deployer.setContexts(contexts);
-            deployer.setContentResolver (getContentResolver());
-            server.addLifeCycle(deployer);
+            System.setProperty ("jetty.home", "/sdcard/jetty");
+            
+            // Deploy any static webapps we have.
+            AndroidWebAppDeployer static_deployer = new AndroidWebAppDeployer();
+            static_deployer.setWebAppDir("/sdcard/jetty/webapps");
+            static_deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+            static_deployer.setContexts(contexts);
+            static_deployer.setContentResolver (getContentResolver());
+            
+            // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
+            ContextDeployer context_deployer = new ContextDeployer();
+            context_deployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
+            context_deployer.setConfigurationDir("/sdcard/jetty/contexts");
+            context_deployer.setContexts(contexts);
+            
+            server.addLifeCycle(static_deployer);
+            server.addLifeCycle(context_deployer);
         }
         else
         {
