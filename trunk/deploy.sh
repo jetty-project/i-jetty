@@ -65,6 +65,17 @@ if (( $? )); then
     echo 
 fi
 
+echo -e "\033[1m******* Building hello application...\033[0m"
+scripts/build-hello.sh
+if (( $? )); then
+    echo
+    echo "======================== [ WARN ] ========================"
+    echo "The Maven build for the hello application failed! Please"
+    echo "check the output and try to rectify the problem."
+    echo "======================== [ WARN ] ========================"
+    echo 
+fi
+
 # Sync up the sdcard folder with the actual image
 # (console should be in here already)
 echo -e "\033[1m******* Syncing SD card against sdcard-layout directory...\033[0m"
@@ -77,7 +88,7 @@ rm -Rfv sdcard-mount/
 
 # and free the loopback device - IMPORTANT!
 echo -e "\033[1m******* Freeing loopback device...\033[0m"
-sudo losetup -f /dev/loop2 || echo " FAILED!"
+sudo losetup -f /dev/loop0 || echo " FAILED!"
 
 # Start ze emulator! (in the background)
 echo -e "\033[1m******* Starting emulator...\033[0m"
