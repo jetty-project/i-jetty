@@ -124,7 +124,9 @@
                 <configuration>
                   <executable>${android.home}/tools/dx</executable>
                   <arguments>
+                    <argument>-JXmx1024M</argument>
                     <argument>--dex</argument>
+                    <argument>--verbose</argument>
                     <argument>--output=${project.build.directory}/classes.dex</argument>
                     <argument>--locals=full</argument>
                     <argument>--positions=lines</argument>

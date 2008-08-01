@@ -43,7 +43,7 @@ if (( $? )); then
     exit 1
 fi
 
-mvn -Dandroid.home=${ANDROID_SDK} install 
+mvn -Dandroid.home=${ANDROID_SDK} -DDEBUG install 
 if (( $? )); then
     echo
     echo "======================== [ ERROR ] ========================"
