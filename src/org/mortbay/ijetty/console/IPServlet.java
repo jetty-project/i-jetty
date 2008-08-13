@@ -35,7 +35,7 @@ public class IPServlet extends InfoServlet
                         HttpServletResponse response) throws ServletException, IOException
         {
                 
-        writer.println("<h1>Phone Network Interfaces</h1>");
+        writer.println("<h1>Network</h1><div id='content'>");
         Enumeration ni = NetworkInterface.getNetworkInterfaces();
         writer.println("<ul>");
         while (ni.hasMoreElements())
@@ -52,6 +52,7 @@ public class IPServlet extends InfoServlet
                 writer.println("</li>");
         }
         writer.println("</ul>");
+        writer.println("</div>");
         }
 
 }

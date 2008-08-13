@@ -64,9 +64,10 @@ public class CallLogServlet extends InfoServlet
                 CallLog.Calls.NAME
                                          };
         Cursor cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, null, null, null);
-        writer.println("<h1>Call Log</h1>");
+        writer.println("<h1>Call Log</h1><div id='content'>");
         String[] cols = cursor.getColumnNames();
         formatCallLog(cols, cursor, writer);  
+        writer.println("</div>");
     }
 
     
@@ -96,10 +97,10 @@ public class CallLogServlet extends InfoServlet
             while (cursor.next())
             {  
                 String style = getRowStyle(row);
-                writer.println("<tr class='"+style+"'>");
+                writer.println("<tr>");
                 for (int i=0;i<colNames.length;i++)
                 {
-                    writer.println("<td class=\""+style+"\">");
+                    writer.println("<td"+style+">");
                     String val=cursor.getString(i);
                     if (colNames[i].equals(CallLog.Calls.DATE))
                         writer.println(android.util.DateFormat.format("yyyy-MM-dd kk:mm", new Date(cursor.getInt(i))));
