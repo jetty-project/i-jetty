@@ -35,10 +35,11 @@ public class SettingsServlet extends InfoServlet
             HttpServletResponse response) throws ServletException, IOException
     {
         
-        writer.println("<h1>System Settings</h1>");
+        writer.println("<h1>System Settings</h1><div id='content'>");
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, null, null, null, null);
         String[] cols = cursor.getColumnNames();
         formatTable(cols, cursor, writer);
+        writer.println("</div>");
     }
 
 }

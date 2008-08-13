@@ -31,8 +31,8 @@ import android.database.Cursor;
 
 public abstract class InfoServlet extends HttpServlet
 {
-    private String[] _navBarLabels = {"Contacts","Call Log", "Settings"};
-    private String[] _navBarItems = {"/console/contacts/", "/console/calls/","/console/settings/"};
+    private String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
+    private String[] _navBarItems = {"/console/contacts", "/console/settings","/console/calls", "/console/network"};
 
     public ContentResolver getContentResolver ()
     {
@@ -40,40 +40,42 @@ public abstract class InfoServlet extends HttpServlet
     }
     protected void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        writer.println("<html>");
-        writer.println("<head><META http-equiv=\"Pragma\" content=\"no-cache\"> <META http-equiv=\"Cache-Control\" content=\"no-cache,no-store\">");
-        writer.println(" <link rel=\"stylesheet\" type=\"text/css\" href=\"/console/console.css\"></link></head>");
+        writer.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+        writer.println("<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>");
+        writer.println("<head>");
+        writer.println("    <title>i-jetty Console</title>");
+        writer.println("    <link rel='stylesheet' type='text/css' media='screen' href='/console/console.css' />");
+        writer.println("    <meta name='viewport' content='width=device-width,minimum-scale=1.0,maximum-scale=1.0'/>");
+        writer.println("</head>");
         writer.println("<body>");
-        writer.println("<table>");
-        writer.println("<tr><td>");
     }
     
     protected void doFooter (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-    	writer.println("</td></tr>");
-    	writer.println("<tr><td class='promo'>");
-    	writer.println("<span class='promo'>This page served by <a href='http://jetty.mortbay.org'>Jetty</a></span>");
-    	writer.println("</td></tr>");
-    	writer.println("</table>");
-    	writer.println("</body>");
+        writer.println("    </div>");
+        writer.println("    <div id='footer'>");
+        writer.println("        Served up by Jetty.<br />Now with 100% more awesome.");
+        writer.println("    </div>");
+        writer.println("</body>");
         writer.println("</html>");
     }
     
     protected void doMenuBar (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        writer.println("<table width='100%'><tr><td><ul id='ulnavbar'>");
+        writer.println("    <div id='navigation'><ul>");
         for (int i=0; i<_navBarItems.length; i++)
         {
+            writer.print("        <li>");
             String pathInContext=URIUtil.addPaths(request.getServletPath(),request.getPathInfo());
-            if (pathInContext.startsWith(_navBarItems[i]))
-                writer.println("<li class='sel'>");
+            if (pathInContext.contains(_navBarItems[i]))
+                writer.print("<strong>"+_navBarLabels[i]+"</strong>");
             else
-                writer.println("<li>");
+                writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
             
-            writer.println("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
             writer.println("</li>");
         }
-        writer.println("</td></tr></table>");
+        writer.println("    </ul></div>");
+        writer.println("    <div id='page'>");
     }
     
     protected abstract void doContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
@@ -95,25 +97,20 @@ public abstract class InfoServlet extends HttpServlet
     {   
         if (colNames!=null && cursor!=null && writer!=null)
         {
-            writer.println("<table class='generic'>");
+            writer.println("<table>");
             writer.println("<tr>");
             for (int i=0;i<colNames.length;i++)
-                writer.println("<th>"+colNames[i]+"</th>");
+                writer.println("    <th>"+colNames[i]+"</th>");
             writer.println("</tr>");
             int row = 0;
             while (cursor.next())
             {  
-                String style = "";
-                if (row%2==0)
-                    style = "even";
-                else
-                    style = "odd";
-
-                writer.println("<tr class='"+style+"'>");
+                String classExtra = getRowStyle(row);
+                writer.println("<tr>");
                 for (int i=0;i<colNames.length;i++)
                 {
                     String val=cursor.getString(i);
-                    writer.println("<td class=\""+style+"\">"+(val==null?"&nbsp;":val)+"</td>");
+                    writer.println("<td"+classExtra+">"+(val==null?"&nbsp;":val)+"</td>");
                 }
                 writer.println("</tr>");
                 ++row;
@@ -126,9 +123,9 @@ public abstract class InfoServlet extends HttpServlet
     protected String getRowStyle (int row)
     {
         if (row%2==0)
-            return "even";
+            return "";
         else
-            return "odd";
+            return " class='odd'";
 
     }
 }

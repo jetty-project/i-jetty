@@ -171,7 +171,7 @@ public class ContactsServlet extends InfoServlet
                     response.setContentType("text/html");
                     response.setStatus(HttpServletResponse.SC_OK);
                     doHeader(writer, request, response);
-                    writer.println("<h2>Sorry, phone calls are not available at this time.</h2>");
+                    writer.println("<h2 style='text-align: center;'>Sorry, phone calls are not available at this time.</h2>");
                     doFooter (writer, request, response);
                 }
                 else
@@ -229,13 +229,14 @@ public class ContactsServlet extends InfoServlet
 
     protected void doBaseContent(PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        writer.println("<h1>Contact List</h1>");
+        writer.println("<h1>Contact List</h1><div id='content'>");
         Cursor cursor = getContentResolver().query(Contacts.People.CONTENT_URI, baseProjection, null, null, null);  
         if (cursor!=null)
         {
             formatUserDetails (cursor, writer);
             cursor.close();
         }
+        writer.println("</div>");
     }
     
     protected void doUserContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
@@ -258,7 +259,7 @@ public class ContactsServlet extends InfoServlet
         cursor.close(); 
         
         //TODO - implement buttons
-        writer.println("<tr><td><button id='edit'>Edit</button>&nbsp;<button id='del'>Delete</button></td></tr>");  
+        writer.println("<br /><button id='edit'>Edit</button>&nbsp;<button id='del'>Delete</button>");
     }
 
 
@@ -266,7 +267,7 @@ public class ContactsServlet extends InfoServlet
     {
         if (cursor!=null && writer!=null)
         {
-            writer.println("<table id='user'>");
+            writer.println("<table id='user' style='border: 0px none;'>");
             int row = 0;
             while (cursor.next())
             {  
@@ -292,6 +293,11 @@ public class ContactsServlet extends InfoServlet
                 ++row;
             }
             writer.println("</table>");
+            
+            if (row==0)
+            {
+                writer.println("<h2 style='text-align: center;'>Sorry, you haven't added any contacts to your phone!</h2>");
+            }
         }
     }
     
@@ -308,11 +314,13 @@ public class ContactsServlet extends InfoServlet
                String notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
                String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));
                boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
-               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>&nbsp;")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
+               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1><div id='content'>");
+               if (photo!=null)
+                   writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
                if (company!=null)
-                   writer.println("<h3>"+company+"</h3>");
+                   writer.println("<p>Company: "+company+"</h3></p>");
                writer.println("<h2>Notes</h2>");
-               writer.println("<table id='notes'>");
+               writer.println("<table id='notes' style='border: 0px none;'>");
                writer.println("<tr>"); 
                writer.println("<td>"); 
                if (notes!=null)
@@ -329,7 +337,7 @@ public class ContactsServlet extends InfoServlet
     private void formatPhones (String who, Cursor cursor, PrintWriter writer)
     {
         writer.println("<h2>Phone Numbers</h2>");
-        writer.println("<table id='phones'>");
+        writer.println("<table id='phones' style='border: 0px none;'>");
         int row = 0;
         while (cursor.next())
         {  
@@ -359,7 +367,7 @@ public class ContactsServlet extends InfoServlet
     private void formatContactMethods (String who, Cursor cursor, PrintWriter writer)
     {
         writer.println("<h2>Addresses</h2>");
-        writer.println("<table id='addresses'>");
+        writer.println("<table id='addresses' style='border: 0px none;'>");
         int row = 0;
         while (cursor.next())
         { 
@@ -430,16 +438,13 @@ public class ContactsServlet extends InfoServlet
     
     private void printCell (PrintWriter writer, String cellContent, String cellStyle)
     {                
-        writer.println("<td class=\""+cellStyle+"\">");
+        writer.println("<td" + cellStyle + ">");
         writer.println(cellContent);
         writer.println("</td>");
     }
     
     private void printCellHeader (PrintWriter writer, String cellContent, String cellStyle)
     {
-        if (cellStyle!=null)
-                writer.println("<th class=\""+cellStyle+"\">"+cellContent+"</th>");
-        else
-                writer.println("<th>"+cellContent+"</th>");
+        writer.println("<th>"+cellContent+"</th>");
     }
 }

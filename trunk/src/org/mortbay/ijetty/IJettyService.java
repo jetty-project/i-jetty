@@ -37,6 +37,7 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.*;
 
 public class IJettyService extends Service
 {
@@ -101,7 +102,7 @@ public class IJettyService extends Service
                 Editor editor = preferences.edit();
                 editor.putBoolean("isRunning", false);
                 editor.commit();
-                Log.i("Jetty", "etty stopped");
+                Log.i("Jetty", "Jetty stopped");
                 __resources = null;
             }
             else
@@ -172,6 +173,11 @@ public class IJettyService extends Service
             context_deployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
             context_deployer.setConfigurationDir("/sdcard/jetty/contexts");
             context_deployer.setContexts(contexts);
+            
+            HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
+            realm.loadConfig();
+            realm.put ("test", "testy");
+            server.setUserRealms(new UserRealm[] { realm } );
             
             server.addLifeCycle(static_deployer);
             server.addLifeCycle(context_deployer);
