@@ -18,6 +18,7 @@ package org.mortbay.ijetty.console;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,11 +29,13 @@ import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.util.Log;
 
 public abstract class InfoServlet extends HttpServlet
 {
     private String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
     private String[] _navBarItems = {"/console/contacts", "/console/settings","/console/calls", "/console/network"};
+    private String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>", "I told you we should've taken a left!" };
 
     public ContentResolver getContentResolver ()
     {
@@ -52,9 +55,11 @@ public abstract class InfoServlet extends HttpServlet
     
     protected void doFooter (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        Random generator = new Random();
+        
         writer.println("    </div>");
         writer.println("    <div id='footer'>");
-        writer.println("        Served up by Jetty.<br />Now with 100% more awesome.");
+        writer.println("        Served up by Jetty.<br />" + _phrases[generator.nextInt(_phrases.length)]);
         writer.println("    </div>");
         writer.println("</body>");
         writer.println("</html>");
@@ -63,11 +68,14 @@ public abstract class InfoServlet extends HttpServlet
     protected void doMenuBar (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         writer.println("    <div id='navigation'><ul>");
+        String path = request.getServletPath();
+        
         for (int i=0; i<_navBarItems.length; i++)
         {
             writer.print("        <li>");
-            String pathInContext=URIUtil.addPaths(request.getServletPath(),request.getPathInfo());
-            if (pathInContext.contains(_navBarItems[i]))
+            
+            String[] splitPath = _navBarItems[i].split("/");
+            if (path.contains(splitPath[splitPath.length - 1]))
                 writer.print("<strong>"+_navBarLabels[i]+"</strong>");
             else
                 writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
