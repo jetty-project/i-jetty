@@ -86,9 +86,9 @@ echo -e "\033[1m******* Unmounting image...\033[0m"
 sudo umount sdcard-mount/
 rm -Rfv sdcard-mount/
 
-# and free the loopback device - IMPORTANT!
+# and detatch the loopback device - IMPORTANT!
 echo -e "\033[1m******* Freeing loopback device...\033[0m"
-sudo losetup -f /dev/loop0 || echo " FAILED!"
+sudo losetup -d /dev/loop0 || echo " FAILED!"
 
 # Start ze emulator! (in the background)
 echo -e "\033[1m******* Starting emulator...\033[0m"
