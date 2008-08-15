@@ -1,3 +1,8 @@
+********************************************************************************
+    Note: it's generally easier if you get the deploy and helper scripts to
+    manage the sdcard image for you (see readme.txt).
+********************************************************************************
+
 How to Add Files to removable storage device
 ============================================
 (Debian instructions)
