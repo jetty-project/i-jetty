@@ -38,11 +38,8 @@ else
 fi
 
 # Nuke the entire SD card so we have a clean slate.
-sudo rm sdcard-mount/* -Rf
+sudo rm sdcard-mount/* -Rf $VERBOSE_ARGS
 
 # Copy it all in (again, root, eugh) minus .svn directories
-sudo cp -Rvf sdcard-layout/* sdcard-mount/
+sudo cp -Rf $VERBOSE_ARGS sdcard-intermediate/* sdcard-mount/
 cd sdcard-mount/jetty
-
-# XXX: Baaaad! 
-sudo svn cleanup
