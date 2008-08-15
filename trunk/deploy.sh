@@ -8,6 +8,18 @@
 # Usage: ./deploy.sh
 
 # Setup any environment variables as required
+
+if [ "$VERBOSE" = "on" ]; then
+    export VERBOSE_ARGS="-v"
+    export UNZIP_ARGS=""
+    export BUILD_ARGS=""
+else
+    export VERBOSE_ARGS=""
+    export UNZIP_ARGS="-qq"
+    export BUILD_ARGS="-q"
+fi
+    
+
 if [ -z "$ANDROID_SDK" ]; then
     echo
     echo "======================== [ ERROR ] ========================"
@@ -31,6 +43,10 @@ if [ ! -e "sdcard.img" ]; then
     scripts/create-sdcard.sh
 fi
 
+mkdir $VERBOSE_ARGS sdcard-intermediate/
+cp sdcard-layout/* sdcard-intermediate/ -Rf
+find sdcard-intermediate/ -name '.svn' -type d | xargs rm -r $VERBOSE_ARGS
+
 echo -e "\033[1m******* Buidling i-jetty...\033[0m"
 mvn -v > /dev/null
 if (( $? )); then
@@ -43,7 +59,7 @@ if (( $? )); then
     exit 1
 fi
 
-mvn -Dandroid.home=${ANDROID_SDK} -DDEBUG install 
+mvn -Dandroid.home=${ANDROID_SDK} -DDEBUG $BUILD_ARGS install 
 if (( $? )); then
     echo
     echo "======================== [ ERROR ] ========================"
@@ -84,11 +100,14 @@ scripts/sync-sdcard.sh
 # We *must* unmount our SD card otherwise we crash poor ol' qemu
 echo -e "\033[1m******* Unmounting image...\033[0m"
 sudo umount sdcard-mount/
-rm -Rfv sdcard-mount/
+rm -Rf $VERBOSE_ARGS sdcard-mount/
 
 # and detatch the loopback device - IMPORTANT!
 echo -e "\033[1m******* Freeing loopback device...\033[0m"
 sudo losetup -d /dev/loop0 || echo " FAILED!"
+
+# Remove temp dir
+rm -Rf $VERBOSE_ARGS sdcard-intermediate/
 
 # Start ze emulator! (in the background)
 echo -e "\033[1m******* Starting emulator...\033[0m"
@@ -120,5 +139,9 @@ fi
 # Setup port forwarding so we can check in our browser instead of only the phone
 echo -e "\033[1m******* Setting up port forwarding...\033[0m"
 ${ANDROID_SDK_TOOLS}adb forward tcp:8888 tcp:8080
+
+unset $VERBOSE_ARGS BUILD_ARGS
+unset $VERBOSE_ARGS UNZIP_ARGS
+unset $VERBOSE_ARGS VERBOSE_ARGS
 
 echo -e "\033[1m******* Done!\033[0m"
