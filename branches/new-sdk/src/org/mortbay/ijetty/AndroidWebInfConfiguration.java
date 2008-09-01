@@ -44,16 +44,17 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
             Log.d("Jetty", "Library resource: " + lib.toString());
             if (lib.exists() || lib.isDirectory())
             {
+                String paths = "";
                 PathClassLoader loader = ((PathClassLoader) _context.getClassLoader());
                 for (String dex : lib.list())
                 {
                     String fullpath = web_inf.addPath("lib/").addPath(dex)
                             .getFile().getAbsolutePath();
-                    if (!loader.addDexFile(fullpath))
-                    {
-                        Log.w("Jetty", "Failed to add DEX file from path: "+ fullpath);
-                    }
+                    paths += fullpath + ":";
                 }
+                
+                loader = new PathClassLoader (paths, ClassLoader.getSystemClassLoader().getParent());
+                _context.setClassLoader (loader);
             }
         }
     }

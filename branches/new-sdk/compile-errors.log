@@ -9,27 +9,9 @@ http://code.google.com/android/documentation.html
 symbol  : class DateFormat
 location: package android.util
 
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidClassLoader.java:[26,21] package android.dalvik does not exist
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidClassLoader.java:[52,24] cannot find symbol
-symbol  : class DexFile
-location: class org.mortbay.ijetty.AndroidClassLoader
-
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/resource/AndroidFileResource.java:[155,23] cannot find symbol
 symbol  : variable DateFormat
 location: class org.mortbay.ijetty.resource.AndroidFileResource
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidClassLoader.java:[61,14] cannot find symbol
-symbol  : class DexFile
-location: class org.mortbay.ijetty.AndroidClassLoader
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidClassLoader.java:[61,45] cannot find symbol
-symbol  : class DexFile
-location: class org.mortbay.ijetty.AndroidClassLoader
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidWebInfConfiguration.java:[52,31] cannot find symbol
-symbol  : method addDexFile(java.lang.String)
-location: class dalvik.system.PathClassLoader
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[193,96] cannot find symbol
 symbol  : variable PHOTO
@@ -78,4 +60,8 @@ symbol  : constructor Notification(org.mortbay.ijetty.IJettyService,int,java.lan
 location: class android.app.Notification
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[89,19] onDestroy() in org.mortbay.ijetty.IJettyService cannot override onDestroy() in android.app.Service; attempting to assign weaker access privileges; was public
+
+/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidWebAppDeployer.java:[189,35] cannot find symbol
+symbol  : class AndroidClassLoader
+location: class org.mortbay.ijetty.AndroidWebAppDeployer
 
