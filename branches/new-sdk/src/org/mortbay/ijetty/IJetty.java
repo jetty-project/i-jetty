@@ -184,7 +184,7 @@ public class IJetty extends Activity
                         //if (isRunning)
                         //    Toast.makeText(IJetty.this, getText(R.string.jetty_started), Toast.LENGTH_SHORT).show();
                         //else
-                            startService(new Intent(IJetty.this, IJettyService.class), null);
+                            startService(new Intent(IJetty.this, IJettyService.class));
 
                     }
                 }

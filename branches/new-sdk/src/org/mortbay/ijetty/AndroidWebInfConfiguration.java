@@ -18,6 +18,7 @@ package org.mortbay.ijetty;
 import org.mortbay.jetty.webapp.WebInfConfiguration;
 import org.mortbay.resource.Resource;
 
+import dalvik.system.PathClassLoader;
 import android.util.Log;
 
 public class AndroidWebInfConfiguration extends WebInfConfiguration
@@ -43,8 +44,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
             Log.d("Jetty", "Library resource: " + lib.toString());
             if (lib.exists() || lib.isDirectory())
             {
-                AndroidClassLoader loader = ((AndroidClassLoader) _context
-                        .getClassLoader());
+                PathClassLoader loader = ((PathClassLoader) _context.getClassLoader());
                 for (String dex : lib.list())
                 {
                     String fullpath = web_inf.addPath("lib/").addPath(dex)

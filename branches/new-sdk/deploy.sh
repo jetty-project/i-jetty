@@ -47,6 +47,10 @@ mkdir $VERBOSE_ARGS sdcard-intermediate/
 cp sdcard-layout/* sdcard-intermediate/ -Rf
 find sdcard-intermediate/ -name '.svn' -type d | xargs rm -r $VERBOSE_ARGS
 
+mvn install:install-file -DgroupId=android -DartifactId=android \
+  -Dversion=m5-rc15 -Dpackaging=jar \
+  -Dfile=$ANDROID_SDK/android.jar
+
 echo -e "\033[1m******* Buidling i-jetty...\033[0m"
 mvn -v > /dev/null
 if (( $? )); then

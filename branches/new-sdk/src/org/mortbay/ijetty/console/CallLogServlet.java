@@ -59,9 +59,8 @@ public class CallLogServlet extends InfoServlet
                 CallLog.Calls.DURATION,
                 CallLog.Calls.NEW,
                 CallLog.Calls.NUMBER,
-                CallLog.Calls.NUMBER_TYPE,
-                CallLog.Calls.PERSON_ID,
-                CallLog.Calls.NAME
+                CallLog.Calls.CACHED_NUMBER_TYPE,
+                CallLog.Calls.CACHED_NAME
                                          };
         Cursor cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, null, null, null);
         writer.println("<h1>Call Log</h1><div id='content'>");
@@ -81,9 +80,9 @@ public class CallLogServlet extends InfoServlet
             {
                 String cname=null;
                 
-                if (colNames[i].equals(CallLog.Calls.PERSON_ID))
+                /*if (colNames[i].equals(CallLog.Calls.PERSON_ID))
                         continue;
-                else if (colNames[i].equals(CallLog.Calls.NEW))
+                else */if (colNames[i].equals(CallLog.Calls.NEW))
                         cname=__ACKNOWLEDGED;
                 else if (colNames[i].equals(CallLog.Calls.DURATION))
                         cname=__DURATION;
@@ -94,7 +93,7 @@ public class CallLogServlet extends InfoServlet
             }
             writer.println("</tr>");
             int row = 0;
-            while (cursor.next())
+            while (cursor.moveToNext())
             {  
                 String style = getRowStyle(row);
                 writer.println("<tr>");
@@ -103,7 +102,8 @@ public class CallLogServlet extends InfoServlet
                     writer.println("<td"+style+">");
                     String val=cursor.getString(i);
                     if (colNames[i].equals(CallLog.Calls.DATE))
-                        writer.println(android.util.DateFormat.format("yyyy-MM-dd kk:mm", new Date(cursor.getInt(i))));
+                        /*writer.println(android.util.DateFormat.format("yyyy-MM-dd kk:mm", new Date(cursor.getInt(i))));*/
+                        writer.println((new Date(cursor.getInt(i))).toString());
                     else if (colNames[i].equals(CallLog.Calls.NEW))
                     {
                         if (cursor.getInt(i)>0)
@@ -115,19 +115,21 @@ public class CallLogServlet extends InfoServlet
                     {
                         writer.println(_logTypeMap.get(cursor.getInt(i)));
                     }
-                    else if (colNames[i].equals(CallLog.Calls.PERSON_ID))
+                    else if (colNames[i].equals(CallLog.Calls.CACHED_NAME))
                     {
-                        int nameIndex = cursor.getColumnIndex(CallLog.Calls.NAME);
+                        /*int nameIndex = cursor.getColumnIndex(CallLog.Calls.NAME);
                         String name=(nameIndex>=0?cursor.getString(nameIndex):null);
-                        if (val!=null && name!=null)
-                                writer.println(name==null?"&nbsp;":"<a href='/console/contacts/"+val+"'>"+name+"</a>");     
+                        if (val!=null && name!=null)*/
+                        String name = cursor.getString(i);
+                        if (name != null)
+                                writer.println(name==null?"&nbsp;":"<a href='/console/contacts/"+row+"'>"+name+"</a>");     
                         else
                                 writer.println("&nbsp;");
                     }
-                    else if (colNames[i].equals(CallLog.Calls.NAME))
+                    /*else if (colNames[i].equals(CallLog.Calls.NAME))
                     {
                         continue;
-                    }
+                    }*/
                     else
                         writer.println((val==null?"&nbsp;":val));
                     writer.println("</td>");

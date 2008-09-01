@@ -64,11 +64,11 @@ public class ContactsServlet extends InfoServlet
 
     String[] baseProjection = new String[] {
             android.provider.BaseColumns._ID,
-            android.provider.Contacts.PeopleColumns.TITLE,
-            android.provider.Contacts.PeopleColumns.NAME,
-            android.provider.Contacts.PeopleColumns.COMPANY,
+            android.provider.Contacts.PeopleColumns.DISPLAY_NAME,
+            /*android.provider.Contacts.PeopleColumns.COMPANY,*/
             android.provider.Contacts.PeopleColumns.NOTES,
-            android.provider.Contacts.PeopleColumns.PHOTO,
+            /*android.provider.Contacts.PeopleColumns.PHOTO,*/
+            android.provider.Contacts.PeopleColumns.PHOTO_VERSION,
             android.provider.Contacts.PeopleColumns.STARRED
     };
     
@@ -103,23 +103,23 @@ public class ContactsServlet extends InfoServlet
     
     public ContactsServlet ()
     {
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.MOBILE_TYPE), __MOBILE);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.HOME_TYPE), __HOME);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.WORK_TYPE), __WORK);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.WORK_FAX_TYPE), __WORK_FAX);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.HOME_FAX_TYPE), __HOME_FAX);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.PAGER_TYPE), __PAGER);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.PAGER_TYPE), __OTHER);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_MOBILE), __MOBILE);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_HOME), __HOME);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_WORK), __WORK);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_FAX_WORK), __WORK_FAX);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_FAX_HOME), __HOME_FAX);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_PAGER), __PAGER);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_OTHER), __OTHER);
         
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.EMAIL_KIND_HOME_TYPE), __HOME);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.EMAIL_KIND_WORK_TYPE), __WORK);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.EMAIL_KIND_PRIMARY_TYPE), __PRIMARY);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.EMAIL_KIND_OTHER_TYPE), __OTHER);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_HOME), __HOME);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_WORK), __WORK);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.ISPRIMARY), __PRIMARY);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_OTHER), __OTHER);
         
-        _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_HOME_TYPE), __HOME);
+        /*_postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_HOME_TYPE), __HOME);
         _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_OTHER_TYPE), __OTHER);
         _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_POSTAL_TYPE), __POSTAL);
-        _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_WORK_TYPE), __WORK);
+        _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_WORK_TYPE), __WORK);*/
     }
     
     
@@ -269,7 +269,7 @@ public class ContactsServlet extends InfoServlet
         {
             writer.println("<table id='user' style='border: 0px none;'>");
             int row = 0;
-            while (cursor.next())
+            while (cursor.moveToNext())
             {  
                 String style = getRowStyle(row);
                 
@@ -305,20 +305,20 @@ public class ContactsServlet extends InfoServlet
     {
          if (cursor!=null && writer!=null)
          {
-           if (cursor.first())
+           if (cursor.moveToFirst())
            {
                String id = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));  
                String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NAME));
-               String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));
-               String company = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.COMPANY));
+               /*String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));*/
+               /*String company = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.COMPANY));*/
                String notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
-               String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));
+               /*String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));*/
                boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
-               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1><div id='content'>");
-               if (photo!=null)
-                   writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
-               if (company!=null)
-                   writer.println("<p>Company: "+company+"</h3></p>");
+               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+/*(title==null?"":title+"&nbsp;")+*/(name==null?"Unknown":name)+"</h1><div id='content'>");
+               /*if (photo!=null)
+                   writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");*/
+               /*if (company!=null)
+                   writer.println("<p>Company: "+company+"</h3></p>");*/
                writer.println("<h2>Notes</h2>");
                writer.println("<table id='notes' style='border: 0px none;'>");
                writer.println("<tr>"); 
@@ -339,7 +339,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("<h2>Phone Numbers</h2>");
         writer.println("<table id='phones' style='border: 0px none;'>");
         int row = 0;
-        while (cursor.next())
+        while (cursor.moveToNext())
         {  
                 String style = getRowStyle(row);
                 writer.println("<tr class='"+style+"'>");
@@ -369,7 +369,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("<h2>Addresses</h2>");
         writer.println("<table id='addresses' style='border: 0px none;'>");
         int row = 0;
-        while (cursor.next())
+        while (cursor.moveToNext())
         { 
                 String style = getRowStyle(row);
             writer.println("<tr class='"+style+"'>");

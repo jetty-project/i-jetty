@@ -153,7 +153,8 @@ public class IJettyService extends Service
 
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
+        SecurityHandler security = new SecurityHandler();
+        handlers.setHandlers(new Handler[] {security, contexts, new DefaultHandler()});
         server.setHandler(handlers);
 
         // Load any webapps we find on the card.
@@ -167,6 +168,7 @@ public class IJettyService extends Service
             static_deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
             static_deployer.setContexts(contexts);
             static_deployer.setContentResolver (getContentResolver());
+            static_deployer.setAuthenticate(true);
             
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
             ContextDeployer context_deployer = new ContextDeployer();
@@ -174,10 +176,15 @@ public class IJettyService extends Service
             context_deployer.setConfigurationDir("/sdcard/jetty/contexts");
             context_deployer.setContexts(contexts);
             
+            FormAuthenticator authenticator = new FormAuthenticator();
+            authenticator.setErrorPage("/testErrorPage");
+            authenticator.setLoginPage("/testLoginPage");
+            security.setAuthenticator(authenticator);
+            
             HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
             realm.loadConfig();
             realm.put ("test", "testy");
-            server.setUserRealms(new UserRealm[] { realm } );
+            security.setUserRealm(realm);
             
             server.addLifeCycle(static_deployer);
             server.addLifeCycle(context_deployer);

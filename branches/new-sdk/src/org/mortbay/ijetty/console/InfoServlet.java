@@ -111,7 +111,7 @@ public abstract class InfoServlet extends HttpServlet
                 writer.println("    <th>"+colNames[i]+"</th>");
             writer.println("</tr>");
             int row = 0;
-            while (cursor.next())
+            while (cursor.moveToNext())
             {  
                 String classExtra = getRowStyle(row);
                 writer.println("<tr>");
