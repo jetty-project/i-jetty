@@ -41,7 +41,7 @@ import org.mortbay.jetty.servlet.Dispatcher;
 
 import org.mortbay.util.URIUtil;
 
-import android.content.Resources;
+import android.content.res.Resources;
 import android.util.Log;
 
 

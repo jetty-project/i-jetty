@@ -1,32 +1,19 @@
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/servlet/DefaultServlet.java:[44,22] cannot find symbol
-symbol  : class Resources
-location: package android.content
+Useful links on API changes:
+http://code.google.com/android/migrating/m5-0.9/changes-overview.html
+http://code.google.com/android/migrating/m5-0.9/changes.html
+http://code.google.com/android/documentation.html
 
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/servlet/DefaultServlet.java:[54,12] cannot find symbol
-symbol  : class Resources
-location: class org.mortbay.ijetty.servlet.DefaultServlet
+================================================================================
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/resource/AndroidFileResource.java:[34,19] cannot find symbol
 symbol  : class DateFormat
 location: package android.util
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/servlet/DefaultServlet.java:[347,30] cannot find symbol
-symbol  : class Resources
-location: class org.mortbay.ijetty.servlet.DefaultServlet
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidClassLoader.java:[26,21] package android.dalvik does not exist
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidClassLoader.java:[52,24] cannot find symbol
 symbol  : class DexFile
 location: class org.mortbay.ijetty.AndroidClassLoader
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[25,22] cannot find symbol
-symbol  : class Resources
-location: package android.content
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[49,19] cannot find symbol
-symbol  : class Resources
-location: class org.mortbay.ijetty.IJettyService
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/resource/AndroidFileResource.java:[155,23] cannot find symbol
 symbol  : variable DateFormat
@@ -47,10 +34,6 @@ location: class dalvik.system.PathClassLoader
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[193,96] cannot find symbol
 symbol  : variable PHOTO
 location: interface android.provider.Contacts.PeopleColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[196,31] cannot find symbol
-symbol  : method first()
-location: interface android.database.Cursor
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[202,89] cannot find symbol
 symbol  : variable PHOTO
@@ -95,8 +78,4 @@ symbol  : constructor Notification(org.mortbay.ijetty.IJettyService,int,java.lan
 location: class android.app.Notification
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[89,19] onDestroy() in org.mortbay.ijetty.IJettyService cannot override onDestroy() in android.app.Service; attempting to assign weaker access privileges; was public
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[171,27] cannot find symbol
-symbol  : method setAuthenticate(boolean)
-location: class org.mortbay.ijetty.AndroidWebAppDeployer
 

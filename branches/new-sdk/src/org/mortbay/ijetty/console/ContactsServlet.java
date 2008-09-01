@@ -193,7 +193,7 @@ public class ContactsServlet extends InfoServlet
                     String[] projection = new String[] { android.provider.Contacts.PeopleColumns.PHOTO};
                     String where = "people."+android.provider.BaseColumns._ID+" = ?";
                     Cursor cursor = getContentResolver().query(Contacts.People.CONTENT_URI, projection, where, new String[]{who}, null);  
-                    if (!cursor.first())
+                    if (!cursor.moveToFirst())
                     { 
                         response.sendError(javax.servlet.http.HttpServletResponse.SC_NO_CONTENT);
                         cursor.close();
