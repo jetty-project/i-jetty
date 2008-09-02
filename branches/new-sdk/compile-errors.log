@@ -13,46 +13,6 @@ location: package android.util
 symbol  : variable DateFormat
 location: class org.mortbay.ijetty.resource.AndroidFileResource
 
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[193,96] cannot find symbol
-symbol  : variable PHOTO
-location: interface android.provider.Contacts.PeopleColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[202,89] cannot find symbol
-symbol  : variable PHOTO
-location: interface android.provider.Contacts.PeopleColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[279,92] cannot find symbol
-symbol  : variable TITLE
-location: interface android.provider.Contacts.PeopleColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[280,94] cannot find symbol
-symbol  : variable COMPANY
-location: interface android.provider.Contacts.PeopleColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[282,92] cannot find symbol
-symbol  : variable PHOTO
-location: interface android.provider.Contacts.PeopleColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[387,51] cannot find symbol
-symbol  : variable EMAIL_KIND
-location: interface android.provider.Contacts.ContactMethodsColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[390,64] cannot find symbol
-symbol  : variable EMAIL_KIND_PRIMARY_TYPE
-location: interface android.provider.Contacts.ContactMethodsColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[400,51] cannot find symbol
-symbol  : variable JABBER_IM_KIND
-location: interface android.provider.Contacts.ContactMethodsColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[407,51] cannot find symbol
-symbol  : variable POSTAL_KIND
-location: interface android.provider.Contacts.ContactMethodsColumns
-
-/home/alex/Sources/i-jetty/src/org/mortbay/ijetty/console/ContactsServlet.java:[415,51] cannot find symbol
-symbol  : variable LOCATION_KIND
-location: interface android.provider.Contacts.ContactMethodsColumns
-
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[54,19] onCreate() in org.mortbay.ijetty.IJettyService cannot override onCreate() in android.app.Service; attempting to assign weaker access privileges; was public
 
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/IJettyService.java:[72,47] cannot find symbol
@@ -64,4 +24,3 @@ location: class android.app.Notification
 /home/alex/Sources/i-jetty/src/org/mortbay/ijetty/AndroidWebAppDeployer.java:[189,35] cannot find symbol
 symbol  : class AndroidClassLoader
 location: class org.mortbay.ijetty.AndroidWebAppDeployer
-

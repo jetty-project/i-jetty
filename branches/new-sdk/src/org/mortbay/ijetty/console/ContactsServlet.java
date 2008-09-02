@@ -188,7 +188,7 @@ public class ContactsServlet extends InfoServlet
             }
             else
             {
-                if (what.trim().equals("photo"))
+                /*if (what.trim().equals("photo"))
                 { 
                     String[] projection = new String[] { android.provider.Contacts.PeopleColumns.PHOTO};
                     String where = "people."+android.provider.BaseColumns._ID+" = ?";
@@ -217,7 +217,7 @@ public class ContactsServlet extends InfoServlet
                     OutputStream os = response.getOutputStream();
                     IO.copy(is,os);
                     cursor.close();
-                }
+                }*/
             }
         }
     }
@@ -276,18 +276,18 @@ public class ContactsServlet extends InfoServlet
                 writer.println("<tr class='"+style+"'>");
                 String id = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));  
                 String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NAME));
-                String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));
-                String company = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.COMPANY));
+                /*String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));
+                String company = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.COMPANY));*/
                 String notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
-                String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));
+                /*String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));*/
                 boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
-                printCell(writer, (photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>"), style);
+                /*printCell(writer, (photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>"), style);
                 if (title!=null)
                         printCell(writer, "["+title+"]&nbsp;<a href=\"/console/contacts/"+id+"/\">"+name+"</a>", style);
-                else
+                else*/
                         printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
-                printCell(writer, (company==null?"":company), style);
+                /*printCell(writer, (company==null?"":company), style);*/
                
                 writer.println("</tr>");
                 ++row;
@@ -384,7 +384,8 @@ public class ContactsServlet extends InfoServlet
             }
             switch (kind)
             {
-                case Contacts.ContactMethodsColumns.EMAIL_KIND:
+                // FIXME: Maybe switch on both  Contacts.ContactMethods  and 'kind'?
+                /*case Contacts.ContactMethodsColumns.EMAIL_KIND:
                 {
                         printCell(writer, "<span class='label'>"+__EMAIL+":</span>", style);
                         if (type==Contacts.ContactMethodsColumns.EMAIL_KIND_PRIMARY_TYPE)
@@ -419,13 +420,16 @@ public class ContactsServlet extends InfoServlet
                         printCell(writer, "<span class='qualifier'>["+typeStr+"]</span>&nbsp;"+data, style);
                         printCell(writer, auxData, style);
                         break;
-                }
+                }*/
                 default:
                 {
                         if (data!=null)
                                 printCell(writer, data, style);
                         if (auxData!=null)
                                 printCell(writer, data, style);
+                        
+                        // FIXME: Just debugging.
+                        printCell (writer, "Kind = " + kind + "; type = " + type, style);
                         break;
                 }
             }
