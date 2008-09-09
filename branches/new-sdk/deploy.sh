@@ -69,6 +69,9 @@ if (( $? )); then
     echo "======================== [ ERROR ] ========================"
     echo "The Maven build failed! Please check the output and try to "
     echo "rectify the problem."
+    echo 
+    echo "You may want to try running with verbose mode enabled; you "
+    echo "do that like so: $ VERBOSE=on ./deploy.sh"
     echo "======================== [ ERROR ] ========================"
     exit 1
 fi
@@ -81,6 +84,9 @@ if (( $? )); then
     echo "======================== [ WARN ] ========================"
     echo "The Maven build for the console application failed! Please"
     echo "check the output and try to rectify the problem."
+    echo 
+    echo "You may want to try running with verbose mode enabled; you "
+    echo "do that like so: $ VERBOSE=on ./deploy.sh"
     echo "======================== [ WARN ] ========================"
     echo 
 fi
@@ -92,6 +98,9 @@ if (( $? )); then
     echo "======================== [ WARN ] ========================"
     echo "The Maven build for the hello application failed! Please"
     echo "check the output and try to rectify the problem."
+    echo 
+    echo "You may want to try running with verbose mode enabled; you "
+    echo "do that like so: $ VERBOSE=on ./deploy.sh"
     echo "======================== [ WARN ] ========================"
     echo 
 fi

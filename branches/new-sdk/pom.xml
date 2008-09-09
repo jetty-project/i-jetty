@@ -128,7 +128,6 @@
                     <argument>--dex</argument>
                     <argument>--verbose</argument>
                     <argument>--output=${project.build.directory}/classes.dex</argument>
-                    <argument>--locals=full</argument>
                     <argument>--positions=lines</argument>
                     <argument>${project.build.directory}/classes/</argument>
                   </arguments>
@@ -148,7 +147,6 @@
                     <argument>package</argument>
                     <argument>-f</argument>
                     <argument>-c</argument>
-                    <argument>-M</argument>
                     <argument>${basedir}/AndroidManifest.xml</argument>
                     <argument>-S</argument>
                     <argument>${basedir}/res/</argument>

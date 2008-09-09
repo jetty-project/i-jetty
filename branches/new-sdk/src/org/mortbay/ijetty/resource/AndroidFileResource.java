@@ -31,7 +31,6 @@ import java.util.Date;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
-import android.util.DateFormat;
 import android.util.Log;
 
 public class AndroidFileResource extends AndroidResource
@@ -152,7 +151,8 @@ public class AndroidFileResource extends AndroidResource
             buf.append("</TD><TD ALIGN=right>");
             buf.append(item.length());
             buf.append(" bytes&nbsp;</TD><TD>");
-            buf.append(DateFormat.format("yyyy-MM-dd kk:mm:ss", new Date(item.lastModified())));
+            // FIXME: is toString sufficient for our formatting needs?
+            buf.append(new Date(item.lastModified()).toString());
             buf.append("</TD></TR>\n");
         }
         buf.append("</TABLE>\n");

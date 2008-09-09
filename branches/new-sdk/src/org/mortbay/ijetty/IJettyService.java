@@ -51,7 +51,7 @@ public class IJettyService extends Service
     private SharedPreferences preferences;
 
     @Override
-    protected void onCreate()
+    public void onCreate()
     {
         try
         {
@@ -69,12 +69,9 @@ public class IJettyService extends Service
 
             Toast.makeText(IJettyService.this, R.string.jetty_started,
                     Toast.LENGTH_SHORT).show();
-            mNM.notify(R.string.jetty_started, new Notification(this,
-                    R.drawable.jicon, getText(R.string.manage_jetty), System
-                            .currentTimeMillis(),
-                    getText(R.string.manage_jetty),
-                    getText(R.string.manage_jetty), intent, R.drawable.jicon,
-                    getText(R.string.manage_jetty), intent));
+            mNM.notify(R.string.jetty_started, new Notification(
+                            R.drawable.jicon, getText(R.string.manage_jetty),
+                            System.currentTimeMillis()));
             Log.i("Jetty", "Jetty started");
         }
         catch (Exception e)
@@ -86,7 +83,7 @@ public class IJettyService extends Service
     }
 
     @Override
-    protected void onDestroy()
+    public void onDestroy()
     {
 
         try

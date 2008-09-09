@@ -26,6 +26,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
+import dalvik.system.PathClassLoader;
 import android.content.ContentResolver;
 import android.util.Log;
 
@@ -186,7 +187,8 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                 wah = new WebAppContext();
             }
 
-            wah.setClassLoader(new AndroidClassLoader());
+            // Don't care (for now).
+            ///wah.setClassLoader(new PathClassLoader());
 
             // configure it
             wah.setContextPath(context);
