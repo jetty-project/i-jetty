@@ -12,7 +12,7 @@
       <dependency>
          <groupId>android</groupId>
          <artifactId>android</artifactId>
-         <version>m5-rc15</version>
+         <version>0.9_beta</version>
       </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
