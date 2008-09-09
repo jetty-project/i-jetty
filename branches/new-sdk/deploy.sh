@@ -139,7 +139,7 @@ ${ANDROID_SDK_TOOLS}adb wait-for-device
 
 # Upload the package to the emulator when it's started
 echo -e "\033[1m******* Uploading i-jetty to emulator...\033[0m"
-${ANDROID_SDK_TOOLS}adb install target/i-jetty.apk
+${ANDROID_SDK_TOOLS}adb install target/i-jetty-debug.apk
 
 if (( $? )); then
     echo
