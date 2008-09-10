@@ -1,3 +1,4 @@
 Some todos, in no particular order:
 
+* Fix key signing: http://groups.google.com/group/android-developers/browse_thread/thread/398b4bedaaa3df3d/f09c56634b7616fe?#f09c56634b7616fe
 * Fix loading of packed WARs. At the moment, we fail to find some core resources during the initialisation stage of the HttpServlet object. The first class that we inherit this as a base class is DefaultServlet, so that's where it appears the error comes from. See http://paste.pocoo.org/show/79549/ for a trace. Line 82 is generally the main cause here.
