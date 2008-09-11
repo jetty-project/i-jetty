@@ -22,6 +22,15 @@
    </dependencies>
    <build>
       <sourceDirectory>src</sourceDirectory>
+      <resources>
+        <resource>
+          <directory>target/generated-sources</directory>
+          <includes>
+            <include>**/*.properties</include>
+            <include>**/*.xml</include>
+          </includes>
+        </resource>
+      </resources>
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
