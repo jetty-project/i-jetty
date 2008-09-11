@@ -51,7 +51,7 @@ mvn install:install-file -DgroupId=android -DartifactId=android \
   -Dversion=0.9_beta -Dpackaging=jar \
   -Dfile=$ANDROID_SDK/android.jar $BUILD_ARGS
 
-echo -e "\033[1m******* Buidling i-jetty...\033[0m"
+echo -e "\033[1m******* Building i-jetty...\033[0m"
 mvn -v > /dev/null
 if (( $? )); then
     echo
