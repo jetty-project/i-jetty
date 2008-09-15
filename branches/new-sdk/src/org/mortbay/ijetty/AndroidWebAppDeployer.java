@@ -168,14 +168,14 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             // create a webapp
             WebAppContext wah = null;
             HandlerContainer contexts = getContexts();
-			if (contexts instanceof ContextHandlerCollection
-				&& 
-				WebAppContext.class.isAssignableFrom(((ContextHandlerCollection) contexts).getContextClass()))
-			{
-				try
-				{
-					wah = (WebAppContext) ((ContextHandlerCollection) contexts).getContextClass().newInstance();
-				}
+            if (contexts instanceof ContextHandlerCollection
+                    && 
+               WebAppContext.class.isAssignableFrom(((ContextHandlerCollection) contexts).getContextClass()))
+            {
+                try
+                {
+                    wah = (WebAppContext) ((ContextHandlerCollection) contexts).getContextClass().newInstance();
+                }
                 catch (Exception e)
                 {
                     throw new Error(e);
@@ -183,7 +183,6 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             }
             else
             {
-                Log.d ("Jetty", "Created new AppContext with empty contexts.");
                 wah = new WebAppContext();
             }
 
@@ -192,20 +191,13 @@ public class AndroidWebAppDeployer extends WebAppDeployer
 
             if (getConfigurationClasses() != null)
             {
-                Log.d ("Jetty", "Set configuration classes to " + getConfigurationClasses());
                 wah.setConfigurationClasses(getConfigurationClasses());
-            }
-            else
-            {
-                // Defaults stolen from WebAppContext.
-                wah.setConfigurationClasses(new String[] {
-                        "org.mortbay.ijetty.AndroidWebInfConfiguration",
-                        "org.mortbay.jetty.webapp.WebXmlConfiguration",
-                        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
-                        "org.mortbay.jetty.webapp.TagLibConfiguration" });
+                Log.d ("Jetty", "AndroidWebAppDeployer: Set configuration classes");
             }
 
-            if (getDefaultsDescriptor() != null) {
+
+            if (getDefaultsDescriptor() != null) 
+            {
                 Log.d ("Jetty", "Setting defaults descriptor to: " + getDefaultsDescriptor());
                 wah.setDefaultsDescriptor(getDefaultsDescriptor());
             }
@@ -215,7 +207,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             if (_resolver != null)
                 wah.setAttribute("contentResolver", _resolver);
             // add it
-            Log.d ("Jetty", "Deployed: " + app.toString());
+            Log.d ("Jetty", "AndroidWebAppDeployer: prepared " + app.toString());
             contexts.addHandler(wah);
             _deployed.add(wah);
         }

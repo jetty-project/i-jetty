@@ -42,6 +42,12 @@ import org.mortbay.jetty.security.*;
 public class IJettyService extends Service
 {
 
+    private static final String[] __configurationClasses = 
+        new String[] {
+        "org.mortbay.ijetty.AndroidWebInfConfiguration",
+        "org.mortbay.jetty.webapp.WebXmlConfiguration",
+        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+        "org.mortbay.jetty.webapp.TagLibConfiguration" };
     private NotificationManager mNM;
 
     private Server server;
@@ -154,24 +160,26 @@ public class IJettyService extends Service
         handlers.setHandlers(new Handler[] {security, contexts, new DefaultHandler()});
         server.setHandler(handlers);
 
+       
         // Load any webapps we find on the card.
         if (new File("/sdcard/jetty/").exists())
         {
             System.setProperty ("jetty.home", "/sdcard/jetty");
             
             // Deploy any static webapps we have.
-            AndroidWebAppDeployer static_deployer = new AndroidWebAppDeployer();
-            static_deployer.setWebAppDir("/sdcard/jetty/webapps");
-            static_deployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
-            static_deployer.setContexts(contexts);
-            static_deployer.setContentResolver (getContentResolver());
+            AndroidWebAppDeployer staticDeployer = new AndroidWebAppDeployer();
+            staticDeployer.setWebAppDir("/sdcard/jetty/webapps");
+            staticDeployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+            staticDeployer.setContexts(contexts);
+            staticDeployer.setContentResolver (getContentResolver());
+            staticDeployer.setConfigurationClasses(__configurationClasses);
             //static_deployer.setAuthenticate(true);
             
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
-            ContextDeployer context_deployer = new ContextDeployer();
-            context_deployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
-            context_deployer.setConfigurationDir("/sdcard/jetty/contexts");
-            context_deployer.setContexts(contexts);
+            ContextDeployer contextDeployer = new ContextDeployer();
+            contextDeployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
+            contextDeployer.setConfigurationDir("/sdcard/jetty/contexts");
+            contextDeployer.setContexts(contexts);
             
             FormAuthenticator authenticator = new FormAuthenticator();
             authenticator.setErrorPage("/testErrorPage");
@@ -183,8 +191,9 @@ public class IJettyService extends Service
             realm.put ("test", "testy");
             security.setUserRealm(realm);
             
-            server.addLifeCycle(static_deployer);
-            server.addLifeCycle(context_deployer);
+            server.addLifeCycle(contextDeployer);
+            server.addLifeCycle(staticDeployer);
+
         }
         else
         {

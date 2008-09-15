@@ -23,7 +23,7 @@ import android.util.Log;
 
 public class AndroidWebInfConfiguration extends WebInfConfiguration
 {
-    @Override
+
     public void configureClassLoader() throws Exception
     {
         if (getWebAppContext().isStarted())
@@ -31,29 +31,41 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
             Log.d("Jetty", "Cannot configure webapp after it is started");
             return;
         }
-
+        
         Resource web_inf = _context.getWebInf();
+      
+       
+        ClassLoader loader = ClassLoader.getSystemClassLoader();
 
-        // Add WEB-INF lib classpaths
-        if (web_inf != null && web_inf.isDirectory() && _context.getClassLoader()==null)
+        // Add WEB-INF lib classpath 
+        if (web_inf != null && web_inf.isDirectory())
         {
             // Look for jars
             Resource lib = web_inf.addPath("lib/");
-            Log.d("Jetty", "Library resource: " + lib.toString());
+            String paths = "";   
             if (lib.exists() || lib.isDirectory())
-            {
-                String paths = "";
-                
+            {                 
                 for (String dex : lib.list())
                 {
-                    String fullpath = web_inf.addPath("lib/").addPath(dex)
-                            .getFile().getAbsolutePath();
-                    paths += fullpath + ":";
+                    String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
+                    if (!"".equals(paths))
+                        paths +=":";
+
+                    paths += fullpath;
                 }
-                
-                PathClassLoader loader = new PathClassLoader (paths, ClassLoader.getSystemClassLoader().getParent());
-                _context.setClassLoader (loader);
+                Log.d("Jetty", "webapp classloader paths = "+paths);
+                loader = new PathClassLoader (paths, ClassLoader.getSystemClassLoader());
             }
+            else
+                Log.d("Jetty", "No WEB-INF/lib for "+_context.getContextPath());
         }
+        else
+            Log.d("Jetty", "No WEB-INF for "+_context.getContextPath());
+
+        if (_context.getClassLoader() != null)
+            Log.w ("Jetty", "Ignoring classloader "+_context.getClassLoader());
+
+        Log.d("Jetty", "Android classloader "+loader);
+        _context.setClassLoader (loader);
     }
 }
