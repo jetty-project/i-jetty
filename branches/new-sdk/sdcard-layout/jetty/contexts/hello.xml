@@ -4,5 +4,4 @@
   <Set name="contextPath">/hello</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/hello</Set>
   <Set name="defaultsDescriptor">/sdcard/jetty/etc/webdefault.xml</Set>
-  <Set name="classLoader"><New class="dalvik.system.PathClassLoader" /></Set>
 </Configure>

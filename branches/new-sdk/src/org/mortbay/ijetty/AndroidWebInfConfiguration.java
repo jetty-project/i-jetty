@@ -35,9 +35,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
         Resource web_inf = _context.getWebInf();
 
         // Add WEB-INF lib classpaths
-        if (web_inf != null && web_inf.isDirectory()
-            && 
-            _context.getClassLoader() instanceof ClassLoader)
+        if (web_inf != null && web_inf.isDirectory() && _context.getClassLoader()==null)
         {
             // Look for jars
             Resource lib = web_inf.addPath("lib/");
@@ -45,7 +43,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
             if (lib.exists() || lib.isDirectory())
             {
                 String paths = "";
-                PathClassLoader loader = ((PathClassLoader) _context.getClassLoader());
+                
                 for (String dex : lib.list())
                 {
                     String fullpath = web_inf.addPath("lib/").addPath(dex)
@@ -53,7 +51,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
                     paths += fullpath + ":";
                 }
                 
-                loader = new PathClassLoader (paths, ClassLoader.getSystemClassLoader().getParent());
+                PathClassLoader loader = new PathClassLoader (paths, ClassLoader.getSystemClassLoader().getParent());
                 _context.setClassLoader (loader);
             }
         }

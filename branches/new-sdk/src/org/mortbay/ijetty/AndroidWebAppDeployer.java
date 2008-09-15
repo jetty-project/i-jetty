@@ -187,9 +187,6 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                 wah = new WebAppContext();
             }
 
-            // Don't care (for now).
-            ///wah.setClassLoader(new PathClassLoader());
-
             // configure it
             wah.setContextPath(context);
 
