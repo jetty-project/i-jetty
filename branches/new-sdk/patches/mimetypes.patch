@@ -1,6 +1,6 @@
---- /home/janb/src/jetty-6.1/modules/jetty/src/main/java/org/mortbay/jetty/MimeTypes.java	2007-12-21 13:53:51.000000000 +1100
-+++ org/mortbay/jetty/MimeTypes.java	2008-02-20 13:47:07.000000000 +1100
-@@ -14,13 +14,17 @@
+--- org/mortbay/jetty/MimeTypes.java	2008-09-24 11:42:09.000000000 +1000
++++ ../original-sources/org/mortbay/jetty/MimeTypes.java	2008-09-24 11:44:00.000000000 +1000
+@@ -14,11 +14,13 @@
  
  package org.mortbay.jetty;
  
@@ -13,47 +13,42 @@
 +import java.util.PropertyResourceBundle;
  import java.util.ResourceBundle;
  
-+import org.mortbay.ijetty.IJettyService;
-+import org.mortbay.ijetty.R;
  import org.mortbay.io.Buffer;
- import org.mortbay.io.BufferCache;
- import org.mortbay.io.BufferCache.CachedBuffer;
-@@ -92,7 +96,7 @@
+@@ -92,7 +94,8 @@
      {
          try
          {
 -            ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/jetty/mime");
-+            ResourceBundle mime = new PropertyResourceBundle(IJettyService.getStreamToRawResource(R.raw.org_mortbay_jetty_mime));
++            java.io.InputStream is = MimeTypes.class.getResourceAsStream("/org/mortbay/jetty/mime.properties");
++            ResourceBundle mime = new PropertyResourceBundle(is);
              Enumeration i = mime.getKeys();
              while(i.hasMoreElements())
              {
-@@ -106,10 +110,15 @@
+@@ -101,7 +104,7 @@
+                 __dftMimeMap.put(StringUtil.asciiToLowerCase(ext),normalizeMimeType(m));
+             }
+         }
+-        catch(MissingResourceException e)
++        catch(Exception e)
+         {
              Log.warn(e.toString());
              Log.debug(e);
-         }
-+        catch (IOException e)
-+        {
-+            Log.warn(e.toString());
-+            Log.debug(e); 
-+        }
+@@ -109,7 +112,8 @@
  
          try
          {
 -            ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/jetty/encoding");
-+            ResourceBundle encoding = new PropertyResourceBundle(IJettyService.getStreamToRawResource(R.raw.org_mortbay_jetty_encoding));
++            java.io.InputStream is = MimeTypes.class.getResourceAsStream("/org/mortbay/jetty/encoding.properties");
++            ResourceBundle encoding = new PropertyResourceBundle(is);
              Enumeration i = encoding.getKeys();
              while(i.hasMoreElements())
              {
-@@ -122,7 +131,11 @@
+@@ -117,7 +121,7 @@
+                 __encodings.put(type,encoding.getString(type.toString()));
+             }
+         }
+-        catch(MissingResourceException e)
++        catch(Exception e)
+         {
              Log.warn(e.toString());
              Log.debug(e);
-         }
--
-+        catch (IOException e)
-+        {
-+            Log.warn(e.toString());
-+            Log.debug(e); 
-+        }
-         
-         TEXT_HTML_BUFFER.setAssociate("ISO-8859-1",TEXT_HTML_8859_1_BUFFER);
-         TEXT_HTML_BUFFER.setAssociate("ISO_8859_1",TEXT_HTML_8859_1_BUFFER);

@@ -1,39 +1,35 @@
---- /home/janb/src/jetty-6.1/modules/servlet-api-2.5/src/main/java/javax/servlet/http/Cookie.java	2007-12-21 13:53:55.000000000 +1100
-+++ javax/servlet/http/Cookie.java	2008-02-20 11:51:18.000000000 +1100
-@@ -28,8 +28,12 @@
+--- javax/servlet/http/Cookie.java	2008-06-06 11:04:46.000000000 +1000
++++ ../original-sources/javax/servlet/http/Cookie.java	2008-09-24 10:20:44.000000000 +1000
+@@ -28,6 +28,7 @@
  package javax.servlet.http;
  
  import java.text.MessageFormat;
 +import java.util.PropertyResourceBundle;
  import java.util.ResourceBundle;
  
-+import org.mortbay.ijetty.IJettyService;
-+import org.mortbay.ijetty.R;
-+
  /**
-  *
-  * Creates a cookie, a small amount of information sent by a servlet to 
-@@ -75,9 +79,20 @@
+@@ -75,9 +76,21 @@
  public class Cookie implements Cloneable {
  
      private static final String LSTRING_FILE =
 -	"javax.servlet.http.LocalStrings";
 -    private static ResourceBundle lStrings =
 -	ResourceBundle.getBundle(LSTRING_FILE);
-+	"javax_servlet_http_localstrings";
++	"/javax/servlet/http/LocalStrings.properties";
 +    private static ResourceBundle lStrings;
-+    
++
++    static 
 +    {
 +        try
 +        {
-+            lStrings = new PropertyResourceBundle(IJettyService.getStreamToRawResource(R.raw.javax_servlet_http_localstrings));
++            lStrings = new PropertyResourceBundle(Cookie.class.getResourceAsStream(LSTRING_FILE));
 +        }
 +        catch (Exception e)
 +        {
 +            e.printStackTrace();
 +        }
++
 +    }
-+	
      
      //
      // The value of the cookie itself.
