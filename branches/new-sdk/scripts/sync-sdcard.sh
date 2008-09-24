@@ -9,11 +9,30 @@ if [ ! -e "sdcard.img" ]; then
     exit 1
 fi
 
+if [ -d sdcard-intermediate ]; then
+  echo "Dir sdcard-intermediate exists"
+else
+  echo "Dir sdcard-intermediate created"
+fi
+
+# Copy standard static content, remove .svn files
+cp sdcard-layout/* sdcard-intermediate/ -Rf
+find sdcard-intermediate/ -name '.svn' -type d | xargs rm -r $VERBOSE_ARGS
+
+
 if [ `mount -l | grep "sdcard-mount"` == ""]; then
     # Looks OK to mount.
     echo "SD image doesn't seem to have been mounted yet."
     echo "Mounting image..."
+
     
+    if [ -d sdcard-mount ]; then
+      echo "Dir sdcard-mount exists"
+    else
+      mkdir sdcard-mount
+      echo "Dir sdcard-mount created"
+    fi
+
     # NOTE: Requires root permissions! :(
     echo "This step requires root permissions to setup the"
     echo "loopback device and mount the image."
@@ -25,7 +44,6 @@ if [ `mount -l | grep "sdcard-mount"` == ""]; then
         # It may mean we've already been setup.
     fi
     
-    mkdir sdcard-mount
     sudo mount /dev/loop0 sdcard-mount
     if (( $? )); then
         echo "Failed to mount image."
@@ -42,4 +60,15 @@ sudo rm sdcard-mount/* -Rf $VERBOSE_ARGS
 
 # Copy it all in (again, root, eugh) minus .svn directories
 sudo cp -Rf $VERBOSE_ARGS sdcard-intermediate/* sdcard-mount/
-cd sdcard-mount/jetty
+
+# We *must* unmount our SD card otherwise we crash poor ol' qemu
+echo -e "\033[1m******* Unmounting image...\033[0m"
+sudo umount sdcard-mount/
+rm -Rf $VERBOSE_ARGS sdcard-mount/
+
+# and detatch the loopback device - IMPORTANT!
+echo -e "\033[1m******* Freeing loopback device...\033[0m"
+sudo losetup -d /dev/loop0 || echo " FAILED!"
+
+# Remove temp dir
+rm -Rf $VERBOSE_ARGS sdcard-intermediate/*
