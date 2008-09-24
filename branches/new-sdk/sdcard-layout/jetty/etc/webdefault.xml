@@ -108,7 +108,7 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>default</servlet-name>
-    <servlet-class>org.mortbay.ijetty.servlet.DefaultServlet</servlet-class>
+    <servlet-class>org.mortbay.jetty.servlet.DefaultServlet</servlet-class>
     <init-param>
       <param-name>acceptRanges</param-name>
       <param-value>true</param-value>
@@ -135,7 +135,7 @@
     </init-param>
     <init-param>
       <param-name>cacheType</param-name>
-      <param-value>both</param-value>
+      <param-value>none</param-value>
     </init-param>
     <init-param>
       <param-name>gzip</param-name>
