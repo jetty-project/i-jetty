@@ -157,8 +157,7 @@ public class IJettyService extends Service
 
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        SecurityHandler security = new SecurityHandler();
-        handlers.setHandlers(new Handler[] {security, contexts, new DefaultHandler()});
+        handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
         server.setHandler(handlers);
 
        
@@ -174,7 +173,6 @@ public class IJettyService extends Service
             staticDeployer.setContexts(contexts);
             staticDeployer.setContentResolver (getContentResolver());
             staticDeployer.setConfigurationClasses(__configurationClasses);
-            //static_deployer.setAuthenticate(true);
             
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
             ContextDeployer contextDeployer = new ContextDeployer();
@@ -182,19 +180,16 @@ public class IJettyService extends Service
             contextDeployer.setConfigurationDir("/sdcard/jetty/contexts");
             contextDeployer.setContexts(contexts);
             
-            FormAuthenticator authenticator = new FormAuthenticator();
-            authenticator.setErrorPage("/testErrorPage");
-            authenticator.setLoginPage("/testLoginPage");
-            security.setAuthenticator(authenticator);
-            
-            HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
-            realm.loadConfig();
-            realm.put ("test", "testy");
-            security.setUserRealm(realm);
+            File realmProps = new File("/sdcard/jetty/etc/realm.properties");
+            if (realmProps.exists())
+            {
+              HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
+              realm.setRefreshInterval(0);
+              server.addUserRealm(realm);
+            }
             
             server.addLifeCycle(contextDeployer);
             server.addLifeCycle(staticDeployer);
-
         }
         else
         {

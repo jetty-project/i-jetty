@@ -46,7 +46,7 @@
 		<url-pattern>/network/*</url-pattern>
 	</servlet-mapping>
 	
-    <!--<security-constraint>
+    <security-constraint>
       <web-resource-collection>
         <web-resource-name>I-Jetty Console</web-resource-name>
         <url-pattern>/*</url-pattern>
@@ -54,12 +54,15 @@
       <auth-constraint>
         <role-name>admin</role-name>
         <role-name>user</role-name>
-        <role-name>moderator</role-name>
       </auth-constraint>
     </security-constraint>
     
     <login-config>
-      <auth-method>BASIC</auth-method>
+      <auth-method>FORM</auth-method>
       <realm-name>Console</realm-name>
-    </login-config>-->
+      <form-login-config>
+         <form-login-page>/login.html</form-login-page>
+         <form-error-page>/loginError.html</form-error-page>
+      </form-login-config>
+    </login-config>
 </web-app>
