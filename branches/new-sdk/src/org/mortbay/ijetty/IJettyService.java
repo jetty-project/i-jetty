@@ -145,7 +145,8 @@ public class IJettyService extends Service
     {
         // TODO - get ports and types of connector from SharedPrefs?
         server = new Server();
-        Connector connector = new SelectChannelConnector();
+        SelectChannelConnector connector = new SelectChannelConnector();
+        connector.setUseDirectBuffers(false);
         connector.setPort(8080);
         server.setConnectors(new Connector[] { connector });
 
