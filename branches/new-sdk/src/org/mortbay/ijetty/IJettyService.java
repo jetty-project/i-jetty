@@ -18,6 +18,7 @@ package org.mortbay.ijetty;
 import java.io.InputStream;
 import java.io.File;
 
+import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -75,9 +76,21 @@ public class IJettyService extends Service
 
             Toast.makeText(IJettyService.this, R.string.jetty_started,
                     Toast.LENGTH_SHORT).show();
-            mNM.notify(R.string.jetty_started, new Notification(
-                            R.drawable.jicon, getText(R.string.manage_jetty),
-                            System.currentTimeMillis()));
+
+            // The PendingIntent to launch IJetty activity if the user selects this notification
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                            new Intent(this, IJetty.class), 0);
+
+            CharSequence text = getText(R.string.manage_jetty);
+
+            Notification notification = new Notification(R.drawable.jicon, 
+                                                         text, 
+                                                         System.currentTimeMillis());
+
+            notification.setLatestEventInfo(this, getText(R.string.app_name),
+                                               text, contentIntent);
+ 
+            mNM.notify(R.string.jetty_started, notification);
             Log.i("Jetty", "Jetty started");
         }
         catch (Exception e)
