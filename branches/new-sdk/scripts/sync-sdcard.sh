@@ -12,6 +12,7 @@ fi
 if [ -d sdcard-intermediate ]; then
   echo "Dir sdcard-intermediate exists"
 else
+  mkdir sdcard-intermediate
   echo "Dir sdcard-intermediate created"
 fi
 
