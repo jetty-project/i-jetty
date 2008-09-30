@@ -16,6 +16,39 @@
           <verbose>false</verbose>
         </configuration>
       </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}" />
+              </tasks>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copywar</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <mkdir dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}"/>
+                <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" 
+                       overwrite="true"
+                       dest="../sdcard-intermediate/jetty/webapps/${project.artifactId}" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
      
     <!--<plugin>
     <groupId>org.codehaus.mojo</groupId>

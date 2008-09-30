@@ -1,18 +1,36 @@
 How to build
 ============
+0)  Install the android.jar from your android install directory into your
+    local maven repository:
+      $ mvn install:install-file -DgroupId=android -DartifactId=android \
+        -Dversion=[android version] -Dpackaging=jar \
+        -Dfile=[path to android.jar]
 
 1)  Check out the project from code.google.com:
     $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
     
-2)  Once in the checkout direcory, simple run the deploy script with the SDK in
-    your path (trailing slash optional):
-        $ cd i-jetty-read-only/
-        $ export ANDROID_SDK=/home/alex/Desktop/Downloads/android-sdk_m5-rc15_linux-x86
-        $ ./deploy.sh
+2)  Build i-jetty. You will need to have maven installed:
+        $ cd i-jetty-read-only
+        $ mvn clean install -Dandroid.home=[path to your android installation]
 
-    The script should do all the building, packaging, and uploading to the
-    emulator for you. Once it's done, the emulator should pop up and boot into
-    Android.
+3) Build two example web applications:
+        $ cd console
+        $ mvn clean install -Dandroid.home=[path to your android installation]
+        $ cd hello
+        $ mvn clean install -Dandroid.home=[path to your android installation]
+
+4) Make an sdcard image if you do not already have one:
+        $ scripts/create-sdcard.sh
+
+5) Copy the webapps and i-jetty onto the sdcard.img:
+        $ scripts/sync-sdcard.sh
+
+4)  Run i-jetty:
+        $ export ANDROID_SDK=[path to your android installation]
+        $ scripts/deploy.sh
+
+    The script will start the emulator for you. Once it's done, the 
+    emulator should pop up and boot into Android.
 
 3)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
     and click "Start Jetty". You should be able to point your favorite browser
@@ -21,16 +39,6 @@ How to build
 
 Troubleshooting
 ===============
-
-If you get a "Failed to resolve artifact error" with
-android:android:jar:m5-rc15 missing, you'll need to follow the instructions
-provided and install the Android JAR that comes with the SDK. For example:
-
-$ mvn install:install-file -DgroupId=android -DartifactId=android \
-  -Dversion=m5-rc15 -Dpackaging=jar \
-  -Dfile=/home/alex/Desktop/Downloads/android-sdk_m5-rc15_linux-x86/android.jar
-
-You should then be able to re-run the deploy script and it should succeed.
 If you encounter any errors, you can run the deploy script with verbose output
 enabled, like so:
 $ VERBOSE=on ./deploy.sh
@@ -96,11 +104,6 @@ Except for cleanup.sh, the scripts/ directory contains a number of utility
 scripts used by the main deploy.sh shell script. They are intended to be called
 from the main checkout, since they assume that path as the working directory:
 
-    build-console.sh        -   Builds the console application, and copies it
-                                into the temporary sdcard-intermediate/
-                                directory (extracted war)
-
-    build-hello.sh          -   Same as above, except with the hello servlet.
 
     cleanup.sh              -   Cleans builds and sdcard-layout. See first
                                 paragraph for more information.

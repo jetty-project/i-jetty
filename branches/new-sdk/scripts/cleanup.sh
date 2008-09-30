@@ -13,10 +13,3 @@ cd hello
 mvn clean
 cd ..
 
-cd sdcard-layout
-cd jetty
-cd webapps
-rm * -Rf
-cd ..
-cd etc
-
