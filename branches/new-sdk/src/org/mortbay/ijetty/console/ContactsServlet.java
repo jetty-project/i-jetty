@@ -53,6 +53,7 @@ public class ContactsServlet extends InfoServlet
         private static final String __HOME_FAX = "home fax";
         private static final String __PRIMARY = "primary";
         private static final String __EMAIL = "email";
+        private static final String __CUSTOM = "custom";
         private static final String __JABBER = "jabber";
         private static final String __GEO_LOCATION = "geo location";
         
@@ -65,10 +66,7 @@ public class ContactsServlet extends InfoServlet
     String[] baseProjection = new String[] {
             android.provider.BaseColumns._ID,
             android.provider.Contacts.PeopleColumns.DISPLAY_NAME,
-            /*android.provider.Contacts.PeopleColumns.COMPANY,*/
             android.provider.Contacts.PeopleColumns.NOTES,
-            /*android.provider.Contacts.PeopleColumns.PHOTO,*/
-            android.provider.Contacts.PeopleColumns.PHOTO_VERSION,
             android.provider.Contacts.PeopleColumns.STARRED
     };
     
@@ -113,8 +111,10 @@ public class ContactsServlet extends InfoServlet
         
         _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_HOME), __HOME);
         _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_WORK), __WORK);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.ISPRIMARY), __PRIMARY);
         _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_OTHER), __OTHER);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_CUSTOM), __CUSTOM);
+  
+        //_contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.ISPRIMARY), __PRIMARY);
         
         /*_postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_HOME_TYPE), __HOME);
         _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_OTHER_TYPE), __OTHER);
@@ -188,18 +188,18 @@ public class ContactsServlet extends InfoServlet
             }
             else
             {
-                /*if (what.trim().equals("photo"))
+                if (what.trim().equals("photo"))
                 { 
-                    String[] projection = new String[] { android.provider.Contacts.PeopleColumns.PHOTO};
+                    String[] projection = new String[] { android.provider.Contacts.PhotosColumns.DATA};
                     String where = "people."+android.provider.BaseColumns._ID+" = ?";
-                    Cursor cursor = getContentResolver().query(Contacts.People.CONTENT_URI, projection, where, new String[]{who}, null);  
+                    Cursor cursor = getContentResolver().query(Contacts.Photos.CONTENT_URI, projection, where, new String[]{who}, null);  
                     if (!cursor.moveToFirst())
                     { 
                         response.sendError(javax.servlet.http.HttpServletResponse.SC_NO_CONTENT);
                         cursor.close();
                         return;
                     }
-                    int i = cursor.getColumnIndex(android.provider.Contacts.PeopleColumns.PHOTO);
+                    int i = cursor.getColumnIndex(android.provider.Contacts.PhotosColumns.DATA);
                     if (i<0)
                     {
                         response.sendError(javax.servlet.http.HttpServletResponse.SC_NO_CONTENT);
@@ -217,7 +217,7 @@ public class ContactsServlet extends InfoServlet
                     OutputStream os = response.getOutputStream();
                     IO.copy(is,os);
                     cursor.close();
-                }*/
+                }
             }
         }
     }
@@ -275,20 +275,15 @@ public class ContactsServlet extends InfoServlet
                 
                 writer.println("<tr class='"+style+"'>");
                 String id = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));  
-                String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NAME));
-                /*String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));
-                String company = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.COMPANY));*/
+                String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.DISPLAY_NAME));
+                String title = null;
+                String company = null;
                 String notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
-                /*String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));*/
+                String photo = null;
                 boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
-                /*printCell(writer, (photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>"), style);
-                if (title!=null)
-                        printCell(writer, "["+title+"]&nbsp;<a href=\"/console/contacts/"+id+"/\">"+name+"</a>", style);
-                else*/
-                        printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
-                /*printCell(writer, (company==null?"":company), style);*/
-               
+                printCell(writer, (photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>"), style);
+                printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
                 ++row;
             }
@@ -308,17 +303,17 @@ public class ContactsServlet extends InfoServlet
            if (cursor.moveToFirst())
            {
                String id = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));  
-               String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NAME));
-               /*String title = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.TITLE));*/
-               /*String company = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.COMPANY));*/
+               String name =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.DISPLAY_NAME));
+               String title = null;
+               String company = null;
                String notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
-               /*String photo = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.PHOTO));*/
+               String photo = null;
                boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
-               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+/*(title==null?"":title+"&nbsp;")+*/(name==null?"Unknown":name)+"</h1><div id='content'>");
-               /*if (photo!=null)
-                   writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");*/
-               /*if (company!=null)
-                   writer.println("<p>Company: "+company+"</h3></p>");*/
+               writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1><div id='content'>");
+               if (photo!=null)
+                   writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
+               if (company!=null)
+                   writer.println("<p>Company: "+company+"</h3></p>");
                writer.println("<h2>Notes</h2>");
                writer.println("<table id='notes' style='border: 0px none;'>");
                writer.println("<tr>"); 
