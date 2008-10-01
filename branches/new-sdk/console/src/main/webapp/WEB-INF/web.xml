@@ -49,7 +49,10 @@
     <security-constraint>
       <web-resource-collection>
         <web-resource-name>I-Jetty Console</web-resource-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/contacts/*</url-pattern>
+        <url-pattern>/calls/*</url-pattern>
+        <url-pattern>/settings/*</url-pattern>
+        <url-pattern>/network/*</url-pattern>
       </web-resource-collection>
       <auth-constraint>
         <role-name>admin</role-name>
