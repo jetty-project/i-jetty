@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.util.IO;
 import org.mortbay.util.URIUtil;
 
+import android.content.ContentUris;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Contacts;
@@ -54,7 +55,7 @@ public class ContactsServlet extends InfoServlet
         private static final String __PRIMARY = "primary";
         private static final String __EMAIL = "email";
         private static final String __CUSTOM = "custom";
-        private static final String __JABBER = "jabber";
+        private static final String __IM = "IM";
         private static final String __GEO_LOCATION = "geo location";
         
         
@@ -75,7 +76,9 @@ public class ContactsServlet extends InfoServlet
             android.provider.Contacts.ContactMethodsColumns.DATA,
             android.provider.Contacts.ContactMethodsColumns.AUX_DATA,
             android.provider.Contacts.ContactMethodsColumns.KIND,
-            android.provider.Contacts.ContactMethodsColumns.TYPE
+            android.provider.Contacts.ContactMethodsColumns.LABEL,
+            android.provider.Contacts.ContactMethodsColumns.TYPE,
+            android.provider.Contacts.ContactMethodsColumns.ISPRIMARY
     };
     
     String[] phonesProjection = new String[] {
@@ -190,33 +193,12 @@ public class ContactsServlet extends InfoServlet
             {
                 if (what.trim().equals("photo"))
                 { 
-                    String[] projection = new String[] { android.provider.Contacts.PhotosColumns.DATA};
-                    String where = "people."+android.provider.BaseColumns._ID+" = ?";
-                    Cursor cursor = getContentResolver().query(Contacts.Photos.CONTENT_URI, projection, where, new String[]{who}, null);  
-                    if (!cursor.moveToFirst())
-                    { 
-                        response.sendError(javax.servlet.http.HttpServletResponse.SC_NO_CONTENT);
-                        cursor.close();
-                        return;
-                    }
-                    int i = cursor.getColumnIndex(android.provider.Contacts.PhotosColumns.DATA);
-                    if (i<0)
-                    {
-                        response.sendError(javax.servlet.http.HttpServletResponse.SC_NO_CONTENT);
-                        cursor.close();
-                        return;  
-                    }
+                    Uri personUri = ContentUris.withAppendedId(Contacts.People.CONTENT_URI,Long.valueOf(who.trim()).longValue());
+                    InputStream is = Contacts.People.openContactPhotoInputStream(getContentResolver(), personUri);
 
-                    String pic = cursor.getString(i);
-                    //handle streaming image
-                    if (!pic.contains(":"))
-                        pic = "file://"+pic;
-                    getServletContext().log("Url for photo="+pic);
-                    InputStream is = getContentResolver().openInputStream(Uri.parse(pic));
-                    response.setContentType(getServletContext().getMimeType(pic));
+                    response.setContentType("application/octet-stream");
                     OutputStream os = response.getOutputStream();
                     IO.copy(is,os);
-                    cursor.close();
                 }
             }
         }
@@ -282,7 +264,7 @@ public class ContactsServlet extends InfoServlet
                 String photo = null;
                 boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
-                printCell(writer, (photo==null?"&nbsp;":"<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>"), style);
+                printCell(writer, "<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>", style);
                 printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
                 ++row;
@@ -310,8 +292,7 @@ public class ContactsServlet extends InfoServlet
                String photo = null;
                boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
                writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1><div id='content'>");
-               if (photo!=null)
-                   writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
+               writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
                if (company!=null)
                    writer.println("<p>Company: "+company+"</h3></p>");
                writer.println("<h2>Notes</h2>");
@@ -366,48 +347,52 @@ public class ContactsServlet extends InfoServlet
         int row = 0;
         while (cursor.moveToNext())
         { 
-                String style = getRowStyle(row);
+            String style = getRowStyle(row);
             writer.println("<tr class='"+style+"'>");
             String data = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.DATA));
             String auxData = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.AUX_DATA));
-            int kind = -99;
-            int type = -99;
-            if (data!=null||auxData!=null)
+            String label = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.LABEL));
+            int isPrimary = cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.ISPRIMARY));
+            int kind = cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.KIND));
+            int type = cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.TYPE));
+            String typeStr;
+            switch (type)
             {
-                kind = cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.KIND));
-                type = cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.TYPE));
+                case Contacts.ContactMethodsColumns.TYPE_CUSTOM:
+                {
+                  typeStr = label;
+                  break;
+                }
+                default:
+                {
+                  typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
+                }
             }
+
             switch (kind)
             {
-                // FIXME: Maybe switch on both  Contacts.ContactMethods  and 'kind'?
-                /*case Contacts.ContactMethodsColumns.EMAIL_KIND:
+                case Contacts.KIND_EMAIL:
                 {
                         printCell(writer, "<span class='label'>"+__EMAIL+":</span>", style);
-                        if (type==Contacts.ContactMethodsColumns.EMAIL_KIND_PRIMARY_TYPE)
-                                printCell(writer, "<a href=\"mailto:"+data+"\">"+data+"</a>", style);
-                        else
-                        {
-                                String typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
-                                printCell(writer, "<a href=\"mailto:"+data+"\">"+"("+typeStr+")"+data+"</a>", style);
-                        }
+                        printCell(writer, "<a href=\"mailto:"+data+"\">"+data+" ["+typeStr+"]</a>", style);
                         printCell(writer, "", style);
                         break;
                 }
-                case Contacts.ContactMethodsColumns.JABBER_IM_KIND:
+                case Contacts.KIND_IM:
                 {
-                        printCell(writer, "<span class='label'>"+__JABBER+":</span>", style);
+                        printCell(writer, "<span class='label'>"+__IM+":</span>", style);
                         printCell(writer, data, style);
                         printCell(writer, "", style);
                         break;
                 }
-                case Contacts.ContactMethodsColumns.POSTAL_KIND:
+                case Contacts.KIND_POSTAL:
                 {
                         printCell(writer, "<span class='label'>"+__POSTAL+":</span>", style);
-                        String typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
-                                printCell(writer, "<span class='qualifier'>["+typeStr+"]</span>&nbsp;"+data, style);
-                                printCell(writer, "", style);
+                        printCell(writer, data+"&nbsp;<span class='qualifier'>["+typeStr+"]</span>", style);
+                        printCell(writer, "", style);
                         break;
                 }
+/*
                 case Contacts.ContactMethodsColumns.LOCATION_KIND:
                 {
                         printCell(writer, "<span class='label'>"+__GEO_LOCATION+":</span>", style);
@@ -415,7 +400,8 @@ public class ContactsServlet extends InfoServlet
                         printCell(writer, "<span class='qualifier'>["+typeStr+"]</span>&nbsp;"+data, style);
                         printCell(writer, auxData, style);
                         break;
-                }*/
+                }
+*/
                 default:
                 {
                         if (data!=null)
@@ -423,7 +409,6 @@ public class ContactsServlet extends InfoServlet
                         if (auxData!=null)
                                 printCell(writer, data, style);
                         
-                        // FIXME: Just debugging.
                         printCell (writer, "Kind = " + kind + "; type = " + type, style);
                         break;
                 }
