@@ -35,26 +35,41 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
         Resource web_inf = _context.getWebInf();
       
        
-        ClassLoader loader = ClassLoader.getSystemClassLoader();
+        ClassLoader parentLoader = this.getClass().getClassLoader();
 
+         AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context); 
+                              /* new AndroidClassLoader(parentLoader, _context); */
         // Add WEB-INF lib classpath 
         if (web_inf != null && web_inf.isDirectory())
         {
-            // Look for jars
             Resource lib = web_inf.addPath("lib/");
             String paths = "";   
             if (lib.exists() || lib.isDirectory())
             {                 
+/*
                 for (String dex : lib.list())
                 {
-                    String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
-                    if (!"".equals(paths))
-                        paths +=":";
+                    String fullpath = web_inf.addPath("lib/").addPath(dex)
+                            .getFile().getAbsolutePath();
+                    if (!loader.addDexFile(fullpath))
+                    {
+                        Log.w("Jetty", "Failed to add DEX file from path: "+ fullpath);
+                    }
+                }
+*/
+                for (String dex : lib.list())
+                {
+                    if (dex.endsWith("zip") || dex.endsWith("apk"))
+                    {
+                      String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
+                      if (!"".equals(paths))
+                          paths +=":";
 
-                    paths += fullpath;
+                      paths += fullpath;
+                    }
                 }
                 Log.d("Jetty", "webapp classloader paths = "+paths);
-                loader = new PathClassLoader (paths, ClassLoader.getSystemClassLoader());
+                loader = new AndroidClassLoader (paths, parentLoader, _context);
             }
             else
                 Log.d("Jetty", "No WEB-INF/lib for "+_context.getContextPath());

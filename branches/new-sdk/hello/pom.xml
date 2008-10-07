@@ -87,7 +87,7 @@
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>0.9_beta</version>
+      <version>1.0_r1</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

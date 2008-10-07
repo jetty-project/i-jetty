@@ -72,4 +72,4 @@ echo -e "\033[1m******* Freeing loopback device...\033[0m"
 sudo losetup -d /dev/loop0 || echo " FAILED!"
 
 # Remove temp dir
-rm -Rf $VERBOSE_ARGS sdcard-intermediate/*
+#rm -Rf $VERBOSE_ARGS sdcard-intermediate/*

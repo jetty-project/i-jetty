@@ -55,7 +55,7 @@
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>util</artifactId>
                     <includes>org/mortbay/component/**/*.java,org/mortbay/thread/**/*.java,org/mortbay/util/**/*.java,org/mortbay/log/**/*.java,org/mortbay/servlet/**/*.java</includes>
-                    <excludes>org/mortbay/log/**/Slf4jLog.java</excludes>
+                    <excludes>**/Slf4jLog.java</excludes>
                   </artifactItem>
                   <artifactItem>
                     <groupId>org.mortbay.jetty</groupId>
@@ -64,6 +64,7 @@
                   </artifactItem>
                 </artifactItems>
                 <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                <excludes>**/Slf4jLog.java</excludes>
               </configuration>
             </execution>
           </executions>
@@ -136,6 +137,7 @@
                     <argument>-JXmx1024M</argument>
                     <argument>--dex</argument>
                     <argument>--verbose</argument>
+                    <argument>--core-library</argument>
                     <argument>--output=${project.build.directory}/classes.dex</argument>
                     <argument>--positions=lines</argument>
                     <argument>${project.build.directory}/classes/</argument>
