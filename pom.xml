@@ -76,6 +76,23 @@
           </executions>
          </plugin>
          <plugin>
+           <artifactId>maven-antrun-plugin</artifactId>
+           <executions>
+             <execution>
+               <id>fixclrf-patches</id>
+               <phase>generate-sources</phase>
+               <configuration>
+                 <tasks>
+                   <fixcrlf srcdir="${basedir}/patches" includes="**/*.patch" />
+                 </tasks>
+               </configuration>
+               <goals>
+                 <goal>run</goal>
+               </goals>
+             </execution>
+           </executions>
+         </plugin>           
+         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-patch-plugin</artifactId>
             <version>1.0</version>
