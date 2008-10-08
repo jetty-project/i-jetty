@@ -1,0 +1,11 @@
+#Fri Jun 06 17:20:26 EST 2008
+activeProfiles=
+eclipse.preferences.version=1
+filterResources=false
+fullBuildGoals=process-test-resources
+includeModules=false
+instance/org.eclipse.core.net/org.eclipse.core.net.hasMigrated=true
+resolveWorkspaceProjects=true
+resourceFilterGoals=process-resources resources\:testResources
+useMavenFolders=true
+version=1

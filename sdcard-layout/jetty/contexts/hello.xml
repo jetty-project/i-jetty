@@ -1,0 +1,15 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+<Configure class="org.mortbay.jetty.webapp.WebAppContext">
+  <Set name="contextPath">/hello</Set>
+  <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/hello</Set>
+  <Set name="defaultsDescriptor">/sdcard/jetty/etc/webdefault.xml</Set>
+  <Set name="configurationClasses">
+      <Array type="java.lang.String">
+        <Item>org.mortbay.ijetty.AndroidWebInfConfiguration</Item>
+        <Item>org.mortbay.jetty.webapp.WebXmlConfiguration</Item>
+        <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
+        <Item>org.mortbay.jetty.webapp.TagLibConfiguration</Item>
+    </Array>
+  </Set>
+</Configure>

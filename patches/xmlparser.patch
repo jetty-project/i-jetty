@@ -1,0 +1,11 @@
+--- org/mortbay/xml/XmlParser.java	2008-06-06 11:04:32.000000000 +1000
++++ ../original-sources/org/mortbay/xml/XmlParser.java	2008-09-24 11:30:09.000000000 +1000
+@@ -108,7 +108,7 @@
+ 
+             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
+             _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces", validating);
+-            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", validating);  }
++            _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespace-prefixes", !validating);  }
+         catch (Exception e)
+         {
+             Log.warn(Log.EXCEPTION, e);
