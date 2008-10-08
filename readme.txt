@@ -13,10 +13,12 @@ How to build
         $ cd i-jetty-read-only
         $ mvn clean install -Dandroid.home=[path to your android installation]
 
-3) Build two example web applications:
+3) Build the example web applications:
         $ cd console
         $ mvn clean install -Dandroid.home=[path to your android installation]
         $ cd hello
+        $ mvn clean install -Dandroid.home=[path to your android installation]
+        $ cd chat
         $ mvn clean install -Dandroid.home=[path to your android installation]
 
 4) Make an sdcard image if you do not already have one:
@@ -25,23 +27,27 @@ How to build
 5) Copy the webapps and i-jetty onto the sdcard.img:
         $ scripts/sync-sdcard.sh
 
-4)  Run i-jetty:
-        $ export ANDROID_SDK=[path to your android installation]
-        $ scripts/deploy.sh
+6)  Run i-jetty:
+        $ emulator -sdcard [path to the sdcard.img created in step 4]
 
-    The script will start the emulator for you. Once it's done, the 
-    emulator should pop up and boot into Android.
-
-3)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
+7)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
     and click "Start Jetty". You should be able to point your favorite browser
     at http://localhost:8888/ (or http://localhost:8080 on the phone) and check
     out Jetty from Android!
 
 Troubleshooting
 ===============
-If you encounter any errors, you can run the deploy script with verbose output
-enabled, like so:
-$ VERBOSE=on ./deploy.sh
+
+If the webapps are not able to inflate their WEB-INF/lib/classes.dex files
+to /data/dalvik-cache, you'll see log messages like:
+  "Can't open dex cache '/data/dalvik-cache/sdcard@jetty@webapps@chat@WEB-INF@lib@classes.zip@classes.dex'" 
+To fix that, you'll need to follow these steps:
+   1. stop ijetty using the emulator application
+   2. in a desktop window do:
+      $ adb shell
+      > chmod 777 /data/dalvik-cache
+   3. restart ijetty using the emulator application
+
 
 Adding photos to contacts
 =========================
@@ -59,19 +65,12 @@ Adding photos to contacts
   where the images from the Camera are stored. You can then use the Contacts
   application to pick the image to suit the Contact. Here's an example:
   
-  adb push /my/local/pic.jpg /sdcard/Camera/dcim
+  $ adb push /my/local/pic.jpg /sdcard/Camera/dcim
 
 Scripts
 =======
-
-The one script that may of be use to regular users is cleanup.sh. Its purpose
-is to clean any Maven builds, and make sure the sdcard-layout directory is
-pristine. You might like to use it before doing a stable release, or for testing
-before commit.
-
-Except for cleanup.sh, the scripts/ directory contains a number of utility
-scripts used by the main deploy.sh shell script. They are intended to be called
-from the main checkout, since they assume that path as the working directory:
+These are intended to be called from the main checkout, since they assume that 
+path as the working directory:
 
 
     cleanup.sh              -   Cleans builds and sdcard-layout. See first
@@ -91,7 +90,7 @@ from the main checkout, since they assume that path as the working directory:
 Most of these scripts (except cleanup.sh) depend on one or more of following
 environment variables be available to them:
 
-    ANDROID_SDK_TOOLS       -   Path to SDK tools/ directory. Use ANDROID_SDK
+    ANDROID_SDK             -   Path to SDK tools/ directory. Use ANDROID_SDK
                                 if you're after the root SDK path.
 
     VERBOSE_ARGS            -   Flags to pass to programs if they should be
@@ -100,5 +99,3 @@ environment variables be available to them:
     UNZIP_ARGS              -   Flags to pass to the 'unzip' program. Empty if
                                 verbose, "-qq" otherwise.
 
-    BUILD_ARGS              -   Flags to pass to Maven while building. Empty if
-                                verbose, "-q" otherwise.

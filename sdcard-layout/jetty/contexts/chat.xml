@@ -4,7 +4,7 @@
   <Set name="contextPath">/chat</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/chat</Set>
   <Set name="defaultsDescriptor">/sdcard/jetty/etc/webdefault.xml</Set>
-  <Set name="parentLoaderPriority">true</Set>
+  <Set name="parentLoaderPriority">false</Set>
   <Set name="configurationClasses">
       <Array type="java.lang.String">
         <Item>org.mortbay.ijetty.AndroidWebInfConfiguration</Item>
