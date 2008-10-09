@@ -32,7 +32,7 @@
                 <configuration>
                   <executable>${android.home}/tools/dx</executable>
                   <arguments>
-                    <argument>-JXmx1024M</argument>
+                    <!--<argument>-JXmx1024M</argument>-->
                     <argument>--dex</argument>
                     <argument>--verbose</argument>
                     <argument>--core-library</argument>
