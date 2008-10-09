@@ -157,7 +157,7 @@
                 <configuration>
                   <executable>${android.home}/tools/dx</executable>
                   <arguments>
-                    <argument>-JXmx1024M</argument>
+                    <!-- argument>-JXmx1024M</argument -->
                     <argument>--dex</argument>
                     <argument>--verbose</argument>
                     <argument>--core-library</argument>
@@ -192,29 +192,6 @@
                 </configuration>
               </execution>
               
-              <!-- Adds the .dex to the Android package (apk) file. -->
-              <!--<execution>
-                <id>aapt-dex-package</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>-->
-                  <!-- NOTE: Must keep this as working directory, otherwise
-                       item will be added to the apk with the whole path; eg:
-                       just doing "add /path/to/file" results in the whole
-                       directory path being recreated, whereas "add file" does
-                       not. -->
-                  <!--<workingDirectory>${project.build.directory}</workingDirectory>
-                  <executable>${android.home}/tools/aapt</executable>
-                  <arguments>
-                    <argument>add</argument>
-                    <argument>${project.build.directory}/${artifactId}.apk</argument>
-                    <argument>classes.dex</argument>
-                  </arguments>
-                </configuration>
-              </execution>-->
-              
               <execution>
                 <id>finish-package</id>
                 <phase>package</phase>
@@ -237,22 +214,6 @@
                     </arguments>
                 </configuration>
               </execution>
-              
-              <!-- Uploads and installs the package on the emulator. -->
-              <!--<execution>
-                <id>adb-install</id>
-                <phase>install</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>${android.home}/tools/adb</executable>
-                  <arguments>
-                    <argument>install</argument>
-                    <argument>${project.build.directory}/${artifactId}.apk</argument>
-                  </arguments>
-                </configuration>
-              </execution>-->
             </executions>
           </plugin>
       </plugins>
