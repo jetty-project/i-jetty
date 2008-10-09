@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.mortbay.ijetty">
+    package="org.mortbay.ijetty"
+    android:versionCode="100"
+    android:versionName="1.0.0">
     <application android:label="@string/manage_jetty" android:icon="@drawable/jetty">
         <activity android:name=".IJetty" android:label="@string/manage_jetty" android:icon="@drawable/jetty" android:multiprocess="false" android:launchMode="singleInstance">
             <intent-filter>
