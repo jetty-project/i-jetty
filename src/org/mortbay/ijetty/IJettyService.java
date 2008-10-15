@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -42,7 +43,6 @@ import org.mortbay.jetty.security.*;
 
 public class IJettyService extends Service
 {
-
     private static final String[] __configurationClasses = 
         new String[] {
         "org.mortbay.ijetty.AndroidWebInfConfiguration",
@@ -56,13 +56,32 @@ public class IJettyService extends Service
     private static Resources __resources;
 
     private SharedPreferences preferences;
+   
 
-    @Override
     public void onCreate()
     {
+            Log.i("Jetty", "onCreate called");
+            __resources = getResources();
+    }
+
+
+    public void onStart(Intent intent, int startId)
+    {
+        Log.i("Jetty", "onStart called");
+        if (server != null)
+        {
+            Log.i("Jetty", "already running");
+            return;
+        }
+        
         try
         {
-            __resources = getResources();
+            Bundle bundle = intent.getExtras();
+
+            Log.i("Jetty", "port = "+bundle.getString(IJetty.__PORT));
+            Log.i("Jetty", "nio = "+bundle.getBoolean(IJetty.__NIO));
+            Log.i("Jetty", "pwd = "+bundle.getString(IJetty.__CONSOLE_PWD));
+
             startJetty();
             preferences = getSharedPreferences("jetty", MODE_WORLD_READABLE);
             Editor editor = preferences.edit();
@@ -72,26 +91,25 @@ public class IJettyService extends Service
 
             // This is who should be launched if the user selects our persistent
             // notification.
-            Intent intent = new Intent(this, IJetty.class);
-
             Toast.makeText(IJettyService.this, R.string.jetty_started,
                     Toast.LENGTH_SHORT).show();
 
             // The PendingIntent to launch IJetty activity if the user selects this notification
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                            new Intent(this, IJetty.class), 0);
+                    new Intent(this, IJetty.class), 0);
 
             CharSequence text = getText(R.string.manage_jetty);
 
             Notification notification = new Notification(R.drawable.jicon, 
-                                                         text, 
-                                                         System.currentTimeMillis());
+                    text, 
+                    System.currentTimeMillis());
 
             notification.setLatestEventInfo(this, getText(R.string.app_name),
-                                               text, contentIntent);
- 
+                    text, contentIntent);
+
             mNM.notify(R.string.jetty_started, notification);
             Log.i("Jetty", "Jetty started");
+            super.onStart(intent, startId);
         }
         catch (Exception e)
         {
@@ -101,10 +119,9 @@ public class IJettyService extends Service
         }
     }
 
-    @Override
+
     public void onDestroy()
     {
-
         try
         {
             if (server != null)
@@ -123,7 +140,6 @@ public class IJettyService extends Service
             }
             else
                 Log.i("Jetty", "Jetty not running");
-
         }
         catch (Exception e)
         {
@@ -132,6 +148,15 @@ public class IJettyService extends Service
                     Toast.LENGTH_SHORT).show();
         }
     }
+    
+    
+
+    public void onLowMemory()
+    {
+        Log.i("Jetty", "Low on memory");
+        super.onLowMemory();
+    }
+
 
     /**
      * Hack to get around bug in ResourceBundles
@@ -150,7 +175,7 @@ public class IJettyService extends Service
     @Override
     public IBinder onBind(Intent intent)
     {
-        // TODO Auto-generated method stub
+        Log.d("Jetty", "onBind called");
         return null;
     }
 
@@ -173,36 +198,46 @@ public class IJettyService extends Service
         handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
         server.setHandler(handlers);
 
-       
+        File jettyDir = new File("/sdcard/jetty");
+        
         // Load any webapps we find on the card.
-        if (new File("/sdcard/jetty/").exists())
+        if (jettyDir.exists())
         {
             System.setProperty ("jetty.home", "/sdcard/jetty");
+            AndroidWebAppDeployer staticDeployer = null;
             
             // Deploy any static webapps we have.
-            AndroidWebAppDeployer staticDeployer = new AndroidWebAppDeployer();
-            staticDeployer.setWebAppDir("/sdcard/jetty/webapps");
-            staticDeployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
-            staticDeployer.setContexts(contexts);
-            staticDeployer.setContentResolver (getContentResolver());
-            staticDeployer.setConfigurationClasses(__configurationClasses);
-            
+            if (new File(jettyDir, "webapps").exists())
+            {
+                staticDeployer = new AndroidWebAppDeployer();
+                staticDeployer.setWebAppDir("/sdcard/jetty/webapps");
+                staticDeployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+                staticDeployer.setContexts(contexts);
+                staticDeployer.setContentResolver (getContentResolver());
+                staticDeployer.setConfigurationClasses(__configurationClasses);
+            }
+            ContextDeployer contextDeployer = null;
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
-            ContextDeployer contextDeployer = new ContextDeployer();
-            contextDeployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
-            contextDeployer.setConfigurationDir("/sdcard/jetty/contexts");
-            contextDeployer.setContexts(contexts);
-            
+            if (new File(jettyDir, "contexts").exists())
+            {
+                contextDeployer = new ContextDeployer();
+                contextDeployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
+                contextDeployer.setConfigurationDir("/sdcard/jetty/contexts");
+                contextDeployer.setContexts(contexts);
+            }
             File realmProps = new File("/sdcard/jetty/etc/realm.properties");
             if (realmProps.exists())
             {
-              HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
-              realm.setRefreshInterval(0);
-              server.addUserRealm(realm);
+                HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
+                realm.setRefreshInterval(0);
+                server.addUserRealm(realm);
             }
-            
-            server.addLifeCycle(contextDeployer);
-            server.addLifeCycle(staticDeployer);
+
+            if (contextDeployer != null)
+                server.addLifeCycle(contextDeployer);
+
+            if (staticDeployer != null)
+                server.addLifeCycle(staticDeployer);
         }
         else
         {
