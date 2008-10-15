@@ -41,56 +41,64 @@ import android.widget.TextView;
 
 public class IJetty extends Activity 
 {
-	private IPList _ipList;
-	
-	
-	private class IPList 
-	{
-		private List _list = new ArrayList();
-		
-		public IPList()
-		{
-		}
-		
-		public int getCount ()
-		{
-			return _list.size();
-		}
-		
-		public String getItem(int index)
-		{
-			return (String)_list.get(index);
-		}
-		
-		public void refresh ()
-		{
-			_list.clear();
-		
-			try
-			{
-				Enumeration nis = NetworkInterface.getNetworkInterfaces();
-				while (nis.hasMoreElements())
-				{
-					NetworkInterface ni = (NetworkInterface)nis.nextElement();
-					Enumeration iis = ni.getInetAddresses();
-					while (iis.hasMoreElements())
-					{
-						_list.add(ni.getDisplayName()+": "+((InetAddress)iis.nextElement()).getHostAddress());
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				Log.e("JETTY", "Problem retrieving ip addresses", e);
-			}
-		}
-	}
-	
+    public static final String __PORT = "org.mortbay.ijetty.port";
+    public static final String __NIO = "org.mortbay.ijetty.nio";
+    public static final String __CONSOLE_PWD = "org.mortbay.ijetty.console";
+    
+    public static final String __PORT_DEFAULT = "8080";
+    public static final boolean __NIO_DEFAULT = true;
+    public static final String __CONSOLE_PWD_DEFAULT = "admin";
+    
+    private IPList _ipList;
+
+
+    private class IPList 
+    {
+        private List _list = new ArrayList();
+
+        public IPList()
+        {
+        }
+
+        public int getCount ()
+        {
+            return _list.size();
+        }
+
+        public String getItem(int index)
+        {
+            return (String)_list.get(index);
+        }
+
+        public void refresh ()
+        {
+            _list.clear();
+
+            try
+            {
+                Enumeration nis = NetworkInterface.getNetworkInterfaces();
+                while (nis.hasMoreElements())
+                {
+                    NetworkInterface ni = (NetworkInterface)nis.nextElement();
+                    Enumeration iis = ni.getInetAddresses();
+                    while (iis.hasMoreElements())
+                    {
+                        _list.add(ni.getDisplayName()+": "+((InetAddress)iis.nextElement()).getHostAddress());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.e("JETTY", "Problem retrieving ip addresses", e);
+            }
+        }
+    }
+
     private class NetworkListAdapter extends BaseAdapter 
     {
-    	private Context _context;
-    	private IPList _ipList;
-    	
+        private Context _context;
+        private IPList _ipList;
+
         public NetworkListAdapter(Context context, IPList ipList) 
         {
             _context = context;
@@ -139,18 +147,15 @@ public class IJetty extends Activity
         }
     }
 
-	
-	
-	
-	
-	
-	
+
+
+
     /** Called when the activity is first created. */
     public void onCreate(Bundle icicle) 
     {
         super.onCreate(icicle);
         setContentView(R.layout.jetty_controller);
-       
+
         // Watch for button clicks.
         final Button startButton = (Button)findViewById(R.id.start);
         startButton.setOnClickListener(
@@ -174,8 +179,7 @@ public class IJetty extends Activity
                             catch (NullPointerException e)
                             {
                                 Log.e("Jetty", "No preferences");
-                            }
-
+                           }
                         }
                         else
                             Log.i("Jetty", "there are no preferences");
@@ -184,12 +188,17 @@ public class IJetty extends Activity
                         //if (isRunning)
                         //    Toast.makeText(IJetty.this, getText(R.string.jetty_started), Toast.LENGTH_SHORT).show();
                         //else
-                            startService(new Intent(IJetty.this, IJettyService.class));
-
+                        
+                        //TODO get these values from editable UI elements
+                        Intent intent = new Intent(IJetty.this, IJettyService.class);
+                        intent.putExtra(__PORT, __PORT_DEFAULT);
+                        intent.putExtra(__NIO, __NIO_DEFAULT);
+                        intent.putExtra(__CONSOLE_PWD, __CONSOLE_PWD_DEFAULT);
+                        startService(intent);
                     }
                 }
         );
-        
+
         Button stopButton = (Button)findViewById(R.id.stop);
         stopButton.setOnClickListener(
                 new OnClickListener()
@@ -202,12 +211,11 @@ public class IJetty extends Activity
                         //    Toast.makeText(IJetty.this, getText(R.string.jetty_stopped), Toast.LENGTH_SHORT).show();
                         //else
                         //Log.i("Jetty", "is running: "+isRunning);
-                            stopService(new Intent(IJetty.this, IJettyService.class));
-                        
+                        stopService(new Intent(IJetty.this, IJettyService.class));
                     }
                 }
         );
-        
+
         ListView list = (ListView) findViewById(R.id.list);
         _ipList = new IPList();
         list.setAdapter(new NetworkListAdapter(this, _ipList));
@@ -215,12 +223,9 @@ public class IJetty extends Activity
     }
 
 
-	protected void onResume()
-	{
-		_ipList.refresh();
-		super.onResume();
-	}
-    
-    
-
+    protected void onResume()
+    {
+        _ipList.refresh();
+        super.onResume();
+    }
 }
