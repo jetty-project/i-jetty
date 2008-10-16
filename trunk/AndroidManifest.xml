@@ -2,10 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.mortbay.ijetty">
     <application android:label="@string/manage_jetty" android:icon="@drawable/jetty">
-        <activity android:name=".IJetty" android:label="@string/manage_jetty" android:icon="@drawable/jetty" android:multiprocess="false" android:launchMode="singleInstance">
+        <activity android:name=".IJetty"
+                  android:label="@string/manage_jetty"
+                  android:icon="@drawable/jetty"
+                  android:multiprocess="false"
+                  android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".IJettyEditor"
+                  android:label="@string/edit_preferences">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
         </activity>
         

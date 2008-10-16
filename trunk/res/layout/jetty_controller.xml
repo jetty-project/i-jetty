@@ -40,6 +40,11 @@
         android:text="@string/stop_jetty">
     </Button>
 
+    <Button android:id="@+id/config"
+        android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        android:text="@string/config_jetty">
+    </Button>
+
     <TextView
         android:layout_width="fill_parent" android:layout_height="wrap_content"
         android:layout_weight="0"        

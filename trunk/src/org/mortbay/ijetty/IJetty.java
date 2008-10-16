@@ -163,32 +163,6 @@ public class IJetty extends Activity
                 {
                     public void onClick(View v)
                     {  
-                        SharedPreferences prefs = getSharedPreferences("jetty", MODE_WORLD_WRITEABLE);
-                        if (prefs!=null)
-                        {
-                            try
-                            {
-                                Map m = prefs.getAll();
-                                Iterator itor = m.entrySet().iterator();
-                                while (itor.hasNext())
-                                {
-                                    Map.Entry me = (Map.Entry)itor.next();
-                                    Log.i("Jetty", "Map entry "+me.getKey()+":"+me.getValue());
-                                }
-                            }
-                            catch (NullPointerException e)
-                            {
-                                Log.e("Jetty", "No preferences");
-                           }
-                        }
-                        else
-                            Log.i("Jetty", "there are no preferences");
-                        //boolean isRunning = prefs.getBoolean("isRunning", false);
-                        //Log.i("Jetty", "is running: "+isRunning);
-                        //if (isRunning)
-                        //    Toast.makeText(IJetty.this, getText(R.string.jetty_started), Toast.LENGTH_SHORT).show();
-                        //else
-                        
                         //TODO get these values from editable UI elements
                         Intent intent = new Intent(IJetty.this, IJettyService.class);
                         intent.putExtra(__PORT, __PORT_DEFAULT);
@@ -205,15 +179,20 @@ public class IJetty extends Activity
                 {
                     public void onClick(View v)
                     {
-                        //SharedPreferences prefs = getSharedPreferences("jetty", MODE_WORLD_WRITEABLE);
-                        //boolean isRunning = prefs.getBoolean("isRunning", false);
-                        //if (!isRunning)
-                        //    Toast.makeText(IJetty.this, getText(R.string.jetty_stopped), Toast.LENGTH_SHORT).show();
-                        //else
-                        //Log.i("Jetty", "is running: "+isRunning);
                         stopService(new Intent(IJetty.this, IJettyService.class));
                     }
                 }
+        );
+
+        Button configButton = (Button)findViewById(R.id.config);
+        configButton.setOnClickListener(
+            new OnClickListener()
+            {
+              public void onClick(View v)
+              {
+                startActivity(new Intent(IJetty.this, IJettyEditor.class));
+              }
+            }
         );
 
         ListView list = (ListView) findViewById(R.id.list);

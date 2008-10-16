@@ -3,11 +3,26 @@
     <string name="app_name">I-Jetty</string>
     <string name="jetty_started">Jetty started</string>
     <string name="jetty_not_started">Jetty not started</string>
+    <string name="jetty_already_started">Jetty already running</string>
     <string name="jetty_stopped">Jetty stopped</string>
     <string name="jetty_not_stopped">Jetty not stopped</string>
+    <string name="jetty_not_running">Jetty not running</string>
     <string name="manage_jetty">Manage Jetty</string>
     <string name="jetty_controller">Start and Stop Jetty</string>
     <string name="start_jetty">Start Jetty</string>
     <string name="stop_jetty">Stop Jetty</string>
+    <string name="config_jetty">Configure</string>
     <string name="interfaces">Known IP Addresses</string>
+    <string name="pref_nio_value">true</string>
+    <string name="pref_nio_title">Use NIO</string>
+    <string name="pref_nio_key">org.mortbay.ijetty.pref_nio</string>
+    <string name="pref_port_value">8080</string>
+    <string name="pref_port">Port</string>
+    <string name="pref_port_title">Edit Port</string>
+    <string name="pref_port_key">org.mortbay.ijetty.pref.port</string>
+    <string name="pref_console_pwd_value">admin</string>
+    <string name="pref_console_pwd">Console Password</string>
+    <string name="pref_console_pwd_title">Edit Console Password</string>
+    <string name="pref_console_pwd_key">org.mortbay.ijetty.pref.pwd</string>
+    <string name="edit_preferences">Edit IJetty Settings</string>
 </resources>
