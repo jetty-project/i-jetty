@@ -25,7 +25,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -34,6 +34,7 @@ import android.widget.Toast;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -52,6 +53,9 @@ public class IJettyService extends Service
     private NotificationManager mNM;
 
     private Server server;
+    private boolean _useNIO;
+    private int _port;
+    private String _consolePassword;
 
     private static Resources __resources;
 
@@ -70,27 +74,38 @@ public class IJettyService extends Service
         Log.i("Jetty", "onStart called");
         if (server != null)
         {
+            Toast.makeText(IJettyService.this, R.string.jetty_already_started,
+                    Toast.LENGTH_SHORT).show();
             Log.i("Jetty", "already running");
             return;
         }
         
         try
         {
-            Bundle bundle = intent.getExtras();
 
-            Log.i("Jetty", "port = "+bundle.getString(IJetty.__PORT));
-            Log.i("Jetty", "nio = "+bundle.getBoolean(IJetty.__NIO));
-            Log.i("Jetty", "pwd = "+bundle.getString(IJetty.__CONSOLE_PWD));
+            // preferences = getSharedPreferences("ijetty_preference", MODE_WORLD_READABLE);
+            preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+            String portDefault = getText(R.string.pref_port_value).toString();
+            String pwdDefault = getText(R.string.pref_console_pwd_value).toString();
+            String nioDefault = getText(R.string.pref_nio_value).toString();
+
+            String portKey = getText(R.string.pref_port_key).toString();
+            String pwdKey = getText(R.string.pref_console_pwd_key).toString();
+            String nioKey = getText(R.string.pref_nio_key).toString();
+            
+            _useNIO = preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault));
+            _port = Integer.parseInt(preferences.getString(portKey, portDefault));
+            _consolePassword = preferences.getString(pwdKey, pwdDefault);
+
+            Log.i("Jetty", "pref port = "+preferences.getString(portKey, portDefault));
+            Log.i("Jetty", "pref nio = "+preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault)));
+            //Log.i("Jetty", "pref pwd = "+preferences.getString(pwdKey, pwdDefault));
 
             startJetty();
-            preferences = getSharedPreferences("jetty", MODE_WORLD_READABLE);
-            Editor editor = preferences.edit();
-            editor.putBoolean("isRunning", true);
-            editor.commit();
+
             mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-            // This is who should be launched if the user selects our persistent
-            // notification.
             Toast.makeText(IJettyService.this, R.string.jetty_started,
                     Toast.LENGTH_SHORT).show();
 
@@ -132,14 +147,15 @@ public class IJettyService extends Service
                 // Tell the user we stopped.
                 Toast.makeText(this, getText(R.string.jetty_stopped),
                         Toast.LENGTH_SHORT).show();
-                Editor editor = preferences.edit();
-                editor.putBoolean("isRunning", false);
-                editor.commit();
                 Log.i("Jetty", "Jetty stopped");
                 __resources = null;
             }
             else
+            {
                 Log.i("Jetty", "Jetty not running");
+                Toast.makeText(IJettyService.this, R.string.jetty_not_running,
+                    Toast.LENGTH_SHORT).show();
+            }
         }
         catch (Exception e)
         {
@@ -181,16 +197,26 @@ public class IJettyService extends Service
 
     private void startJetty() throws Exception
     {
-        // TODO - get ports and types of connector from SharedPrefs?
         server = new Server();
-        SelectChannelConnector connector = new SelectChannelConnector();
-        connector.setUseDirectBuffers(false);
-        connector.setPort(8080);
+        Connector connector;
+        if (_useNIO)
+        {
+          SelectChannelConnector nioConnector = new SelectChannelConnector();
+          nioConnector.setUseDirectBuffers(false);
+          nioConnector.setPort(_port);
+          connector = nioConnector;
+        }
+        else
+        {
+            SocketConnector bioConnector = new SocketConnector();
+            bioConnector.setPort(_port);
+            connector = bioConnector;
+        }
         server.setConnectors(new Connector[] { connector });
 
         // Bridge Jetty logging to Android logging
         System.setProperty("org.mortbay.log.class",
-                "org.mortbay.log.AndroidLog");
+                           "org.mortbay.log.AndroidLog");
         org.mortbay.log.Log.setLog(new AndroidLog());
 
         HandlerCollection handlers = new HandlerCollection();
@@ -230,6 +256,8 @@ public class IJettyService extends Service
             {
                 HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
                 realm.setRefreshInterval(0);
+                if (_consolePassword != null)
+                    realm.put("admin", _consolePassword); //set the admin password for console webapp
                 server.addUserRealm(realm);
             }
 
