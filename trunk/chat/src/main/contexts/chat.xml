@@ -5,12 +5,4 @@
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/chat</Set>
   <Set name="defaultsDescriptor">/sdcard/jetty/etc/webdefault.xml</Set>
   <Set name="parentLoaderPriority">false</Set>
-  <!-- Set name="configurationClasses">
-      <Array type="java.lang.String">
-        <Item>org.mortbay.ijetty.AndroidWebInfConfiguration</Item>
-        <Item>org.mortbay.jetty.webapp.WebXmlConfiguration</Item>
-        <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
-        <Item>org.mortbay.jetty.webapp.TagLibConfiguration</Item>
-    </Array>
-  </Set -->
 </Configure>

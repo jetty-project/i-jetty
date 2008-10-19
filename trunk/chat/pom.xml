@@ -201,6 +201,7 @@
                         <exclude name="WEB-INF/classes/**/**"/>
                       </patternset>
                     </unjar>
+                    <copy file="${basedir}/src/main/contexts/chat.xml" todir="../sdcard-intermediate/jetty/contexts"/>
                   </tasks>
                 </configuration>
               </execution>
@@ -213,6 +214,7 @@
                 <configuration>
                   <tasks>
                     <delete dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}" />
+                    <delete file="../sdcard-intermediate/jetty/contexts/chat.xml"/>
                   </tasks>
                 </configuration>
               </execution>
