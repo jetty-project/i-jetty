@@ -24,6 +24,11 @@
       <artifactId>jetty-util5</artifactId>
       <version>6.1.12.rc2</version>
     </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-client</artifactId>
+      <version>6.1.12.rc2</version>
+    </dependency>
    </dependencies>
    <build>
       <sourceDirectory>src</sourceDirectory>
@@ -68,6 +73,10 @@
                   <artifactItem>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jetty</artifactId>
+                  </artifactItem>
+                  <artifactItem>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-client</artifactId>
                   </artifactItem>
                 </artifactItems>
                 <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
