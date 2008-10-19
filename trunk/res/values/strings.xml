@@ -9,9 +9,12 @@
     <string name="jetty_not_running">Jetty not running</string>
     <string name="manage_jetty">Manage Jetty</string>
     <string name="jetty_controller">Start and Stop Jetty</string>
+    <string name="jetty_downloader">Download WebApp</string>
     <string name="start_jetty">Start Jetty</string>
     <string name="stop_jetty">Stop Jetty</string>
     <string name="config_jetty">Configure</string>
+    <string name="start_download">Download</string>
+    <string name="url">URL</string>
     <string name="interfaces">Known IP Addresses</string>
     <string name="pref_nio_value">true</string>
     <string name="pref_nio_title">Use NIO</string>

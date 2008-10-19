@@ -17,46 +17,50 @@ public final class R {
     }
     public static final class id {
         public static final int config=0x7f070002;
+        public static final int download_url=0x7f070004;
         public static final int list=0x7f070003;
         public static final int start=0x7f070000;
+        public static final int start_download=0x7f070005;
         public static final int stop=0x7f070001;
     }
     public static final class layout {
         public static final int jetty_controller=0x7f030000;
-        public static final int main=0x7f030001;
+        public static final int jetty_downloader=0x7f030001;
+        public static final int main=0x7f030002;
     }
     public static final class raw {
-        public static final int javax_servlet_http_localstrings=0x7f050000;
-        public static final int javax_servlet_localstrings=0x7f050001;
-        public static final int org_mortbay_jetty_encoding=0x7f050002;
-        public static final int org_mortbay_jetty_mime=0x7f050003;
+        public static final int realm_properties=0x7f050000;
+        public static final int webdefault=0x7f050001;
     }
     public static final class string {
         public static final int app_name=0x7f060000;
-        public static final int config_jetty=0x7f06000b;
-        public static final int edit_preferences=0x7f060018;
-        public static final int interfaces=0x7f06000c;
+        public static final int config_jetty=0x7f06000c;
+        public static final int edit_preferences=0x7f06001b;
+        public static final int interfaces=0x7f06000f;
         public static final int jetty_already_started=0x7f060003;
         public static final int jetty_controller=0x7f060008;
+        public static final int jetty_downloader=0x7f060009;
         public static final int jetty_not_running=0x7f060006;
         public static final int jetty_not_started=0x7f060002;
         public static final int jetty_not_stopped=0x7f060005;
         public static final int jetty_started=0x7f060001;
         public static final int jetty_stopped=0x7f060004;
         public static final int manage_jetty=0x7f060007;
-        public static final int pref_console_pwd=0x7f060015;
-        public static final int pref_console_pwd_key=0x7f060017;
-        public static final int pref_console_pwd_title=0x7f060016;
-        public static final int pref_console_pwd_value=0x7f060014;
-        public static final int pref_nio_key=0x7f06000f;
-        public static final int pref_nio_title=0x7f06000e;
-        public static final int pref_nio_value=0x7f06000d;
-        public static final int pref_port=0x7f060011;
-        public static final int pref_port_key=0x7f060013;
-        public static final int pref_port_title=0x7f060012;
-        public static final int pref_port_value=0x7f060010;
-        public static final int start_jetty=0x7f060009;
-        public static final int stop_jetty=0x7f06000a;
+        public static final int pref_console_pwd=0x7f060018;
+        public static final int pref_console_pwd_key=0x7f06001a;
+        public static final int pref_console_pwd_title=0x7f060019;
+        public static final int pref_console_pwd_value=0x7f060017;
+        public static final int pref_nio_key=0x7f060012;
+        public static final int pref_nio_title=0x7f060011;
+        public static final int pref_nio_value=0x7f060010;
+        public static final int pref_port=0x7f060014;
+        public static final int pref_port_key=0x7f060016;
+        public static final int pref_port_title=0x7f060015;
+        public static final int pref_port_value=0x7f060013;
+        public static final int start_download=0x7f06000d;
+        public static final int start_jetty=0x7f06000a;
+        public static final int stop_jetty=0x7f06000b;
+        public static final int url=0x7f06000e;
     }
     public static final class xml {
         public static final int ijetty_preference=0x7f040000;

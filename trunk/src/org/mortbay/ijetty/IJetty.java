@@ -17,6 +17,10 @@
 package org.mortbay.ijetty;
 
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -24,6 +28,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.mortbay.util.IO;
 
 import android.app.Activity;
 import android.content.Context;
@@ -48,6 +54,11 @@ public class IJetty extends Activity
     public static final String __PORT_DEFAULT = "8080";
     public static final boolean __NIO_DEFAULT = true;
     public static final String __CONSOLE_PWD_DEFAULT = "admin";
+    
+    public static final String __JETTY_DIR = "/sdcard/jetty";
+    public static final String __WEBAPP_DIR = "webapps";
+    public static final String __ETC_DIR = "etc";
+    public static final String __CONTEXTS_DIR = "contexts";
     
     private IPList _ipList;
 
@@ -153,6 +164,7 @@ public class IJetty extends Activity
     /** Called when the activity is first created. */
     public void onCreate(Bundle icicle) 
     {
+        setupJetty();
         super.onCreate(icicle);
         setContentView(R.layout.jetty_controller);
 
@@ -201,10 +213,65 @@ public class IJetty extends Activity
 
     }
 
-
     protected void onResume()
     {
         _ipList.refresh();
         super.onResume();
+    }
+    
+    
+    public void setupJetty ()
+    {
+        File jettyDir = new File(__JETTY_DIR);
+        if (!jettyDir.exists())
+            jettyDir.mkdirs();
+        
+        File webappsDir = new File (jettyDir, __WEBAPP_DIR);
+        if (!webappsDir.exists())
+        {
+            webappsDir.mkdirs();           
+            //TODO get the console webapp out of resources?
+        }
+
+        File etcDir = new File (jettyDir, __ETC_DIR);
+        if (!etcDir.exists())
+            etcDir.mkdirs();
+
+        File webdefaults = new File (etcDir, "webdefault.xml");
+        if (!webdefaults.exists())
+        {
+            //get the webdefaults.xml file out of resources
+            try
+            {
+                InputStream is = getResources().openRawResource(R.raw.webdefault);
+                OutputStream os = new FileOutputStream(webdefaults);
+                IO.copy(is, os);
+                Log.i("Jetty", "Loaded webdefault.xml");
+            }
+            catch (Exception e)
+            {
+                Log.e("Jetty", "Error loading webdefault.xml", e);
+            }
+        }
+        File realm = new File (etcDir, "realm.properties"); 
+        if (!realm.exists())
+        {
+            try
+            {
+                //get the realm.properties file out resources
+                InputStream is = getResources().openRawResource(R.raw.realm_properties);
+                OutputStream os = new FileOutputStream(realm);
+                IO.copy(is,os);
+                Log.i("Jetty", "Loaded realm.properties");
+            }
+            catch (Exception e)
+            {
+                Log.e("Jetty", "Error loading realm.propeties", e);
+            }
+        }
+        
+        File contextsDir = new File (jettyDir, __CONTEXTS_DIR);
+        if (!contextsDir.exists())
+            contextsDir.mkdirs();
     }
 }

@@ -4,12 +4,12 @@
   <Set name="contextPath">/hello</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/hello</Set>
   <Set name="defaultsDescriptor">/sdcard/jetty/etc/webdefault.xml</Set>
-  <Set name="configurationClasses">
+  <!-- Set name="configurationClasses">
       <Array type="java.lang.String">
         <Item>org.mortbay.ijetty.AndroidWebInfConfiguration</Item>
         <Item>org.mortbay.jetty.webapp.WebXmlConfiguration</Item>
         <Item>org.mortbay.jetty.webapp.JettyWebXmlConfiguration</Item>
         <Item>org.mortbay.jetty.webapp.TagLibConfiguration</Item>
     </Array>
-  </Set>
+  </Set -->
 </Configure>

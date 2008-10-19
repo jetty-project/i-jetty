@@ -1,0 +1,11 @@
+--- org/mortbay/jetty/webapp/WebAppContext.java	2008-10-19 15:24:42.000000000 +1100
++++ ../original-sources/org/mortbay/jetty/webapp/WebAppContext.java	2008-10-19 15:21:38.000000000 +1100
+@@ -77,7 +77,7 @@
+     
+     private static String[] __dftConfigurationClasses =  
+     { 
+-        "org.mortbay.jetty.webapp.WebInfConfiguration", 
++        "org.mortbay.ijetty.AndroidWebInfConfiguration", 
+         "org.mortbay.jetty.webapp.WebXmlConfiguration", 
+         "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+         "org.mortbay.jetty.webapp.TagLibConfiguration" 

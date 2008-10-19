@@ -15,32 +15,31 @@
 
 package org.mortbay.ijetty;
 
-import java.io.InputStream;
 import java.io.File;
-
-import android.app.PendingIntent;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
-import android.widget.Toast;
+import java.io.InputStream;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.*;
+import org.mortbay.jetty.security.HashUserRealm;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
 
 public class IJettyService extends Service
 {
@@ -82,8 +81,6 @@ public class IJettyService extends Service
         
         try
         {
-
-            // preferences = getSharedPreferences("ijetty_preference", MODE_WORLD_READABLE);
             preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
             String portDefault = getText(R.string.pref_port_value).toString();
