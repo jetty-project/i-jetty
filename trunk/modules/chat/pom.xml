@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <parent>
+     <groupId>org.mortbay.ijetty</groupId>
+     <artifactId>ijetty-parent</artifactId>
+     <version>1.0-SNAPSHOT</version>
+   </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.mortbay</groupId>
    <artifactId>chat</artifactId>
-   <version>1.0-SNAPSHOT</version>
    <packaging>war</packaging>
    <name>chat</name>
    <description>Jetty Cometd Chat on Android</description>
@@ -161,61 +164,6 @@
                     <argument>--positions=lines</argument>
                     <argument>${project.build.directory}/classes/</argument>
                   </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>copydex</id>
-                <phase>process-classes</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks>
-                    <mkdir dir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib"/>
-                    <jar  basedir="${project.build.directory}"
-                          update="true"
-                          includes="classes.dex"
-                          destfile="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib/classes.zip"/>
-                  </tasks>
-                </configuration>
-              </execution>
-              <execution>
-                <id>copywar</id>
-                <phase>install</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks>
-                    <mkdir dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}"/>
-                    <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" 
-                           overwrite="true"
-                           dest="../sdcard-intermediate/jetty/webapps/${project.artifactId}">
-                      <patternset>
-                        <exclude name="WEB-INF/lib/*.jar"/>
-                        <exclude name="WEB-INF/classes/**/**"/>
-                      </patternset>
-                    </unjar>
-                    <copy file="${basedir}/src/main/contexts/chat.xml" todir="../sdcard-intermediate/jetty/contexts"/>
-                  </tasks>
-                </configuration>
-              </execution>
-              <execution>
-                <id>clean</id>
-                <phase>clean</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks>
-                    <delete dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}" />
-                    <delete file="../sdcard-intermediate/jetty/contexts/chat.xml"/>
-                  </tasks>
                 </configuration>
               </execution>
             </executions>

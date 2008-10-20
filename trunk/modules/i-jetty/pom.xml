@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <parent>
+     <groupId>org.mortbay.ijetty</groupId>
+     <artifactId>ijetty-parent</artifactId>
+     <version>1.0-SNAPSHOT</version>
+   </parent>
    <modelVersion>4.0.0</modelVersion>
-   <groupId>org.mortbay</groupId>
    <artifactId>i-jetty</artifactId>
    <version>1.0-SNAPSHOT</version>
    <packaging>jar</packaging>
-   <name>i-jetty</name>
+   <name>I-Jetty :: Android Application</name>
    <description>Jetty on Android</description>
    <dependencies>
       <dependency>
@@ -30,7 +34,7 @@
       <version>6.1.12.rc2</version>
     </dependency>
     <dependency>
-      <groupId>org.mortbay.ijetty.console</groupId>
+      <groupId>org.mortbay.ijetty</groupId>
       <artifactId>console</artifactId>
       <type>war</type>
       <version>${project.version}</version>

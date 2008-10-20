@@ -1,8 +1,12 @@
 <?xml version="1.0"?><project>
+   <parent>
+     <groupId>org.mortbay.ijetty</groupId>
+     <artifactId>ijetty-parent</artifactId>
+     <version>1.0-SNAPSHOT</version>
+   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.test</groupId>
   <artifactId>hello</artifactId>
-  <name>hello</name>
+  <name>I-Jetty :: Hello</name>
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <url>http://maven.apache.org</url>
@@ -63,40 +67,6 @@
                   </tasks>
                 </configuration>
               </execution>
-              <execution>
-                <id>copywar</id>
-                <phase>install</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks>
-                    <mkdir dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}"/>
-                    <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" 
-                           overwrite="true"
-                           dest="../sdcard-intermediate/jetty/webapps/${project.artifactId}">
-                      <patternset>
-                        <exclude name="WEB-INF/lib/*.jar"/>
-                        <exclude name="WEB-INF/classes/**/**"/>
-                      </patternset>
-                    </unjar>
-                    <copy file="${basedir}/src/main/contexts/hello.xml" todir="../sdcard-intermediate/jetty/contexts"/>
-                  </tasks>
-                </configuration>
-              </execution>
-              <execution>
-                <id>clean</id>
-                <phase>clean</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks>
-                    <delete dir="../sdcard-intermediate/jetty/webapps/${project.artifactId}" />
-                    <delete file="../sdcard-intermediate/jetty/contexts/hello.xml" />
-                  </tasks>
-                </configuration>
-              </execution>
             </executions>
           </plugin>
   </plugins>
@@ -115,5 +85,4 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-  
 </project>

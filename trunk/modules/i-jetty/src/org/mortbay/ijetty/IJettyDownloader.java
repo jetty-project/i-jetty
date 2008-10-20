@@ -80,10 +80,9 @@ public class IJettyDownloader extends Activity
                 }
                 case __MSG_DOWNLOAD_FAILED:
                 {
-                    //Toast.makeText(IJettyDownloader.this, R.string.download_fail,Toast.LENGTH_LONG).show();
                     _progressBar.setProgress(100);
                     _progressBar.setVisibility(ProgressBar.INVISIBLE);
-                    ((TextView)findViewById(R.id.loading)).setVisibility(TextView.VISIBLE);
+                    ((TextView)findViewById(R.id.loading)).setVisibility(TextView.INVISIBLE);
                     AlertDialog.Builder builder = new AlertDialog.Builder(IJettyDownloader.this);
                     builder.setCancelable(true);
                     builder.setMessage((String)msg.obj);
