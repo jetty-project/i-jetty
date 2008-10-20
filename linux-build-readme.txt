@@ -24,16 +24,30 @@ How to build
 4) Make an sdcard image if you do not already have one:
         $ scripts/create-sdcard.sh
 
-6)  Run i-jetty:
+5)  Run i-jetty:
         $ emulator -sdcard [path to the sdcard.img created in step 4]
 
-7)  Install i-jetty:
+6)  Install i-jetty:
         $ adb install target/i-jetty-debug.apk
+
+7)  If you want to be able to access the webapps running on the phone from
+    your desktop browser, then link up the i-jetty port on the phone to that
+    of your desktop environment. For example, assuming i-jetty is running on
+    it's default port of 8080, and you want to be able to access that on your
+    desktop as port 8888, do:
+
+        $ adb forward tcp:8888 tcp:8080
 
 8)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
     and click "Start Jetty". You should be able to point your favorite browser
     at http://localhost:8888/ (or http://localhost:8080 on the phone) and check
     out Jetty from Android!
+
+9) There is a console webapp accessible at http://localhost:8888/console (or 
+   http://localhost:8080/console on the phone). You can use it to manage
+   your on-phone data such as Contacts, Call Logs etc.
+
+
 
 Using i-jetty
 =============
@@ -73,6 +87,8 @@ to i-jetty.
 You may need to restart i-jetty in order to start the newly installed
 webapp. 
 
+
+
 Troubleshooting
 ===============
 
@@ -85,6 +101,7 @@ To fix that, you'll need to follow these steps:
       $ adb shell
       > chmod 777 /data/dalvik-cache
    3. restart ijetty using the emulator application
+
 
 
 Adding photos to contacts
@@ -111,29 +128,7 @@ These are intended to be called from the main checkout, since they assume that
 path as the working directory:
 
 
-    cleanup.sh              -   Cleans builds and sdcard-layout. See first
-                                paragraph for more information.
-
-    create-sdcard.sh        -   Creates a new sdcard.img file. Should be run as
-                                root. Accepts optional filename and image size
-                                arguments. See source header for more info.
-
-    sync-sdcard.sh          -   Mounts the sdcard image on a loopback device
-                                (requires root permissions, will prompt), cleans
-                                the SD card, and copies the sdcard-intermediate
-                                directory onto the card image. Note that it does
-                                *NOT* unmount the image. This is done back in 
-                                deploy.sh.
-
-Most of these scripts (except cleanup.sh) depend on one or more of following
-environment variables be available to them:
-
-    ANDROID_SDK             -   Path to SDK tools/ directory. Use ANDROID_SDK
-                                if you're after the root SDK path.
-
-    VERBOSE_ARGS            -   Flags to pass to programs if they should be
-                                verbose. "-v" if verbose, empty otherwise.
-
-    UNZIP_ARGS              -   Flags to pass to the 'unzip' program. Empty if
-                                verbose, "-qq" otherwise.
+    create-sdcard.sh        -   Creates a new sdcard.img file. Accepts optional
+                                filename and image size arguments. See source 
+                                header for more info.
 
