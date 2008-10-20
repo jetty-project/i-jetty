@@ -32,8 +32,7 @@
     <EditText
         android:id="@+id/download_url"
         android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:layout_weight="0"        
-        android:text="@string/url">
+        android:layout_weight="0">        
         <requestFocus />
     </EditText>
 
@@ -41,6 +40,21 @@
         android:layout_width="wrap_content" android:layout_height="wrap_content" 
         android:text="@string/start_download">
     </Button>
+
+
+    <ProgressBar android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:visibility="invisible"/>
+
+    <TextView android:id="@+id/loading"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center_horizontal"
+        android:textStyle="bold"
+        android:text="@string/loading"
+        android:visibility="invisible"/>
 
 </LinearLayout>
 

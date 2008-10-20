@@ -16,9 +16,6 @@ else
   echo "Dir sdcard-intermediate created"
 fi
 
-# Copy standard static content, remove .svn files
-cp sdcard-layout/* sdcard-intermediate/ -Rf
-find sdcard-intermediate/ -name '.svn' -type d | xargs rm -r $VERBOSE_ARGS
 
 
 if [ `mount -l | grep "sdcard-mount"` == ""]; then
@@ -70,6 +67,3 @@ rm -Rf $VERBOSE_ARGS sdcard-mount/
 # and detatch the loopback device - IMPORTANT!
 echo -e "\033[1m******* Freeing loopback device...\033[0m"
 sudo losetup -d /dev/loop0 || echo " FAILED!"
-
-# Remove temp dir
-#rm -Rf $VERBOSE_ARGS sdcard-intermediate/*

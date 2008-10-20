@@ -28,6 +28,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import org.mortbay.util.IO;
 
@@ -206,6 +208,17 @@ public class IJetty extends Activity
               }
             }
         );
+        
+        Button downloadButton = (Button)findViewById(R.id.download);
+        downloadButton.setOnClickListener(
+                new OnClickListener()
+                {
+                    public void onClick(View v)
+                    {
+                        startActivity(new Intent(IJetty.this, IJettyDownloader.class));
+                    }
+                }
+        );
 
         ListView list = (ListView) findViewById(R.id.list);
         _ipList = new IPList();
@@ -222,6 +235,7 @@ public class IJetty extends Activity
     
     public void setupJetty ()
     {
+        //create the jetty dir structure
         File jettyDir = new File(__JETTY_DIR);
         if (!jettyDir.exists())
             jettyDir.mkdirs();
@@ -230,7 +244,6 @@ public class IJetty extends Activity
         if (!webappsDir.exists())
         {
             webappsDir.mkdirs();           
-            //TODO get the console webapp out of resources?
         }
 
         File etcDir = new File (jettyDir, __ETC_DIR);
@@ -269,9 +282,68 @@ public class IJetty extends Activity
                 Log.e("Jetty", "Error loading realm.propeties", e);
             }
         }
-        
+
         File contextsDir = new File (jettyDir, __CONTEXTS_DIR);
         if (!contextsDir.exists())
             contextsDir.mkdirs();
+
+        //unpack the console war
+        File consoleWar = new File (webappsDir, "console");
+        boolean exists = consoleWar.exists();
+        String[] files = consoleWar.list();
+        
+        if (!exists || files == null || files.length == 0)
+        {
+            InputStream is = this.getClassLoader().getResourceAsStream("console.war");
+            if (is != null)
+            {
+                try
+                {
+                    JarInputStream jin = new JarInputStream(is);
+                    JarEntry entry;
+                    while((entry=jin.getNextJarEntry())!=null)
+                    {
+                        String entryName = entry.getName();             
+                        File file=new File(consoleWar,entryName);
+                        if (entry.isDirectory())
+                        {
+                            // Make directory
+                            if (!file.exists())
+                                file.mkdirs();
+                        }
+                        else
+                        {
+                            // make directory (some jars don't list dirs)
+                            File dir = new File(file.getParent());
+                            if (!dir.exists())
+                                dir.mkdirs();
+
+                            // Make file
+                            FileOutputStream fout = null;
+                            try
+                            {
+                                fout = new FileOutputStream(file);
+                                IO.copy(jin,fout);
+                            }
+                            finally
+                            {
+                                IO.close(fout);
+                            }
+
+                            // touch the file.
+                            if (entry.getTime()>=0)
+                                file.setLastModified(entry.getTime());
+                        }
+                    }
+                    IO.close(jin);
+                }
+                catch (Exception e)
+                {
+                    Log.e("Jetty", "Error inflating console.war", e);
+                }
+            }
+            else
+                Log.e("Jetty", "No console war");
+        }
     }
 }

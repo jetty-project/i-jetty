@@ -29,6 +29,12 @@
       <artifactId>jetty-client</artifactId>
       <version>6.1.12.rc2</version>
     </dependency>
+    <dependency>
+      <groupId>org.mortbay.ijetty.console</groupId>
+      <artifactId>console</artifactId>
+      <type>war</type>
+      <version>${project.version}</version>
+    </dependency>
    </dependencies>
    <build>
       <sourceDirectory>src</sourceDirectory>
@@ -80,6 +86,23 @@
                   </artifactItem>
                 </artifactItems>
                 <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+              </configuration>
+            </execution>
+
+            <execution>
+              <id>copy-war</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                 <outputDirectory>${project.build.directory}/included-wars</outputDirectory>
+                 <overWriteReleases>false</overWriteReleases>
+                 <overWriteSnapshots>false</overWriteSnapshots>
+                 <overWriteIfNewer>true</overWriteIfNewer>
+                 <excludeTransitive>true</excludeTransitive>
+                 <stripVersion>true</stripVersion>
+                 <includeArtifactIds>console</includeArtifactIds>
               </configuration>
             </execution>
           </executions>
@@ -220,6 +243,8 @@
                         <argument>${project.build.directory}/generated-sources</argument>
                         <argument>-rf</argument>
                         <argument>${basedir}/src</argument>
+                        <argument>-rf</argument>
+                        <argument>${project.build.directory}/included-wars</argument>
                     </arguments>
                 </configuration>
               </execution>
