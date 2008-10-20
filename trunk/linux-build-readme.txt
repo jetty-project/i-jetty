@@ -9,11 +9,7 @@ How to build
 1)  Check out the project from code.google.com:
     $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
     
-2)  Build i-jetty. You will need to have maven installed:
-        $ cd i-jetty-read-only
-        $ mvn clean install -Dandroid.home=[path to your android installation]
-
-3) Build the example web applications:
+2) Build the example web applications:
         $ cd console
         $ mvn clean install -Dandroid.home=[path to your android installation]
         $ cd hello
@@ -21,19 +17,61 @@ How to build
         $ cd chat
         $ mvn clean install -Dandroid.home=[path to your android installation]
 
+3)  Build i-jetty. You will need to have maven installed:
+        $ cd i-jetty-read-only
+        $ mvn clean install -Dandroid.home=[path to your android installation]
+
 4) Make an sdcard image if you do not already have one:
         $ scripts/create-sdcard.sh
-
-5) Copy the webapps and i-jetty onto the sdcard.img:
-        $ scripts/sync-sdcard.sh
 
 6)  Run i-jetty:
         $ emulator -sdcard [path to the sdcard.img created in step 4]
 
-7)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
+7)  Install i-jetty:
+        $ adb install target/i-jetty-debug.apk
+
+8)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
     and click "Start Jetty". You should be able to point your favorite browser
     at http://localhost:8888/ (or http://localhost:8080 on the phone) and check
     out Jetty from Android!
+
+Using i-jetty
+=============
+
+Starting i-jetty
+----------------
+Navigate to the "Manage Jetty" application and click on it to activate. Click
+on the "Start Jetty" button.
+
+Stopping i-jetty
+----------------
+If you already have i-jetty running, you can click and drag down the i-jetty
+icon in the navigation bar at the top of the screen to see the "Manage Jetty"
+task. Click on the task.
+
+Now click on the "Stop Jetty" button.
+
+
+Configuring i-jetty
+-------------------
+
+Click on the "Configure" button to change the settings for i-jetty.
+
+Currently supported settings are:
+
+ + Use NIO [true|false]
+ + Port [8080]
+ + Password for console [admin]
+
+Downloading new webapps
+-----------------------
+
+Click on the "Download" button and then enter the http url of a 
+android-enabled webapp. The webapp will be downloaded and installed
+to i-jetty.
+
+You may need to restart i-jetty in order to start the newly installed
+webapp. 
 
 Troubleshooting
 ===============
