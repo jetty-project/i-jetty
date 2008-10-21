@@ -45,7 +45,7 @@
     </dependency>
    </dependencies>
    <build>
-      <sourceDirectory>src/main/java</sourceDirectory>
+      <sourceDirectory>src</sourceDirectory>
       <resources>
         <resource>
           <directory>target/generated-sources</directory>
@@ -75,6 +75,27 @@
                   <exclude>examples/echo/**</exclude>
                   <exclude>examples/echo/**</exclude>
                   <exclude>dijit/**/**</exclude>
+                  <exclude>dojox/charting/**</exclude>
+                  <exclude>dojox/layout/**</exclude>
+                  <exclude>dojox/grid/**</exclude>
+                  <exclude>dojox/fx/**</exclude>
+                  <exclude>dojox/gfx/**</exclude>
+                  <exclude>dojox/color/**</exclude>
+                  <exclude>dojox/image/**</exclude>
+                  <exclude>dojox/sketch/**</exclude>
+                  <exclude>dojox/av/**</exclude>
+                  <exclude>dojox/highlight/**</exclude>
+                  <exclude>dojox/wire/**</exclude>
+                  <exclude>dojox/editor/**</exclude>
+                  <exclude>dojox/gfx3d/**</exclude>
+                  <exclude>dojox/widget/**</exclude>
+                  <exclude>dojox/form/**</exclude>
+                  <exclude>dojox/presentation/**</exclude>
+                  <exclude>dojox/analytics/**</exclude>
+                  <exclude>dojox/xmpp/**</exclude>
+                  <exclude>dojox/data/**</exclude>
+                  <exclude>dojox/storage/**</exclude>
+                  <exclude>dojox/sql/**</exclude>
                 </excludes>
               </overlay>
            </overlays>
@@ -164,6 +185,27 @@
                     <argument>--positions=lines</argument>
                     <argument>${project.build.directory}/classes/</argument>
                   </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copydex</id>
+                <phase>process-classes</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <tasks>
+                    <mkdir dir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib"/>
+                    <jar  basedir="${project.build.directory}"
+                          update="true"
+                          includes="classes.dex"
+                          destfile="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib/classes.zip"/>
+                  </tasks>
                 </configuration>
               </execution>
             </executions>
