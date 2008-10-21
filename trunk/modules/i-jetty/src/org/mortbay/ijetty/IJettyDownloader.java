@@ -54,6 +54,8 @@ public class IJettyDownloader extends Activity
     private HttpClient client;
     private File tmpDir;
     private ProgressBar _progressBar;
+
+    private File fileInProgress = null;
     
     private final Handler mHandler = new Handler() 
     {
@@ -68,6 +70,7 @@ public class IJettyDownloader extends Activity
                     ((TextView)findViewById(R.id.loading)).setVisibility(TextView.INVISIBLE);
                     ((EditText)findViewById(R.id.download_url)).setText("");
                     ((EditText)findViewById(R.id.context_path)).setText("");
+                    fileInProgress = null;
                     AlertDialog.Builder builder = new AlertDialog.Builder(IJettyDownloader.this);
                     builder.setCancelable(true);
                     builder.setMessage(R.string.download_success);
@@ -80,6 +83,7 @@ public class IJettyDownloader extends Activity
                     _progressBar.setProgress(100);
                     _progressBar.setVisibility(ProgressBar.INVISIBLE);
                     ((TextView)findViewById(R.id.loading)).setVisibility(TextView.INVISIBLE);
+                    fileInProgress = null;
                     AlertDialog.Builder builder = new AlertDialog.Builder(IJettyDownloader.this);
                     builder.setCancelable(true);
                     builder.setMessage((String)msg.obj);
@@ -118,7 +122,6 @@ public class IJettyDownloader extends Activity
     {
         super.onCreate(savedInstanceState);
       
-
         if (!tmpDir.exists())
             tmpDir.mkdirs();
         
@@ -160,20 +163,36 @@ public class IJettyDownloader extends Activity
             if (client != null)
             {
                 client.stop();
-                client = null;
-                Log.i("Jetty", "Stopped httpclient");
+                Log.i("Jetty", "Stopped httpclient");     
             }
         }
         catch (Exception e)
         {
-            Log.e("Jetty", "Error stopping httpclient ", e);
+            Log.e("Jetty", "Error stopping httpclient ", e);           
+        }
+        finally
+        {
             client = null;
+            if (fileInProgress != null)
+            {
+                _progressBar.setVisibility(ProgressBar.INVISIBLE);
+                ((TextView)findViewById(R.id.loading)).setVisibility(TextView.INVISIBLE);
+                ((EditText)findViewById(R.id.download_url)).setText("");
+                ((EditText)findViewById(R.id.context_path)).setText("");
+                
+                //don't leave things half done
+                if (fileInProgress != null)
+                    Installer.clean(fileInProgress);
+                fileInProgress = null;
+            }
         }
     }
     
     /** 
      * Download activity is being stopped.
-     * Stop the httpclient.
+     * Stop the httpclient (note that onPause
+     * should always be called first, so the
+     * client should be null).
      * 
      * @see android.app.Activity#onPause()
      */
@@ -185,14 +204,17 @@ public class IJettyDownloader extends Activity
             if (client != null)
             {
                 client.stop();
-                client = null;  
                 Log.i("Jetty", "Stopped httpclient");
             }
         }
         catch (Exception e)
         {
             Log.e("Jetty", "Error stopping httpclient ", e);
+        }
+        finally
+        {
             client = null;
+            fileInProgress = null;
         }
     }
 
@@ -213,11 +235,12 @@ public class IJettyDownloader extends Activity
                 builder.setCancelable(true);
                 builder.setMessage(R.string.overwrite);
                 builder.setTitle(R.string.webapp_exists);
+               
                 builder.setPositiveButton(R.string.yes, 
                                           new DialogInterface.OnClickListener (){
                                             public void onClick(DialogInterface arg0,int arg1)
                                             {
-                                                Installer.cleanInstall(warFile);
+                                                Installer.clean(warFile);
                                                 doDownload(url, warFile, path);
                                             }});
                 builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener()
@@ -252,7 +275,6 @@ public class IJettyDownloader extends Activity
      */
     public void doDownload(final String url, final File warFile, final String path)
     {
-       
         try
         {
             //lazily create the httpclient
@@ -273,9 +295,9 @@ public class IJettyDownloader extends Activity
             mHandler.sendMessage(Message.obtain(mHandler, __MSG_DOWNLOAD_FAILED, "Failed to start client"));
             return;
         }
-
-        
+       
         //Get the file    
+        fileInProgress = warFile;
         _progressBar.setVisibility(ProgressBar.VISIBLE);
         _progressBar.setProgress(0);
         _progressBar.setIndeterminate(true);
@@ -403,8 +425,7 @@ public class IJettyDownloader extends Activity
             if (name.endsWith(".war") || name.endsWith(".jar"))
                 name = name.substring(0, name.length()-4);
            
-            Installer.install(file, path, webappDir, name);
-                      
+            Installer.install(file, path, webappDir, name, true);                      
             mHandler.sendMessage(Message.obtain(mHandler, __MSG_DOWNLOAD_SUCCEEDED));
         }
         catch (Exception e)

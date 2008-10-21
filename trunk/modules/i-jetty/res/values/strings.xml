@@ -17,7 +17,7 @@
     <string name="download_webapp">Download</string>
     <string name="url">URL</string>
     <string name="interfaces">Known IP Addresses</string>
-    <string name="pref_nio_value">true</string>
+    <string name="pref_nio_value">false</string>
     <string name="pref_nio_title">Use NIO</string>
     <string name="pref_nio_key">org.mortbay.ijetty.pref_nio</string>
     <string name="pref_port_value">8080</string>
