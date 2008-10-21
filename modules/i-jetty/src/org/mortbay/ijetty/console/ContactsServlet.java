@@ -35,6 +35,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.URIUtil;
 
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Contacts;
@@ -177,6 +178,16 @@ public class ContactsServlet extends InfoServlet
                     writer.println("<h2 style='text-align: center;'>Sorry, phone calls are not available at this time.</h2>");
                     doFooter (writer, request, response);
                 }
+                else if (who.trim().equals("add"))
+                {
+                    PrintWriter writer = response.getWriter();
+                    response.setContentType("text/html");
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    doHeader(writer, request, response);
+                    doMenuBar(writer, request, response);
+                    doEditUser(writer, request, response, null);
+                    doFooter (writer, request, response);
+                }
                 else
                 {
                     //show the details for a particular user
@@ -200,8 +211,39 @@ public class ContactsServlet extends InfoServlet
                     OutputStream os = response.getOutputStream();
                     IO.copy(is,os);
                 }
+                else if (what.trim().equals("edit")) {
+                    PrintWriter writer = response.getWriter();
+                    response.setContentType("text/html");
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    doHeader(writer, request, response);
+                    doMenuBar(writer, request, response);
+                    doEditUser(writer, request, response, who.trim());
+                    doFooter (writer, request, response);
+                }
             }
         }
+    }
+    
+    protected void doPost (HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        String id = request.getParameter("id");
+        ContentValues person = new ContentValues();
+        
+        person.put(Contacts.People._ID, Long.valueOf(id.trim()).longValue());
+        person.put(Contacts.People.NAME, request.getParameter("name"));
+        person.put(Contacts.People.NOTES, request.getParameter("notes"));
+        person.put(Contacts.People.STARRED, request.getParameter("starred") != null ? 1 : 0);
+        
+        getContentResolver().insert(Contacts.People.CONTENT_URI, person);
+        
+        //show the details for a particular user
+        PrintWriter writer = response.getWriter();
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        doHeader(writer, request, response);
+        doMenuBar(writer, request, response);
+        doUserContent(writer, request, response, id);
+        doFooter (writer, request, response);
     }
 
     protected void doContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -218,6 +260,9 @@ public class ContactsServlet extends InfoServlet
             formatUserDetails (cursor, writer);
             cursor.close();
         }
+        
+        writer.println("<br /><form action=\"/console/contacts/add\"><button id='add'>Add</button></form>");
+        
         writer.println("</div>");
     }
     
@@ -240,8 +285,89 @@ public class ContactsServlet extends InfoServlet
         formatContactMethods (who, cursor, writer);
         cursor.close(); 
         
-        //TODO - implement buttons
-        writer.println("<br /><button id='edit'>Edit</button>&nbsp;<button id='del'>Delete</button>");
+        //TODO - implement 'delete' button
+        writer.println("<br /><a href='/console/contacts/"+who+"/edit'><button id='edit'>Edit</button></a>&nbsp;<button id='del'>Delete</button>");
+    }
+    
+    private void doEditUser (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
+    {
+        String name = "";
+        String notes = "";
+        boolean starred = false;
+        
+        boolean editing = !(id == null || id.trim().equals(""));
+        
+        if (editing)
+        {
+            writer.println("<h1>Adding contact</h1><div id='content'>");
+        }
+        else
+        {
+            writer.println("<h1>Editing contact</h1><div id='content'>");
+        }
+        
+        writer.println("<form action=\"/console/contacts/add\" method='post'>");
+        writer.println("<input type='hidden' name='id' value='" + id + "'>");
+        writer.println("<table>");
+        
+        String[] whereArgs = new String[]{id};
+        
+        if (editing)
+        {
+            Cursor cursor = getContentResolver().query(Contacts.People.CONTENT_URI, baseProjection, "people."+android.provider.BaseColumns._ID+" = ?", whereArgs, Contacts.PeopleColumns.NAME+" ASC");
+            
+            if (cursor != null)
+            {
+                if (cursor.moveToFirst())
+                {
+                    name = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.DISPLAY_NAME));
+                    notes = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
+                    starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) > 0 ? true : false);
+                }
+            }
+            
+            cursor.close();
+        }
+        
+        writer.println("<tr><td colspan='2'><h2>General</h2></td></tr>");
+        writer.println("<tr><td>Name: </td><td><input name='name' type='text' value='" + name + "' /></td></tr>");
+        writer.println("<tr><td>Starred: </td><td><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
+        writer.println("<tr><td>Notes: </td><td><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
+        
+        
+        /*if (editing)
+        {
+            cursor = getContentResolver().query(Contacts.Phones.CONTENT_URI, phonesProjection, "people."+android.provider.BaseColumns._ID+" = ?", whereArgs, Contacts.PhonesColumns.TYPE+" ASC");
+            
+            int row = 0;
+            while (cursor.moveToNext())
+            {  
+                    String style = getRowStyle(row);
+                    writer.println("<tr class='"+style+"'>");
+                    String label = cursor.getString(cursor.getColumnIndex(Contacts.PhonesColumns.LABEL));
+                    String number = cursor.getString(cursor.getColumnIndex(Contacts.PhonesColumns.NUMBER));
+                    int type = cursor.getInt(cursor.getColumnIndex(Contacts.PhonesColumns.TYPE));
+                    String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
+                    printCell(writer, (label==null?"":"<span class='label'>"+label+"</span>"), style);
+                    String encodedNumber = number;
+                    try
+                    {
+                    encodedNumber = URLEncoder.encode(number, "UTF-8");             
+                    }
+                    catch (Exception e)
+                    {
+                            Log.w("Jetty", "Encoding telephone number failed");
+                    }
+                    printCell(writer, (number==null?"&nbsp;":"<a href=\"/console/contacts/"+who+"?call="+encodedNumber+"\">"+number+"</a>&nbsp;<span class='qualifier'>["+phoneType+"]</span>"), style);
+                    writer.println("</tr>");
+                    row++;
+            }
+        }*/
+        
+        writer.println("</table>");
+        
+        writer.println("<br /><button id='save'>Save</button></form>");
+        writer.println("</div>");
     }
 
 
@@ -264,7 +390,9 @@ public class ContactsServlet extends InfoServlet
                 String photo = null;
                 boolean starred = (cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)) >0?true:false);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
-                printCell(writer, "<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>", style);
+                
+                // TODO: Check if user actually *has* a photo.
+                printCell(writer, "<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
                 printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
                 ++row;
