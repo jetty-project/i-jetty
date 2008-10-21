@@ -36,6 +36,19 @@
         <requestFocus />
     </EditText>
 
+    <TextView
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:paddingBottom="4dip"
+        android:textStyle="bold"
+        android:text="@string/context_path"/>
+
+    <EditText
+        android:id="@+id/context_path"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0">        
+    </EditText>
+
     <Button android:id="@+id/start_download"
         android:layout_width="wrap_content" android:layout_height="wrap_content" 
         android:text="@string/start_download">

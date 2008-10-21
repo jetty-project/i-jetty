@@ -62,7 +62,6 @@ public class AndroidFileResource extends AndroidResource
     }
     public  long lastModified()
     {
-        Log.d("Jetty", "Last modified time for "+_file.getName()+_file.lastModified());
         return _file.lastModified();
     }
     public  String[] list()

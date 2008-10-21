@@ -45,19 +45,6 @@ public abstract class AndroidResource
         throws MalformedURLException
         {
             Log.i("Jetty", "Getting resource for path="+path);
-            /*
-            if (path.startsWith("contacts"))
-            {
-                //return new AndroidContactResource
-                return null;
-            }
-            else if (path.startsWith("settings"))
-            {
-                //return new AndroidSettingsResource
-                return null;
-            }
-            else 
-            */
             return new AndroidFileResource(new URL(path));
         }
 }

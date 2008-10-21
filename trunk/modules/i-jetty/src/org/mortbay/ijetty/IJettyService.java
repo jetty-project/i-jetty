@@ -221,37 +221,37 @@ public class IJettyService extends Service
         handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
         server.setHandler(handlers);
 
-        File jettyDir = new File("/sdcard/jetty");
+        File jettyDir = new File(IJetty.__JETTY_DIR);
         
         // Load any webapps we find on the card.
         if (jettyDir.exists())
         {
-            System.setProperty ("jetty.home", "/sdcard/jetty");
+            System.setProperty ("jetty.home", IJetty.__JETTY_DIR);
             AndroidWebAppDeployer staticDeployer = null;
             
             // Deploy any static webapps we have.
-            if (new File(jettyDir, "webapps").exists())
+            if (new File(jettyDir, IJetty.__WEBAPP_DIR).exists())
             {
                 staticDeployer = new AndroidWebAppDeployer();
-                staticDeployer.setWebAppDir("/sdcard/jetty/webapps");
-                staticDeployer.setDefaultsDescriptor("/sdcard/jetty/etc/webdefault.xml");
+                staticDeployer.setWebAppDir(IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR);
+                staticDeployer.setDefaultsDescriptor(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/webdefault.xml");
                 staticDeployer.setContexts(contexts);
                 staticDeployer.setContentResolver (getContentResolver());
                 staticDeployer.setConfigurationClasses(__configurationClasses);
             }
             ContextDeployer contextDeployer = null;
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
-            if (new File(jettyDir, "contexts").exists())
+            if (new File(jettyDir, IJetty.__CONTEXTS_DIR).exists())
             {
                 contextDeployer = new ContextDeployer();
                 contextDeployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
-                contextDeployer.setConfigurationDir("/sdcard/jetty/contexts");
+                contextDeployer.setConfigurationDir(IJetty.__JETTY_DIR+"/"+IJetty.__CONTEXTS_DIR);
                 contextDeployer.setContexts(contexts);
             }
-            File realmProps = new File("/sdcard/jetty/etc/realm.properties");
+            File realmProps = new File(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
             if (realmProps.exists())
             {
-                HashUserRealm realm = new HashUserRealm("Console", "/sdcard/jetty/etc/realm.properties");
+                HashUserRealm realm = new HashUserRealm("Console", IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
                 realm.setRefreshInterval(0);
                 if (_consolePassword != null)
                     realm.put("admin", _consolePassword); //set the admin password for console webapp

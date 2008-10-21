@@ -17,16 +17,16 @@ package org.mortbay.ijetty;
 
 import java.util.ArrayList;
 
-import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
+import org.mortbay.jetty.deployer.ContextDeployer;
+import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
-import dalvik.system.PathClassLoader;
 import android.content.ContentResolver;
 import android.util.Log;
 
@@ -84,7 +84,6 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             throw new IllegalArgumentException("No HandlerContainer");
 
         Resource r = Resource.newResource(getWebAppDir());
-        Log.i ("Jetty", "Web application directory: " + getWebAppDir());
         if (!r.exists())
             throw new IllegalArgumentException("No such webapps resource " + r);
 
@@ -97,13 +96,11 @@ public class AndroidWebAppDeployer extends WebAppDeployer
         files: for (int f = 0; files != null && f < files.length; f++)
         {
             String context = files[f];
-            Log.d ("Jetty", "Have file: " + context);
 
             if (context.equalsIgnoreCase("CVS/")
                     || context.equalsIgnoreCase("CVS")
                     || context.startsWith(".")) continue;
 
-            Log.d ("Jetty", "Adding resource to path.");
             Resource app = r.addPath(r.encode(context));
 
             if (context.toLowerCase().endsWith(".war")
@@ -111,7 +108,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             {
                 context = context.substring(0, context.length() - 4);
                 Resource unpacked = r.addPath(context);
-                Log.d ("Jetty", "Want to unpack!");
+
                 if (unpacked != null && unpacked.exists()
                         && unpacked.isDirectory())
                 {
@@ -121,7 +118,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             }
             else if (!app.isDirectory())
             {
-                Log.d ("Jetty", "Is directory, so skipping...");
+                Log.d ("Jetty", "Not directory");
                 continue;
             }
 
@@ -164,7 +161,6 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                 }
             }
 
-            Log.d("Jetty", "AndroidWebAppDeployer, context="+context);
             // create a webapp
             WebAppContext wah = null;
             HandlerContainer contexts = getContexts();
@@ -192,13 +188,11 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             if (getConfigurationClasses() != null)
             {
                 wah.setConfigurationClasses(getConfigurationClasses());
-                Log.d ("Jetty", "AndroidWebAppDeployer: Set configuration classes");
             }
 
 
             if (getDefaultsDescriptor() != null) 
             {
-                Log.d ("Jetty", "Setting defaults descriptor to: " + getDefaultsDescriptor());
                 wah.setDefaultsDescriptor(getDefaultsDescriptor());
             }
             wah.setExtractWAR(isExtract()); 

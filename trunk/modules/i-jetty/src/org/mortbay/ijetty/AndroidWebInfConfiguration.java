@@ -18,7 +18,6 @@ package org.mortbay.ijetty;
 import org.mortbay.jetty.webapp.WebInfConfiguration;
 import org.mortbay.resource.Resource;
 
-import dalvik.system.PathClassLoader;
 import android.util.Log;
 
 public class AndroidWebInfConfiguration extends WebInfConfiguration
@@ -38,7 +37,7 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
         ClassLoader parentLoader = this.getClass().getClassLoader();
 
          AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context); 
-                              /* new AndroidClassLoader(parentLoader, _context); */
+       
         // Add WEB-INF lib classpath 
         if (web_inf != null && web_inf.isDirectory())
         {
@@ -46,17 +45,6 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
             String paths = "";   
             if (lib.exists() || lib.isDirectory())
             {                 
-/*
-                for (String dex : lib.list())
-                {
-                    String fullpath = web_inf.addPath("lib/").addPath(dex)
-                            .getFile().getAbsolutePath();
-                    if (!loader.addDexFile(fullpath))
-                    {
-                        Log.w("Jetty", "Failed to add DEX file from path: "+ fullpath);
-                    }
-                }
-*/
                 for (String dex : lib.list())
                 {
                     if (dex.endsWith("zip") || dex.endsWith("apk"))
@@ -68,7 +56,6 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
                       paths += fullpath;
                     }
                 }
-                Log.d("Jetty", "webapp classloader paths = "+paths);
                 loader = new AndroidClassLoader (paths, parentLoader, _context);
             }
             else
@@ -80,7 +67,6 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
         if (_context.getClassLoader() != null)
             Log.w ("Jetty", "Ignoring classloader "+_context.getClassLoader());
 
-        Log.d("Jetty", "Android classloader "+loader);
         _context.setClassLoader (loader);
     }
 }

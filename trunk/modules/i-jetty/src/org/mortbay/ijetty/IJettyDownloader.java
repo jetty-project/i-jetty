@@ -18,14 +18,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.HttpStatus;
 import org.mortbay.jetty.client.ContentExchange;
 import org.mortbay.jetty.client.HttpClient;
-import org.mortbay.resource.JarResource;
-import org.mortbay.resource.Resource;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -40,7 +37,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 
@@ -55,7 +51,7 @@ public class IJettyDownloader extends Activity
     public static final int __MSG_DOWNLOAD_FAILED = 1;
     public static final int __MSG_PROGRESS = 2;
     
-    private HttpClient client = new HttpClient();
+    private HttpClient client;
     private File tmpDir;
     private ProgressBar _progressBar;
     
@@ -71,6 +67,7 @@ public class IJettyDownloader extends Activity
                     _progressBar.setVisibility(ProgressBar.INVISIBLE);
                     ((TextView)findViewById(R.id.loading)).setVisibility(TextView.INVISIBLE);
                     ((EditText)findViewById(R.id.download_url)).setText("");
+                    ((EditText)findViewById(R.id.context_path)).setText("");
                     AlertDialog.Builder builder = new AlertDialog.Builder(IJettyDownloader.this);
                     builder.setCancelable(true);
                     builder.setMessage(R.string.download_success);
@@ -108,18 +105,7 @@ public class IJettyDownloader extends Activity
      */
     public IJettyDownloader()
     {
-        client.setConnectorType(HttpClient.CONNECTOR_SOCKET);
-        if (client != null)
-        {
-            try
-            {
-                client.start();
-            }
-            catch (Exception e)
-            {
-                Log.e("Jetty", "Error starting client", e);
-            }
-        }
+        tmpDir = new File(IJetty.__JETTY_DIR+"/"+IJetty.__TMP_DIR);
     }
     
     /** 
@@ -131,7 +117,8 @@ public class IJettyDownloader extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        tmpDir = new File("/sdcard/jetty/tmp/");
+      
+
         if (!tmpDir.exists())
             tmpDir.mkdirs();
         
@@ -150,18 +137,70 @@ public class IJettyDownloader extends Activity
                         if ("".equals(url.trim()))
                             return;
 
-                        startDownload(url);
+                        text = (EditText)findViewById(R.id.context_path);
+                        String path = text.getText().toString();
+                        startDownload(url, path);
                     }
                 }
         );
     }
     
     
+    /** 
+     * User has moved away from the download activity.
+     * Stop the httpclient.
+     * 
+     * @see android.app.Activity#onPause()
+     */
+    protected void onPause()
+    {
+        super.onPause();  
+        try
+        {
+            if (client != null)
+            {
+                client.stop();
+                client = null;
+                Log.i("Jetty", "Stopped httpclient");
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Error stopping httpclient ", e);
+            client = null;
+        }
+    }
+    
+    /** 
+     * Download activity is being stopped.
+     * Stop the httpclient.
+     * 
+     * @see android.app.Activity#onPause()
+     */
+    protected void onStop()
+    {
+        super.onStop();
+        try
+        {
+            if (client != null)
+            {
+                client.stop();
+                client = null;  
+                Log.i("Jetty", "Stopped httpclient");
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Error stopping httpclient ", e);
+            client = null;
+        }
+    }
+
     /**
      * Begin a download of a war file.
      * @param url
      */
-    public void startDownload (final String url)
+    public void startDownload (final String url, final String path)
     {
         final String war = getWarFileName (url);
         final File warFile = new File (tmpDir, war);
@@ -170,25 +209,20 @@ public class IJettyDownloader extends Activity
             if (!warFile.createNewFile())
             {
                 Log.i("Jetty", "File exists");
-               // Toast.makeText(IJettyDownloader.this, R.string.webapp_exists,Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setCancelable(true);
                 builder.setMessage(R.string.overwrite);
                 builder.setTitle(R.string.webapp_exists);
                 builder.setPositiveButton(R.string.yes, 
                                           new DialogInterface.OnClickListener (){
-                                            public void onClick(
-                                                    DialogInterface arg0,
-                                                    int arg1)
+                                            public void onClick(DialogInterface arg0,int arg1)
                                             {
-                                                cleanDownload(warFile);
-                                                doDownload(url, warFile);
+                                                Installer.cleanInstall(warFile);
+                                                doDownload(url, warFile, path);
                                             }});
                 builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener()
                 {
-                    public void onClick(
-                            DialogInterface arg0,
-                            int arg1)
+                    public void onClick(DialogInterface arg0,int arg1)
                     {
                     }
                 });
@@ -201,7 +235,7 @@ public class IJettyDownloader extends Activity
                 builder.show();
             }
             else
-                doDownload(url, warFile);
+                doDownload(url, warFile, path);
         }
         catch (Exception e)
         {
@@ -216,8 +250,31 @@ public class IJettyDownloader extends Activity
      * @param url
      * @param warFile
      */
-    public void doDownload(final String url, final File warFile)
+    public void doDownload(final String url, final File warFile, final String path)
     {
+       
+        try
+        {
+            //lazily create the httpclient
+            if (client == null)
+            {
+                client = new HttpClient();
+                client.setConnectorType(HttpClient.CONNECTOR_SOCKET);
+                client.setMaxConnectionsPerAddress(1);
+                client.setUseDirectBuffers(false);
+            }   
+            
+            if (!client.isRunning())
+                client.start();
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Error starting client", e);
+            mHandler.sendMessage(Message.obtain(mHandler, __MSG_DOWNLOAD_FAILED, "Failed to start client"));
+            return;
+        }
+
+        
         //Get the file    
         _progressBar.setVisibility(ProgressBar.VISIBLE);
         _progressBar.setProgress(0);
@@ -232,7 +289,7 @@ public class IJettyDownloader extends Activity
             {  
                 closeOutputStream();
                 if (getResponseStatus() == HttpStatus.ORDINAL_200_OK)
-                    install (warFile);
+                    install (warFile, path);
                 else
                 {
                     Log.e("Jetty", "Bad status: "+getResponseStatus());                 
@@ -336,7 +393,8 @@ public class IJettyDownloader extends Activity
         }
     }
     
-    public void install (File file)
+    
+    public void install (File file, String path)
     {
         try
         {
@@ -344,13 +402,9 @@ public class IJettyDownloader extends Activity
             String name = file.getName();
             if (name.endsWith(".war") || name.endsWith(".jar"))
                 name = name.substring(0, name.length()-4);
-            
-            File webapp = new File (webappDir, name);
-            if (!webapp.exists())
-                webapp.mkdirs();
-            
-            Resource war = Resource.newResource("jar:"+file.toURL()+"!/");
-            JarResource.extract(war, webapp, false);
+           
+            Installer.install(file, path, webappDir, name);
+                      
             mHandler.sendMessage(Message.obtain(mHandler, __MSG_DOWNLOAD_SUCCEEDED));
         }
         catch (Exception e)
@@ -358,33 +412,5 @@ public class IJettyDownloader extends Activity
             Log.e("Jetty", "Bad resource", e);
             mHandler.sendMessage(Message.obtain(mHandler, __MSG_DOWNLOAD_FAILED, "Exception"));
         }
-    }
-    
-    public void cleanDownload (File file)
-    {
-        File webappDir = new File (IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR);
-        String name = file.getName();
-        if (name.endsWith(".war") || name.endsWith(".jar"))
-            name = name.substring(0, name.length()-4);
-
-        File webapp = new File (webappDir, name);
-        if (webapp.exists())
-            deleteWebapp(webapp);
-
-        file.delete();
-    }
-
-    public void deleteWebapp (File webapp)
-    {
-        if (webapp.isDirectory())
-        {
-            File[] files = webapp.listFiles();
-            for (File f:files)
-            {
-                deleteWebapp(f);
-            }
-        }
-        else
-            webapp.delete();
     }
 }
