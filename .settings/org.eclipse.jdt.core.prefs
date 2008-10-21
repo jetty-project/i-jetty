@@ -1,7 +1,7 @@
-#Tue Sep 09 18:34:49 EST 2008
+#Mon Oct 20 19:49:18 EST 2008
 eclipse.preferences.version=1
 instance/org.eclipse.core.net/org.eclipse.core.net.hasMigrated=true
 org.eclipse.jdt.core.builder.cleanOutputFolder=ignore
-org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
-org.eclipse.jdt.core.compiler.compliance=1.5
-org.eclipse.jdt.core.compiler.source=1.5
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.2
+org.eclipse.jdt.core.compiler.compliance=1.4
+org.eclipse.jdt.core.compiler.source=1.3

@@ -34,7 +34,7 @@ import android.util.Log;
 public class Installer
 {
     
-    public static void install (File warFile, String contextPath, File webappsDir, String webappName) 
+    public static void install (File warFile, String contextPath, File webappsDir, String webappName, boolean createContextXml) 
     throws MalformedURLException, IOException
     {
         File webapp = new File (webappsDir, webappName);
@@ -43,11 +43,12 @@ public class Installer
         
         Resource war = Resource.newResource("jar:"+warFile.toURL()+"!/");
         JarResource.extract(war, webapp, false);
-        installContextFile(webappName, contextPath);
+        if (createContextXml)
+            installContextFile(webappName, contextPath);
     }
     
     
-    public static void install (InputStream warStream, String contextPath, File webappsDir, String webappName)
+    public static void install (InputStream warStream, String contextPath, File webappsDir, String webappName, boolean createContextXml)
     {
         File webapp = new File (webappsDir, webappName);
         if (warStream != null)
@@ -91,8 +92,9 @@ public class Installer
                     }
                 }
                 IO.close(jin);
-                
-                installContextFile (webappName, contextPath);
+
+                if (createContextXml)
+                    installContextFile (webappName, contextPath);
             }
             catch (Exception e)
             {
@@ -107,6 +109,7 @@ public class Installer
     public static void installContextFile (String webappName, String contextPath) 
     throws FileNotFoundException
     {
+        Log.i("Jetty", "Installing "+webappName+".xml");
         contextPath = contextPath == null ? webappName : contextPath;           
         contextPath = contextPath.equals("/") ? "root" : contextPath;
         contextPath = contextPath.startsWith("/") ? contextPath : "/"+contextPath;
@@ -123,14 +126,16 @@ public class Installer
         writer.println("<Set name=\"war\"><SystemProperty name=\"jetty.home\" default=\".\"/>/webapps/"+webappName+"</Set>");
         writer.println("<Set name=\"defaultsDescriptor\">/sdcard/jetty/etc/webdefault.xml</Set>");
         writer.println("</Configure>");
+        writer.flush();
         writer.close();
         File contextDir = new File (IJetty.__JETTY_DIR+"/"+IJetty.__CONTEXTS_DIR); 
         File contextFile = new File (contextDir, webappName+".xml");
-        tmpContextFile.renameTo(contextFile);
+        if (!tmpContextFile.renameTo(contextFile))
+            Log.e("Jetty", "mv "+tmpContextFile.getAbsolutePath()+" "+contextFile.getAbsolutePath()+" failed");
     }
 
     
-    public static void cleanInstall (File warFile)
+    public static void clean (File warFile)
     {
         String webappName = warFile.getName();
         if (webappName.endsWith(".war") || webappName.endsWith(".jar"))

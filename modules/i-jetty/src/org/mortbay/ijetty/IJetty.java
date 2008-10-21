@@ -247,12 +247,17 @@ public class IJetty extends Activity
         if (!jettyDir.exists())
             jettyDir.mkdirs();
         
+        //make jetty/tmp
+        File tmpDir = new File(jettyDir, __TMP_DIR);
+        if (!tmpDir.exists())
+            tmpDir.mkdirs();
+        
+        //make jetty/webapps
         File webappsDir = new File (jettyDir, __WEBAPP_DIR);
         if (!webappsDir.exists())
-        {
             webappsDir.mkdirs();           
-        }
 
+        //make jetty/etc
         File etcDir = new File (jettyDir, __ETC_DIR);
         if (!etcDir.exists())
             etcDir.mkdirs();
@@ -290,11 +295,14 @@ public class IJetty extends Activity
             }
         }
 
+        //make jetty/contexts
         File contextsDir = new File (jettyDir, __CONTEXTS_DIR);
         if (!contextsDir.exists())
             contextsDir.mkdirs();
 
-        //unpack the console war
+        //unpack the console war, but don't make a context.xml for it
+        //Must be deployed by webapp deployer to get the Android ContentResolver
+        //setting.
         File consoleWar = new File (webappsDir, "console");
         boolean exists = consoleWar.exists();
         String[] files = consoleWar.list();
@@ -302,59 +310,7 @@ public class IJetty extends Activity
         if (!exists || files == null || files.length == 0)
         {
             InputStream is = this.getClassLoader().getResourceAsStream("console.war");
-            Installer.install(is, "/console", webappsDir, "console");
-            /*
-            
-            if (is != null)
-            {
-                try
-                {
-                    JarInputStream jin = new JarInputStream(is);
-                    JarEntry entry;
-                    while((entry=jin.getNextJarEntry())!=null)
-                    {
-                        String entryName = entry.getName();             
-                        File file=new File(consoleWar,entryName);
-                        if (entry.isDirectory())
-                        {
-                            // Make directory
-                            if (!file.exists())
-                                file.mkdirs();
-                        }
-                        else
-                        {
-                            // make directory (some jars don't list dirs)
-                            File dir = new File(file.getParent());
-                            if (!dir.exists())
-                                dir.mkdirs();
-
-                            // Make file
-                            FileOutputStream fout = null;
-                            try
-                            {
-                                fout = new FileOutputStream(file);
-                                IO.copy(jin,fout);
-                            }
-                            finally
-                            {
-                                IO.close(fout);
-                            }
-
-                            // touch the file.
-                            if (entry.getTime()>=0)
-                                file.setLastModified(entry.getTime());
-                        }
-                    }
-                    IO.close(jin);
-                }
-                catch (Exception e)
-                {
-                    Log.e("Jetty", "Error inflating console.war", e);
-                }
-            }
-            else
-                Log.e("Jetty", "No console war");
-                */
+            Installer.install(is, "/console", webappsDir, "console", false);
         }
     }
 }
