@@ -25,18 +25,13 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 
 import org.mortbay.util.IO;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +42,17 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * IJetty
+ *
+ * Main Jetty activity.
+ * Can start other activities:
+ *   + configure
+ *   + download
+ *   
+ *  Can start/stop services:
+ *   + IJettyService
+ */
 public class IJetty extends Activity 
 {
     public static final String __PORT = "org.mortbay.ijetty.port";
@@ -61,6 +67,7 @@ public class IJetty extends Activity
     public static final String __WEBAPP_DIR = "webapps";
     public static final String __ETC_DIR = "etc";
     public static final String __CONTEXTS_DIR = "contexts";
+    public static final String __TMP_DIR = "tmp";
     
     private IPList _ipList;
 
@@ -295,6 +302,9 @@ public class IJetty extends Activity
         if (!exists || files == null || files.length == 0)
         {
             InputStream is = this.getClassLoader().getResourceAsStream("console.war");
+            Installer.install(is, "/console", webappsDir, "console");
+            /*
+            
             if (is != null)
             {
                 try
@@ -344,6 +354,7 @@ public class IJetty extends Activity
             }
             else
                 Log.e("Jetty", "No console war");
+                */
         }
     }
 }

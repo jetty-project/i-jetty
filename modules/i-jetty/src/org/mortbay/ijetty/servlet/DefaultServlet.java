@@ -17,10 +17,8 @@ package org.mortbay.ijetty.servlet;
 
 
 import java.io.IOException;
-
 import java.io.OutputStream;
 import java.net.URL;
-
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -30,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.ijetty.resource.AndroidFileResource;
-import org.mortbay.ijetty.resource.AndroidResource;
 import org.mortbay.io.WriterOutputStream;
 import org.mortbay.jetty.HttpFields;
 import org.mortbay.jetty.HttpHeaders;
@@ -38,7 +35,6 @@ import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
-
 import org.mortbay.util.URIUtil;
 
 import android.content.res.Resources;

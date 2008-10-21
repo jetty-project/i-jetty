@@ -15,16 +15,12 @@
 
 package org.mortbay.ijetty;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.lang.ClassNotFoundException;
 import java.net.URL;
-import java.util.List;
-import java.util.ArrayList;
+
+import org.mortbay.jetty.webapp.WebAppContext;
 
 import android.util.Log;
 import dalvik.system.PathClassLoader;
-import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
  * AndroidClassLoader
@@ -44,7 +40,7 @@ public class AndroidClassLoader extends ClassLoader
     {
         // _parent = parent;
         _parent = this.getClass().getClassLoader();
-         Log.i("Jetty", "System classloader="+ClassLoader.getSystemClassLoader()+" class loader="+this.getClass().getClassLoader());
+        
          if (_parent == null)
              _parent = ClassLoader.getSystemClassLoader();
    
