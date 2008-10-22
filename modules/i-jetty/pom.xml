@@ -237,7 +237,7 @@
                 <configuration>
                     <executable>${android.home}/tools/apkbuilder</executable>
                     <arguments>
-                        <argument>${project.build.directory}/${artifactId}-debug.apk</argument>
+                        <argument>${project.build.directory}/${artifactId}-debug-${project.version}.apk</argument>
                         <argument>-v</argument>
                         <argument>-z</argument>
                         <argument>${project.build.directory}/${artifactId}-resources.apk</argument>
