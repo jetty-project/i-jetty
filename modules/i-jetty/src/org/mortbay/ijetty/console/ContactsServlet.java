@@ -331,7 +331,7 @@ public class ContactsServlet extends InfoServlet
         formatUserDetails (users, writer);
         users.close();
 
-        writer.println("<br /><a href=\"/console/contacts?action="+__ACTION_ADD+"\"><button id='add'>Add</button></href>");        
+        writer.println("<br /><a href=\"/console/contacts?action="+__ACTION_ADD+"\"><button id='add'>Add</button></a>");        
         writer.println("</div>");
     }
     
@@ -440,11 +440,11 @@ public class ContactsServlet extends InfoServlet
         {
             writer.println("<table id='user' style='border: 0px none;'>");
             int row = 0;
-            ContentValues user = users.next();
+            ContentValues user = null;
             while ((user = users.next()) != null)
             {  
                 String style = getRowStyle(row);           
-                writer.println("<tr class='"+style+"'>");
+                writer.println("<tr"+style+">");
 
                 String id = user.getAsString(android.provider.BaseColumns._ID);  
                 String name =  user.getAsString(Contacts.PeopleColumns.DISPLAY_NAME);
