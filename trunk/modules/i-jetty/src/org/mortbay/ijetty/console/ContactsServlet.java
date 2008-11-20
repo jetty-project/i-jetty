@@ -219,9 +219,17 @@ public class ContactsServlet extends InfoServlet
                     response.setContentType("text/html");
                     response.setStatus(HttpServletResponse.SC_OK);
                     doHeader(writer, request, response);
-                    doMenuBar(writer, request, response);
-                    doEditUser(writer, request, response, who.trim());
-                    doFooter (writer, request, response);
+                    /*if (isMobileClient(request))
+                    {*/
+                        doMenuBar(writer, request, response);
+                        doEditUser(writer, request, response, who);
+                        doFooter (writer, request, response);
+                    /*}
+                    else
+                    {
+                        // Just print content, since we're spewing to an iframe.
+                        doEditUser(writer, request, response, who);
+                    }*/
                 
                     break;
                 }
@@ -238,7 +246,6 @@ public class ContactsServlet extends InfoServlet
                 }
                 case __ACTION_DEL:
                 {
-                    //TODO - implement 'delete'
                     PrintWriter writer = response.getWriter();
                     response.setContentType("text/html");
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -344,6 +351,9 @@ public class ContactsServlet extends InfoServlet
     throws ServletException, IOException
     {
         writer.println("<h1>Contact List</h1><div id='content'>");
+        if (!isMobileClient(request))
+            writer.println("<iframe style='float: right;' id='detail' name='detail' frameborder='0' scrolling='auto' width='40%' height='300px'></iframe>");
+        
         User.UserCollection users =  User.getAll(getContentResolver());
 
         formatUserDetails (users, writer);
@@ -368,16 +378,13 @@ public class ContactsServlet extends InfoServlet
      */
     protected void doUserContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {   
-        boolean mobile = isMobileClient(request);
-        
-        if (!mobile)
-            writer.println("<iframe style='float: right;' id='detail' name='detail' frameborder='0' scrolling='auto' width='40%' height='300px'></iframe>");
-        
         //query for the user's standard details
         ContentValues values = User.get(getContentResolver(), who);
+        if (!isMobileClient(request))
+            writer.println("<div id='content'>");
+        
         formatSummaryUserDetails (values, writer);
        
-        
         //query for all phone details
         User.PhoneCollection phones = User.getPhones(getContentResolver(), who);
         formatPhones (who, phones, writer);
@@ -390,7 +397,7 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("<br /><a target='_top' href='/console/contacts/"+who+"?action="+__ACTION_EDIT+"'><button id='edit'>Edit</button></a>&nbsp;<a target='_top' href=\"/console/contacts/"+who+"?action="+__ACTION_DEL+"\"><button id='del'>Delete</button></a>");
         
-        if (!mobile)
+        if (!isMobileClient(request))
             writer.println("</div></body></html>");
     }
     
@@ -416,9 +423,16 @@ public class ContactsServlet extends InfoServlet
         boolean editing = !(id == null || id.trim().equals(""));
 
         if (editing)
-            writer.println("<h1>Editing contact</h1><div id='content'>"); 
+        {
+            /*if (!isMobileClient(request))
+                writer.println("<div id='content'>");*/
+            
+            writer.println("<h1>Editing contact</h1><div id='content'>");
+        } 
         else
+        {
             writer.println("<h1>Adding contact</h1><div id='content'>");
+        }
             
         
         writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE+"\" method='post'>");
@@ -448,6 +462,9 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("<br /><button id='save'>Save</button></form>");
         writer.println("</div>");
+        
+        /*if (!isMobileClient(request))
+            writer.println("</div></body></html>");*/
     }
 
 
@@ -481,7 +498,6 @@ public class ContactsServlet extends InfoServlet
                 boolean starred = (i == null ? false : i.intValue() > 0);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
 
-                // TODO: Check if user actually *has* a photo.
                 printCell(writer, "<a target='detail' href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
                 printCell(writer, "<a target='detail' href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
@@ -518,7 +534,7 @@ public class ContactsServlet extends InfoServlet
             Log.i("Jetty", "On summary starring = "+i);
             boolean starred = (i == null ? false : i.intValue() > 0);
             
-            writer.println("<div id='content'><h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
+            writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
             writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
             if (company!=null)
                 writer.println("<p>Company: "+company+"</h3></p>");
