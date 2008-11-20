@@ -75,7 +75,7 @@ public abstract class InfoServlet extends HttpServlet
             writer.print("        <li>");
             
             String[] splitPath = _navBarItems[i].split("/");
-            if (path.contains(splitPath[splitPath.length - 1]))
+            if (path.endsWith(splitPath[splitPath.length - 1]))
                 writer.print("<strong>"+_navBarLabels[i]+"</strong>");
             else
                 writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
@@ -83,7 +83,7 @@ public abstract class InfoServlet extends HttpServlet
             writer.println("</li>");
         }
         writer.println("    </ul></div>");
-        writer.println("    <div id='page'>");
+        writer.println("    <div id='page' style='min-height: 400px;'>");
     }
     
     protected abstract void doContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
@@ -135,5 +135,16 @@ public abstract class InfoServlet extends HttpServlet
         else
             return " class='odd'";
 
+    }
+    
+    protected boolean isMobileClient (HttpServletRequest request)
+    {
+        String useragent = request.getHeader("User-Agent");
+        if (useragent != null && (useragent.contains("Android") || useragent.contains("iPhone")))
+        {
+            return true;
+        }
+        
+        return false;
     }
 }
