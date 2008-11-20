@@ -11,9 +11,11 @@
 
 set -e
 
+VERSION="1.2"
+
 if [ ! $ANDROID_HOME ]; then ANDROID_HOME=/home/alex/Sources/android-sdk-linux_x86-1.0_r1 ; fi
 if [ ! $SDCARD ]; then SDCARD=sdcard.img ; fi
-if [ ! $CLEAN ]; then CLEAN="clean" ; fi
+if [ ! $CLEAN ]; then CLEAN="clean"; else CLEAN=""; fi
 
 if [ ! -d $ANDROID_HOME ]; then
     echo "Error: Bad Android home directory; does not exist, or not directory."
@@ -27,7 +29,7 @@ if [ ! -f $SDCARD ]; then
 fi
 
 # Build it
-echo "i-jetty is compiling. http://xkcd.com/303/"; sleep 1
+echo "i-jetty $VERSION is compiling. http://xkcd.com/303/"; sleep 1
 mvn $CLEAN install -Dandroid.home=$ANDROID_HOME
 
 if [ ! $BUILD_ONLY ]; then
@@ -36,7 +38,7 @@ if [ ! $BUILD_ONLY ]; then
 
     # Wait a bit, then upload the package
     sleep 30
-    $ANDROID_HOME/tools/adb install -r modules/i-jetty/target/i-jetty-debug.apk
+    $ANDROID_HOME/tools/adb install -r modules/i-jetty/target/i-jetty-debug-$VERSION.apk
 
     # Forward ports
     $ANDROID_HOME/tools/adb forward tcp:8888 tcp:8080
