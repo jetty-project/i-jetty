@@ -142,9 +142,17 @@ public class ContactsServlet extends InfoServlet
                         response.setContentType("text/html");
                         response.setStatus(HttpServletResponse.SC_OK);
                         doHeader(writer, request, response);
-                        doMenuBar(writer, request, response);
-                        doUserContent(writer, request, response, who);
-                        doFooter (writer, request, response);
+                        if (isMobileClient(request))
+                        {
+                            doMenuBar(writer, request, response);
+                            doUserContent(writer, request, response, who);
+                            doFooter (writer, request, response);
+                        }
+                        else
+                        {
+                            // Just print content, since we're spewing to an iframe.
+                            doUserContent(writer, request, response, who);
+                        }
 
                     }
                     else if ((what == null) && (who == null))
@@ -230,6 +238,7 @@ public class ContactsServlet extends InfoServlet
                 }
                 case __ACTION_DEL:
                 {
+                    //TODO - implement 'delete'
                     PrintWriter writer = response.getWriter();
                     response.setContentType("text/html");
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -298,7 +307,16 @@ public class ContactsServlet extends InfoServlet
         
         //show the details for a particular user
         response.setStatus(HttpServletResponse.SC_OK);
-        doUserContent(writer, request, response, id);
+        if (isMobileClient(request)) {
+            // Go back to the user's page, since we don't like iframes on
+            // tiny screens.
+            doUserContent(writer, request, response, id);
+        }
+        else
+        {
+            // Just go back to the user selection page (the one with an iframe).
+            doBaseContent(writer, request, response);
+        }
     }
     
     
@@ -349,7 +367,12 @@ public class ContactsServlet extends InfoServlet
      * @throws IOException
      */
     protected void doUserContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
-    {        
+    {   
+        boolean mobile = isMobileClient(request);
+        
+        if (!mobile)
+            writer.println("<iframe style='float: right;' id='detail' name='detail' frameborder='0' scrolling='auto' width='40%' height='300px'></iframe>");
+        
         //query for the user's standard details
         ContentValues values = User.get(getContentResolver(), who);
         formatSummaryUserDetails (values, writer);
@@ -365,8 +388,10 @@ public class ContactsServlet extends InfoServlet
         formatContactMethods (who, contactMethods, writer);
         contactMethods.close(); 
         
-        //TODO - implement 'delete' button
-        writer.println("<br /><a href='/console/contacts/"+who+"?action="+__ACTION_EDIT+"'><button id='edit'>Edit</button></a>&nbsp;<a href=\"/console/contacts/"+who+"?action="+__ACTION_DEL+"\"><button id='del'>Delete</button></a>");
+        writer.println("<br /><a target='_top' href='/console/contacts/"+who+"?action="+__ACTION_EDIT+"'><button id='edit'>Edit</button></a>&nbsp;<a target='_top' href=\"/console/contacts/"+who+"?action="+__ACTION_DEL+"\"><button id='del'>Delete</button></a>");
+        
+        if (!mobile)
+            writer.println("</div></body></html>");
     }
     
     /**
@@ -437,7 +462,7 @@ public class ContactsServlet extends InfoServlet
     private void formatUserDetails (User.UserCollection users, PrintWriter writer)
     {
         if (users!=null && writer!=null)
-        {
+        {            
             writer.println("<table id='user' style='border: 0px none;'>");
             int row = 0;
             ContentValues user = null;
@@ -457,8 +482,8 @@ public class ContactsServlet extends InfoServlet
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
 
                 // TODO: Check if user actually *has* a photo.
-                printCell(writer, "<a href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
-                printCell(writer, "<a href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
+                printCell(writer, "<a target='detail' href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
+                printCell(writer, "<a target='detail' href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
                 ++row;
             }
@@ -493,7 +518,7 @@ public class ContactsServlet extends InfoServlet
             Log.i("Jetty", "On summary starring = "+i);
             boolean starred = (i == null ? false : i.intValue() > 0);
             
-            writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1><div id='content'>");
+            writer.println("<div id='content'><h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
             writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
             if (company!=null)
                 writer.println("<p>Company: "+company+"</h3></p>");
