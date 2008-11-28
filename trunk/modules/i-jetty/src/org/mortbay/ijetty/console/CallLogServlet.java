@@ -60,7 +60,9 @@ public class CallLogServlet extends InfoServlet
         String csv = request.getParameter("csv");
         if (csv != null && Integer.parseInt(csv.trim()) >= 1)
         {
+            String date = new SimpleDateFormat("yyyyMMdd").format(new Date());
             response.setContentType("text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=call-log-" + date + ".csv");
             response.setStatus(HttpServletResponse.SC_OK);
             doContent(writer, request, response);
         }
