@@ -29,8 +29,11 @@ if [ ! -f $SDCARD ]; then
 fi
 
 # Build it
-echo "i-jetty $VERSION is compiling. http://xkcd.com/303/"; sleep 1
-mvn $CLEAN install -Dandroid.home=$ANDROID_HOME
+if [ ! $RUN_ONLY ]; then
+    echo "i-jetty $VERSION is compiling. http://xkcd.com/303/"; 
+    sleep 1
+    mvn $CLEAN install -Dandroid.home=$ANDROID_HOME
+fi
 
 if [ ! $BUILD_ONLY ]; then
     # Run the emulator
