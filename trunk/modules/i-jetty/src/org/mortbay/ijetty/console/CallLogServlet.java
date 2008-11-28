@@ -181,13 +181,15 @@ public class CallLogServlet extends InfoServlet
             {
                 String cname=colNames[i];
                 
+                // We do +1 for the length because the "contactid" column
+                // is an imaginary column we add at the end
+                printCSV(i, colNames.length + 1, writer, cname);
+                
                 // Since we provide the contact's *name* and their ID,
                 // we always do both at the same time, so we should do the
                 // same here.
                 if (colNames[i].equals(CallLog.Calls.CACHED_NAME))
-                    cname += __CSV_DELIM + "contactid";
-                
-                printCSV(i, colNames.length, writer, cname);
+                    printCSV(i + 1, colNames.length + 1, writer, "contactid");
             }
             
             int row = 0;
@@ -233,11 +235,17 @@ public class CallLogServlet extends InfoServlet
     {
         if (col != (length - 1))
         {
-            writer.print(value + __CSV_DELIM);
+            if (value.length() > 1 && value != __CSV_DELIM && !value.startsWith ("\""))
+                writer.print("\"" + value + "\"" + __CSV_DELIM);
+            else
+                writer.print(value + __CSV_DELIM);
         }
         else
         {
-            writer.println(value);
+            if (value.length() > 1 && !value.startsWith ("\""))
+                writer.println("\"" + value + "\"");
+            else
+                writer.println(value);
         }
     }
 }
