@@ -17,6 +17,7 @@ package org.mortbay.ijetty.console;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,8 @@ public class CallLogServlet extends InfoServlet
         public static final String __MISSED = "missed";
         public static final String __YES = "yes";
         public static final String __NO = "no";
+        
+        public static final String __CSV_DELIM = ",";
 
         public Map _logTypeMap = new HashMap();
         
@@ -48,6 +51,30 @@ public class CallLogServlet extends InfoServlet
                 _logTypeMap.put(Integer.valueOf(CallLog.Calls.OUTGOING_TYPE), __OUTGOING);
                 _logTypeMap.put(Integer.valueOf(CallLog.Calls.MISSED_TYPE), __MISSED);
         }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        PrintWriter writer = response.getWriter();
+        
+        String csv = request.getParameter("csv");
+        if (csv != null && Integer.parseInt(csv.trim()) >= 1)
+        {
+            response.setContentType("text/csv");
+            response.setStatus(HttpServletResponse.SC_OK);
+            doContent(writer, request, response);
+        }
+        else
+        {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            doHeader (writer, request, response);
+            doMenuBar(writer, request, response);
+            doContent(writer, request, response);
+            doFooter (writer, request, response);
+        }
+    }
+    
     @Override
     protected void doContent(PrintWriter writer, HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException
@@ -63,10 +90,20 @@ public class CallLogServlet extends InfoServlet
                 CallLog.Calls.CACHED_NAME
                                          };
         Cursor cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, null, null, null);
-        writer.println("<h1>Call Log</h1><div id='content'>");
         String[] cols = cursor.getColumnNames();
-        formatCallLog(cols, cursor, writer);  
-        writer.println("</div>");
+        
+        String csv = request.getParameter("csv");
+        if (csv != null && Integer.parseInt(csv.trim()) >= 1)
+        {
+            formatCSV(cols, cursor, writer);
+        }
+        else
+        {
+            writer.println("<h1>Call Log</h1><div id='content'>");
+            formatCallLog(cols, cursor, writer);  
+            writer.println("<p><small><a href='?csv=1'>Download as CSV</a></small></p>");
+            writer.println("</div>");
+        }
     }
 
     
@@ -76,19 +113,18 @@ public class CallLogServlet extends InfoServlet
         {
             writer.println("<table>");
             writer.println("<tr>");
+            
             for (int i=0;i<colNames.length;i++)
             {
                 String cname=null;
                 
-                /*if (colNames[i].equals(CallLog.Calls.PERSON_ID))
-                        continue;
-                else */if (colNames[i].equals(CallLog.Calls.NEW))
+                if (colNames[i].equals(CallLog.Calls.NEW))
                         cname=__ACKNOWLEDGED;
                 else if (colNames[i].equals(CallLog.Calls.DURATION))
                         cname=__DURATION;
                 else
                         cname=colNames[i];
-                
+            
                 writer.println("<th>"+cname+"</th>");
             }
             writer.println("</tr>");
@@ -102,8 +138,10 @@ public class CallLogServlet extends InfoServlet
                     writer.println("<td"+style+">");
                     String val=cursor.getString(i);
                     if (colNames[i].equals(CallLog.Calls.DATE))
-                        /*writer.println(android.util.DateFormat.format("yyyy-MM-dd kk:mm", new Date(cursor.getInt(i))));*/
+                    {
+                        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date (cursor.getInt(i)*1000));
                         writer.println((new Date(cursor.getInt(i))).toString());
+                    }
                     else if (colNames[i].equals(CallLog.Calls.NEW))
                     {
                         if (cursor.getInt(i)>0)
@@ -117,19 +155,12 @@ public class CallLogServlet extends InfoServlet
                     }
                     else if (colNames[i].equals(CallLog.Calls.CACHED_NAME))
                     {
-                        /*int nameIndex = cursor.getColumnIndex(CallLog.Calls.NAME);
-                        String name=(nameIndex>=0?cursor.getString(nameIndex):null);
-                        if (val!=null && name!=null)*/
                         String name = cursor.getString(i);
                         if (name != null)
                                 writer.println(name==null?"&nbsp;":"<a href='/console/contacts/"+row+"'>"+name+"</a>");     
                         else
                                 writer.println("&nbsp;");
                     }
-                    /*else if (colNames[i].equals(CallLog.Calls.NAME))
-                    {
-                        continue;
-                    }*/
                     else
                         writer.println((val==null?"&nbsp;":val));
                     writer.println("</td>");
@@ -139,6 +170,74 @@ public class CallLogServlet extends InfoServlet
             }
             writer.println("</table>");
 
+        }
+    }
+    
+    private void formatCSV (String[] colNames, Cursor cursor, PrintWriter writer)
+    {
+        if (colNames!=null && cursor!=null && writer!=null)
+        {            
+            for (int i=0;i<colNames.length;i++)
+            {
+                String cname=colNames[i];
+                
+                // Since we provide the contact's *name* and their ID,
+                // we always do both at the same time, so we should do the
+                // same here.
+                if (colNames[i].equals(CallLog.Calls.CACHED_NAME))
+                    cname += __CSV_DELIM + "contactid";
+                
+                printCSV(i, colNames.length, writer, cname);
+            }
+            
+            int row = 0;
+            while (cursor.moveToNext())
+            {  
+                String style = getRowStyle(row);
+                for (int i=0;i<colNames.length;i++)
+                {
+                    String val=cursor.getString(i);
+                    if (colNames[i].equals(CallLog.Calls.DATE))
+                    {
+                        printCSV(i, colNames.length, writer, val);
+                    }
+                    else if (colNames[i].equals(CallLog.Calls.NEW))
+                    {
+                        if (cursor.getInt(i)>0)
+                                printCSV(i, colNames.length, writer, __YES);
+                        else
+                                printCSV(i, colNames.length, writer, __NO);
+                    }
+                    else if (colNames[i].equals(CallLog.Calls.TYPE))
+                    {
+                        printCSV(i, colNames.length, writer, _logTypeMap.get(cursor.getInt(i)).toString());
+                    }
+                    else if (colNames[i].equals(CallLog.Calls.CACHED_NAME))
+                    {
+                        String name = cursor.getString(i);
+                        if (name != null)
+                            printCSV(i, colNames.length, writer, "\"" + name + "\"" + __CSV_DELIM +  row);
+                        else
+                            // Empty pair of commas (no data)
+                            printCSV(i, colNames.length, writer, __CSV_DELIM);
+                    }
+                    else
+                        printCSV(i, colNames.length, writer, (val==null?"":val));
+                }
+                ++row;
+            }
+        }
+    }
+    
+    private void printCSV(int col, int length, PrintWriter writer, String value)
+    {
+        if (col != (length - 1))
+        {
+            writer.print(value + __CSV_DELIM);
+        }
+        else
+        {
+            writer.println(value);
         }
     }
 }
