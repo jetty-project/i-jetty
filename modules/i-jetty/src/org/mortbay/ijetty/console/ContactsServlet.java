@@ -64,6 +64,9 @@ public class ContactsServlet extends InfoServlet
     private static final String __CUSTOM = "custom";
     private static final String __IM = "IM";
     private static final String __GEO_LOCATION = "geo location";
+    
+    // FIXME: Use a local copy when finished testing. :)
+    private static final String[] __JAVASCRIPT = new String[] { "http://code.jquery.com/jquery-latest.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "/console/contacts.js" };
 
 
     private Map _phoneTypes = new HashMap();
@@ -118,6 +121,7 @@ public class ContactsServlet extends InfoServlet
         {
             String who=null;
             String what=null;
+            boolean json=false;
             
             StringTokenizer strtok = new StringTokenizer(pathInfo, "/");
             if (strtok.hasMoreElements())          
@@ -129,6 +133,9 @@ public class ContactsServlet extends InfoServlet
             String str = request.getParameter("action");
             int action = (str==null? __ACTION_NONE : Integer.parseInt(str.trim()));
             
+            str = request.getParameter("json");
+            json = (str==null ? false : Integer.parseInt(str.trim()) == 1);
+            
             Log.i("Jetty", "who="+who+" what="+what+" action="+action);
             
             switch (action)
@@ -139,21 +146,21 @@ public class ContactsServlet extends InfoServlet
                     {
                         //default: nothing specific to do, show user info
                         PrintWriter writer = response.getWriter();
-                        response.setContentType("text/html");
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        doHeader(writer, request, response);
-                        if (isMobileClient(request))
+                        if (json)
                         {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            doUserContentJSON(writer, request, response, who);
+                        }
+                        else
+                        {
+                            response.setContentType("text/html");
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            doHeader(writer, request, response);
                             doMenuBar(writer, request, response);
                             doUserContent(writer, request, response, who);
                             doFooter (writer, request, response);
                         }
-                        else
-                        {
-                            // Just print content, since we're spewing to an iframe.
-                            doUserContent(writer, request, response, who);
-                        }
-
                     }
                     else if ((what == null) && (who == null))
                     {
@@ -161,7 +168,7 @@ public class ContactsServlet extends InfoServlet
                         PrintWriter writer = response.getWriter();
                         response.setContentType("text/html");
                         response.setStatus(HttpServletResponse.SC_OK);
-                        doHeader(writer, request, response);
+                        doHeader(writer, request, response, __JAVASCRIPT);
                         doMenuBar(writer, request, response);
                         doBaseContent(writer, request, response);
                         doFooter (writer, request, response);
@@ -219,40 +226,49 @@ public class ContactsServlet extends InfoServlet
                     response.setContentType("text/html");
                     response.setStatus(HttpServletResponse.SC_OK);
                     doHeader(writer, request, response);
-                    /*if (isMobileClient(request))
-                    {*/
-                        doMenuBar(writer, request, response);
-                        doEditUser(writer, request, response, who);
-                        doFooter (writer, request, response);
-                    /*}
-                    else
-                    {
-                        // Just print content, since we're spewing to an iframe.
-                        doEditUser(writer, request, response, who);
-                    }*/
-                
+                    doMenuBar(writer, request, response);
+                    doEditUser(writer, request, response, who);
+                    doFooter (writer, request, response);
                     break;
                 }
                 case __ACTION_SAVE:
                 {
                     PrintWriter writer = response.getWriter();
-                    response.setContentType("text/html");
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    doHeader(writer, request, response);
-                    doMenuBar(writer, request, response);
-                    doSaveUser(writer, request, response, request.getParameter("id"));
-                    doFooter (writer, request, response);
+                    
+                    if (json)
+                    {
+                        response.setContentType("application/json");
+                        doSaveUserJSON(writer, request, response, request.getParameter("id"));
+                    }
+                    else
+                    {
+                        response.setContentType("text/html");
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        doHeader(writer, request, response);
+                        doMenuBar(writer, request, response);
+                        doSaveUser(writer, request, response, request.getParameter("id"));
+                        doFooter (writer, request, response);
+                    }
                     break;
                 }
                 case __ACTION_DEL:
                 {
                     PrintWriter writer = response.getWriter();
-                    response.setContentType("text/html");
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    doHeader(writer, request, response);
-                    doMenuBar(writer, request, response);
-                    doDeleteUser(writer, request, response, who /*request.getParameter("id")*/);
-                    doFooter (writer, request, response);
+                    
+                    if (json)
+                    {
+                        response.setContentType("application/json");
+                        doDeleteUserJSON(writer, request, response, who);
+                    } 
+                    else
+                    {
+                        response.setContentType("text/html");
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        doHeader(writer, request, response);
+                        doMenuBar(writer, request, response);
+                        doDeleteUser(writer, request, response, who /*request.getParameter("id")*/);
+                        doFooter (writer, request, response);
+                    }
                     break;
                 }
                 default:
@@ -269,6 +285,25 @@ public class ContactsServlet extends InfoServlet
         }
     }
     
+    
+    protected void doDeleteUserJSON (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id)
+    throws ServletException, IOException
+    {
+        try
+        {
+            User.delete(getContentResolver(), id);
+        }
+        catch (Exception e)
+        {
+            // TODO: Better error catching - ie. check for invalid user and just failure at remove
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        writer.println("{ \"status\": \"OK\" }");
+    }
+    
    
     protected void doDeleteUser (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id)
     throws ServletException, IOException
@@ -277,6 +312,20 @@ public class ContactsServlet extends InfoServlet
         doBaseContent(writer, request, response);
     }
     
+    
+    protected void doSaveUserJSON (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id)
+    throws ServletException, IOException
+    {
+        if (!true)
+        {            
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        writer.println("{ \"status\": \"OK\" }");
+    }
+        
     
     /**
      * doSaveUser
@@ -351,8 +400,6 @@ public class ContactsServlet extends InfoServlet
     throws ServletException, IOException
     {
         writer.println("<h1>Contact List</h1><div id='content'>");
-        if (!isMobileClient(request))
-            writer.println("<iframe style='float: right;' id='detail' name='detail' frameborder='0' scrolling='auto' width='40%' height='300px'></iframe>");
         
         User.UserCollection users =  User.getAll(getContentResolver());
 
@@ -363,6 +410,10 @@ public class ContactsServlet extends InfoServlet
         writer.println("</div>");
     }
     
+    protected void doUserContentJSON (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
+    {
+        writer.println ("[ \"Hello thar.\" ]");
+    }
     
     
     /**
@@ -380,9 +431,6 @@ public class ContactsServlet extends InfoServlet
     {   
         //query for the user's standard details
         ContentValues values = User.get(getContentResolver(), who);
-        if (!isMobileClient(request))
-            writer.println("<div id='content'>");
-        
         formatSummaryUserDetails (values, writer);
        
         //query for all phone details
@@ -396,9 +444,6 @@ public class ContactsServlet extends InfoServlet
         contactMethods.close(); 
         
         writer.println("<br /><a target='_top' href='/console/contacts/"+who+"?action="+__ACTION_EDIT+"'><button id='edit'>Edit</button></a>&nbsp;<a target='_top' href=\"/console/contacts/"+who+"?action="+__ACTION_DEL+"\"><button id='del'>Delete</button></a>");
-        
-        if (!isMobileClient(request))
-            writer.println("</div></body></html>");
     }
     
     /**
@@ -427,11 +472,11 @@ public class ContactsServlet extends InfoServlet
             /*if (!isMobileClient(request))
                 writer.println("<div id='content'>");*/
             
-            writer.println("<h1>Editing contact</h1><div id='content'>");
+            writer.println("<h1>Editing contact</h1>");
         } 
         else
         {
-            writer.println("<h1>Adding contact</h1><div id='content'>");
+            writer.println("<h1>Adding contact</h1>");
         }
             
         
@@ -480,7 +525,11 @@ public class ContactsServlet extends InfoServlet
     {
         if (users!=null && writer!=null)
         {            
-            writer.println("<table id='user' style='border: 0px none;'>");
+            writer.println("<table id='user'>");
+            writer.println("<thead><tr>");
+            writer.println("<th>Starred</th><th>Photo</th><th>Name</th>");
+            writer.println("</tr></thead><tbody>");
+            
             int row = 0;
             ContentValues user = null;
             while ((user = users.next()) != null)
@@ -498,12 +547,12 @@ public class ContactsServlet extends InfoServlet
                 boolean starred = (i == null ? false : i.intValue() > 0);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
 
-                printCell(writer, "<a target='detail' href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
-                printCell(writer, "<a target='detail' href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
+                printCell(writer, "<a class='userlink' href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
+                printCell(writer, "<a class='userlink' href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
                 ++row;
             }
-            writer.println("</table>");
+            writer.println("</tbody></table>");
 
             if (row==0)
             {
