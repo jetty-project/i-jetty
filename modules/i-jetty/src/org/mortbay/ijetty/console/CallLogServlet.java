@@ -114,6 +114,7 @@ public class CallLogServlet extends InfoServlet
         if (colNames!=null && cursor!=null && writer!=null)
         {
             writer.println("<table>");
+            writer.println("<thead>");
             writer.println("<tr>");
             
             for (int i=0;i<colNames.length;i++)
@@ -130,6 +131,7 @@ public class CallLogServlet extends InfoServlet
                 writer.println("<th>"+cname+"</th>");
             }
             writer.println("</tr>");
+            writer.println("</thead><tbody>");
             int row = 0;
             while (cursor.moveToNext())
             {  
@@ -170,6 +172,7 @@ public class CallLogServlet extends InfoServlet
                 writer.println("</tr>");
                 ++row;
             }
+            writer.println("</tbody>");
             writer.println("</table>");
 
         }

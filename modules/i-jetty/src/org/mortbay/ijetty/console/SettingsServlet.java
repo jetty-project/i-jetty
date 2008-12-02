@@ -24,11 +24,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import android.database.Cursor;
 import android.provider.Settings;
+import android.provider.Settings.NameValueTable;
 
 import org.mortbay.ijetty.console.InfoServlet;
 
 public class SettingsServlet extends InfoServlet
 {
+    private static final String __HUMAN_ID = "ID";
 
     @Override
     protected void doContent(PrintWriter writer, HttpServletRequest request,
@@ -38,6 +40,19 @@ public class SettingsServlet extends InfoServlet
         writer.println("<h1>System Settings</h1><div id='content'>");
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, null, null, null, null);
         String[] cols = cursor.getColumnNames();
+        int i = 0;
+        
+        for (String col : cols)
+        {
+            if (col == NameValueTable._ID)
+                cols[i] = __HUMAN_ID;
+            else
+                // Make first letter uppercase
+                cols[i] = col.substring(0, 1).toUpperCase() + col.substring(1);
+            
+            i++;
+        }
+        
         formatTable(cols, cursor, writer);
         writer.println("</div>");
     }
