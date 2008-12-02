@@ -85,6 +85,7 @@ hr {
 
 #content {
     padding: 1em;
+    font-size: 85%;
 }
 
 #footer {
@@ -129,4 +130,26 @@ td {
 td.odd {
 	background: #f2f6fb;
 	color: #797268;
+}
+
+th.headerSortUp {
+    background-image: url(asc.gif);
+    background-repeat: no-repeat;
+}
+
+th.headerSortDown {
+    background-image: url(desc.gif);
+    background-repeat: no-repeat;
+}
+
+th.header {
+    cursor: pointer;
+    background-position: right center;
+    background-color: #E6EEEE;
+    
+    padding-right: 18px;
+}
+
+td, tr {
+    font-size: 95% !important;
 }

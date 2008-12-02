@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -412,7 +413,26 @@ public class ContactsServlet extends InfoServlet
     
     protected void doUserContentJSON (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {
-        writer.println ("[ \"Hello thar.\" ]");
+        //query for the user's standard details
+        writer.print("{ \"summary\" : ");
+        ContentValues values = User.get(getContentResolver(), who);
+        formatSummaryUserDetailsJSON (values, writer);
+        
+        writer.print(", \"phones\" : ");
+        
+        //query for all phone details
+        User.PhoneCollection phones = User.getPhones(getContentResolver(), who);
+        formatPhonesJSON (who, phones, writer);
+        phones.close();
+        
+        writer.print(", \"addresses\" : ");
+        
+        //query for all contact details
+        User.ContactMethodsCollection contactMethods = User.getContactMethods(getContentResolver(), who);
+        formatContactMethodsJSON (who, contactMethods, writer);
+        contactMethods.close(); 
+        
+        writer.print(" }");
     }
     
     
@@ -428,7 +448,7 @@ public class ContactsServlet extends InfoServlet
      * @throws IOException
      */
     protected void doUserContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
-    {   
+    {           
         //query for the user's standard details
         ContentValues values = User.get(getContentResolver(), who);
         formatSummaryUserDetails (values, writer);
@@ -466,12 +486,9 @@ public class ContactsServlet extends InfoServlet
         boolean starred = false;
         
         boolean editing = !(id == null || id.trim().equals(""));
-
+        
         if (editing)
         {
-            /*if (!isMobileClient(request))
-                writer.println("<div id='content'>");*/
-            
             writer.println("<h1>Editing contact</h1>");
         } 
         else
@@ -479,6 +496,8 @@ public class ContactsServlet extends InfoServlet
             writer.println("<h1>Adding contact</h1>");
         }
             
+        
+        writer.println("<div id='content'>");
         
         writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE+"\" method='post'>");
         if (id != null)
@@ -507,9 +526,6 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("<br /><button id='save'>Save</button></form>");
         writer.println("</div>");
-        
-        /*if (!isMobileClient(request))
-            writer.println("</div></body></html>");*/
     }
 
 
@@ -584,6 +600,8 @@ public class ContactsServlet extends InfoServlet
             boolean starred = (i == null ? false : i.intValue() > 0);
             
             writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
+            
+            writer.println("<div id='content'>");
             writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
             if (company!=null)
                 writer.println("<p>Company: "+company+"</h3></p>");
@@ -598,6 +616,33 @@ public class ContactsServlet extends InfoServlet
             writer.println("</td>");
             writer.println("</tr>");
             writer.println("</table>");
+        }
+    }
+    
+    private void formatSummaryUserDetailsJSON (ContentValues values, PrintWriter writer)
+    {
+        if (values!=null && writer!=null)
+        {  
+            String id = values.getAsString(android.provider.BaseColumns._ID);  
+            String name =  values.getAsString(Contacts.PeopleColumns.DISPLAY_NAME);
+            String title = null;
+            String company = null;
+            String notes = values.getAsString(Contacts.PeopleColumns.NOTES);
+
+            Integer i = values.getAsInteger(Contacts.PeopleColumns.STARRED);   
+            boolean starred = (i == null ? false : i.intValue() > 0);
+            String starredStr = new Boolean(starred).toString();
+            
+            writer.print ("{ 'name': '" + name + "', ");
+            writer.print ("'starred': " + starredStr);
+            
+            if (company != null)
+                writer.print (", 'company': '" + company + "'");
+                
+            if (notes != null)
+                writer.print (", 'notes': '" + notes + "'");
+            
+            writer.print (" }");
         }
     }
     
@@ -631,6 +676,40 @@ public class ContactsServlet extends InfoServlet
             row++;
         }
         writer.println("</table>");
+    }
+    
+    private void formatPhonesJSON (String who, PhoneCollection phones, PrintWriter writer)
+    {
+        ContentValues phone;
+        writer.print ("{ ");
+        ArrayList<String> numbers = new ArrayList<String>();
+        
+        while ((phone = phones.next() ) != null)
+        {  
+            String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
+            String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
+            int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
+            String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
+            
+            numbers.add ("'" + number + "' : { 'label' : '" + (label == null ? "" : label) + "', 'type' : '" + phoneType + "' }");
+        }
+        
+        String lastNumber;
+        
+        if (numbers.size () > 1)
+        {
+            lastNumber = numbers.remove (numbers.size() - 1);
+            
+            for (String number : numbers)
+            {
+                writer.print (number + ", ");
+            }
+            
+            // Last item shouldn't end with comma
+            writer.print (lastNumber);
+        }
+        
+        writer.print(" }");
     }
     
 
@@ -715,6 +794,11 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("</table>");
     }  
+    
+    private void formatContactMethodsJSON (String who, User.ContactMethodsCollection contactMethods, PrintWriter writer)
+    {
+        writer.print ("[ ]");
+    }
     
     private void printCell (PrintWriter writer, String cellContent, String cellStyle)
     {                

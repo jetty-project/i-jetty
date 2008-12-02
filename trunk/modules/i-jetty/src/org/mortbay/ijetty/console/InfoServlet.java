@@ -36,6 +36,9 @@ public abstract class InfoServlet extends HttpServlet
     private String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
     private String[] _navBarItems = {"/console/contacts", "/console/settings","/console/calls", "/console/network"};
     private String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>", "I told you we should've taken a left!" };
+    
+    // FIXME: Use a local copy when finished testing. :)
+    private static final String[] _javascript = new String[] { "http://code.jquery.com/jquery-latest.min.js", "http://tablesorter.com/jquery.tablesorter.min.js" };
 
     public ContentResolver getContentResolver ()
     {
@@ -44,7 +47,7 @@ public abstract class InfoServlet extends HttpServlet
     
     protected void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        doHeader(writer, request, response, null);
+        doHeader(writer, request, response, _javascript);
     }
     
     protected void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response, String[] scripts) throws ServletException, IOException
@@ -54,8 +57,6 @@ public abstract class InfoServlet extends HttpServlet
         writer.println("<head>");
         writer.println("    <title>i-jetty Console</title>");
         writer.println("    <link rel='stylesheet' type='text/css' media='screen' href='/console/console.css' />");
-        /* FIXME: This should be fixed before commit. */
-        writer.println("    <link rel='stylesheet' href='http://tablesorter.com/themes/blue/style.css' type='text/css' media='print, projection, screen' />");
         writer.println("    <meta name='viewport' content='width=device-width,minimum-scale=1.0,maximum-scale=1.0'/>");
         
         if (scripts != null)
@@ -64,6 +65,10 @@ public abstract class InfoServlet extends HttpServlet
             {
                 writer.println ("    <script src=\"" + script + "\"></script>");
             }
+            
+            // Make any tables we have sortable
+            // (we assume that two of the scripts we add are jQuery and tablesorter)
+            writer.println ("    <script>$(document).ready(function() { $('table').tablesorter(); });</script>");
         }
         
         writer.println("</head>");
@@ -123,10 +128,13 @@ public abstract class InfoServlet extends HttpServlet
         if (colNames!=null && cursor!=null && writer!=null)
         {
             writer.println("<table>");
+            writer.println("<thead>");
             writer.println("<tr>");
             for (int i=0;i<colNames.length;i++)
                 writer.println("    <th>"+colNames[i]+"</th>");
             writer.println("</tr>");
+            writer.println("</thead>");
+            writer.println("<tbody>");
             int row = 0;
             while (cursor.moveToNext())
             {  
@@ -140,6 +148,7 @@ public abstract class InfoServlet extends HttpServlet
                 writer.println("</tr>");
                 ++row;
             }
+            writer.println("</tbody>");
             writer.println("</table>");
 
         }
