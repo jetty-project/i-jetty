@@ -401,6 +401,19 @@ public class ContactsServlet extends InfoServlet
     throws ServletException, IOException
     {
         writer.println("<h1>Contact List</h1><div id='content'>");
+        writer.println("<div class='hidden' id='userinfo'>");
+        writer.println("<h1 id='user-name'></h1>");
+        
+        writer.println("<h2 id='user-photo-label' class='hidden'>Photo</h2>");
+        writer.println("<img id='user-photo' class='hidden' alt='User photo' />");
+        
+        writer.println("<h2 id='user-notes-label' class='hidden'>Notes</h2>");
+        writer.println("<p id='user-notes' class='hidden'></p>");
+        
+        writer.println("<h2 id='user-numbers-label' class='hidden'>Phone Numbers</h2>");
+        writer.println("<table id='user-numbers' class='hidden'></table>");
+        
+        writer.println("</div>");
         
         User.UserCollection users =  User.getAll(getContentResolver());
 

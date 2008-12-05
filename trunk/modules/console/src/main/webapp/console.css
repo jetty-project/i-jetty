@@ -62,7 +62,7 @@ a {
     padding: 4px;
 }
 
-#page h1 {
+#page #content h1 {
     margin: 0;
     background-image: url(titlebar.png);
     background-repeat: repeat-x;
@@ -152,4 +152,13 @@ th.header {
 
 td, tr {
     font-size: 95% !important;
+}
+
+.hidden {
+    display: none;
+}
+
+#userinfo {
+    float: right;
+    padding: 1em;
 }
