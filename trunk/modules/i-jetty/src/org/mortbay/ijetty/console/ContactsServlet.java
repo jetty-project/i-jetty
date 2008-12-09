@@ -67,7 +67,7 @@ public class ContactsServlet extends InfoServlet
     private static final String __GEO_LOCATION = "geo location";
     
     // FIXME: Use a local copy when finished testing. :)
-    private static final String[] __JAVASCRIPT = new String[] { "http://code.jquery.com/jquery-latest.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "/console/contacts.js" };
+    private static final String[] __JAVASCRIPT = new String[] { "http://code.jquery.com/jquery-latest.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.pack.js", "/console/contacts.js" };
 
 
     private Map _phoneTypes = new HashMap();
@@ -400,20 +400,21 @@ public class ContactsServlet extends InfoServlet
     protected void doBaseContent(PrintWriter writer, HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException
     {
-        writer.println("<h1>Contact List</h1><div id='content'>");
-        writer.println("<div class='hidden' id='userinfo'>");
+        writer.println("<h1 class='pageheader'>Contact List</h1><div id='content'>");
+        writer.println("<div class='hidden' id='userinfo'><form>");
         writer.println("<h1 id='user-name'></h1>");
         
-        writer.println("<h2 id='user-photo-label' class='hidden'>Photo</h2>");
-        writer.println("<img id='user-photo' class='hidden' alt='User photo' />");
+        writer.println("<h2 id='user-photo-label'>Photo</h2>");
+        writer.println("<img id='user-photo' alt='User photo' />");
         
-        writer.println("<h2 id='user-notes-label' class='hidden'>Notes</h2>");
+        writer.println("<h2 id='user-notes-label'>Notes</h2>");
         writer.println("<p id='user-notes' class='hidden'></p>");
+        writer.println("<p><input type='button' id='user-notes-add' value='Add note' /></p>");
         
         writer.println("<h2 id='user-numbers-label' class='hidden'>Phone Numbers</h2>");
         writer.println("<table id='user-numbers' class='hidden'></table>");
         
-        writer.println("</div>");
+        writer.println("</form></div>");
         
         User.UserCollection users =  User.getAll(getContentResolver());
 
@@ -502,11 +503,11 @@ public class ContactsServlet extends InfoServlet
         
         if (editing)
         {
-            writer.println("<h1>Editing contact</h1>");
+            writer.println("<h1 class='pageheader'>Editing contact</h1>");
         } 
         else
         {
-            writer.println("<h1>Adding contact</h1>");
+            writer.println("<h1 class='pageheader'>Adding contact</h1>");
         }
             
         
@@ -646,14 +647,15 @@ public class ContactsServlet extends InfoServlet
             boolean starred = (i == null ? false : i.intValue() > 0);
             String starredStr = new Boolean(starred).toString();
             
-            writer.print ("{ 'name': '" + name + "', ");
+            writer.print ("{ 'name': '" + name.replace("'", "\\'") + "', ");
+            writer.print ("'id': " + id + ", ");
             writer.print ("'starred': " + starredStr);
             
             if (company != null)
-                writer.print (", 'company': '" + company + "'");
+                writer.print (", 'company': '" + company.replace("'", "\\'") + "'");
                 
             if (notes != null)
-                writer.print (", 'notes': '" + notes + "'");
+                writer.print (", 'notes': '" + notes.replace("'", "\\'") + "'");
             
             writer.print (" }");
         }
@@ -704,7 +706,7 @@ public class ContactsServlet extends InfoServlet
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
             String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
             
-            numbers.add ("'" + number + "' : { 'label' : '" + (label == null ? "" : label) + "', 'type' : '" + phoneType + "' }");
+            numbers.add ("'" + number + "' : { 'label' : '" + (label == null ? "" : label.replace("'", "\\'")) + "', 'type' : '" + phoneType + "' }");
         }
         
         String lastNumber;

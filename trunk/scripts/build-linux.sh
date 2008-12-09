@@ -41,7 +41,11 @@ if [ ! $BUILD_ONLY ]; then
 
     # Wait a bit, then upload the package
     sleep 30
-    $ANDROID_HOME/tools/adb install -r modules/i-jetty/target/i-jetty-debug-$VERSION.apk
+    
+    # Uninstall it (to get rid of any data; -r maintains data).
+    $ANDROID_HOME/tools/adb uninstall org.mortbay.ijetty
+    # and install it now.
+    $ANDROID_HOME/tools/adb install  modules/i-jetty/target/i-jetty-debug-$VERSION.apk
 
     # Forward ports
     $ANDROID_HOME/tools/adb forward tcp:8888 tcp:8080

@@ -37,14 +37,14 @@ public class SettingsServlet extends InfoServlet
             HttpServletResponse response) throws ServletException, IOException
     {
         
-        writer.println("<h1>System Settings</h1><div id='content'>");
+        writer.println("<h1 class='pageheader'>System Settings</h1><div id='content'>");
         Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, null, null, null, null);
         String[] cols = cursor.getColumnNames();
         int i = 0;
         
         for (String col : cols)
         {
-            if (col == NameValueTable._ID)
+            if (i == 0)
                 cols[i] = __HUMAN_ID;
             else
                 // Make first letter uppercase
