@@ -101,7 +101,7 @@ public class CallLogServlet extends InfoServlet
         }
         else
         {
-            writer.println("<h1>Call Log</h1><div id='content'>");
+            writer.println("<h1 class='pageheader'>Call Log</h1><div id='content'>");
             formatCallLog(cols, cursor, writer);  
             writer.println("<p><small><a href='?csv=1'>Download as CSV</a></small></p>");
             writer.println("</div>");
