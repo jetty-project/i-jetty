@@ -169,7 +169,10 @@ public class ContactsServlet extends InfoServlet
                         PrintWriter writer = response.getWriter();
                         response.setContentType("text/html");
                         response.setStatus(HttpServletResponse.SC_OK);
-                        doHeader(writer, request, response, __JAVASCRIPT);
+                        if (isMobileClient(request))
+                            doHeader(writer, request, response);
+                        else
+                            doHeader(writer, request, response, __JAVASCRIPT);
                         doMenuBar(writer, request, response);
                         doBaseContent(writer, request, response);
                         doFooter (writer, request, response);
@@ -277,7 +280,10 @@ public class ContactsServlet extends InfoServlet
                     PrintWriter writer = response.getWriter();
                     response.setContentType("text/html");
                     response.setStatus(HttpServletResponse.SC_OK);
-                    doHeader(writer, request, response);
+                    if (isMobileClient(request))
+                        doHeader(writer, request, response);
+                    else
+                        doHeader(writer, request, response, __JAVASCRIPT);
                     doMenuBar(writer, request, response);
                     doBaseContent(writer, request, response);
                     doFooter (writer, request, response);
@@ -400,22 +406,25 @@ public class ContactsServlet extends InfoServlet
     protected void doBaseContent(PrintWriter writer, HttpServletRequest request, HttpServletResponse response) 
     throws ServletException, IOException
     {
+        // This HTML is used for the side pane for desktop browsers that use Javascript.
         writer.println("<h1 class='pageheader'>Contact List</h1><div id='content'>");
-        writer.println("<div class='hidden' id='userinfo'><form>");
-        writer.println("<h1 id='user-name'></h1>");
+        writer.println("<div class='hidden' id='userinfo'><form onsubmit='return false;'>");
+        writer.println("<input type='hidden' id='user-id' />");
+        writer.println("<small id='user-edit-hint'>Click on some text to edit it.</small>");
+        writer.println("<h1 style='margin-top: 2px; margin-bottom: 2px;' id='user-name'></h1>");
+        writer.println("<small><a href='#' id='user-delete'>Delete</a> | <a href='#' id='user-call'>Call</a></small>");
         
-        writer.println("<h2 id='user-photo-label'>Photo</h2>");
-        writer.println("<img id='user-photo' alt='User photo' />");
+        writer.println("<a href='#' id='user-photo-link'><img id='user-photo' alt='User photo' /></a>");
         
         writer.println("<h2 id='user-notes-label'>Notes</h2>");
-        writer.println("<p id='user-notes' class='hidden'></p>");
-        writer.println("<p><input type='button' id='user-notes-add' value='Add note' /></p>");
+        writer.println("<p id='user-notes'>Click to add a note.</p>");
         
-        writer.println("<h2 id='user-numbers-label' class='hidden'>Phone Numbers</h2>");
+        writer.println("<h2 id='user-numbers-label'><a href='#' id='user-numbers-add'><img src='/console/list-add.png' /></a>Phone Numbers</h2>");
         writer.println("<table id='user-numbers' class='hidden'></table>");
         
         writer.println("</form></div>");
         
+        // Print out the table that everyone can read.
         User.UserCollection users =  User.getAll(getContentResolver());
 
         formatUserDetails (users, writer);
@@ -538,7 +547,7 @@ public class ContactsServlet extends InfoServlet
            
         writer.println("</table>");
         
-        writer.println("<br /><button id='save'>Save</button></form>");
+        writer.println("<br /><button id='save'>Save</button><a href='/console/contacts/" + id + "'><button id='cancel'>Cancel</button></a></form>");
         writer.println("</div>");
     }
 
@@ -565,9 +574,9 @@ public class ContactsServlet extends InfoServlet
             while ((user = users.next()) != null)
             {  
                 String style = getRowStyle(row);           
-                writer.println("<tr"+style+">");
 
                 String id = user.getAsString(android.provider.BaseColumns._ID);  
+                writer.println("<tr"+style+" id='contact-" + id + "'>");
                 String name =  user.getAsString(Contacts.PeopleColumns.DISPLAY_NAME);
                 String title = null;
                 String company = null;
@@ -613,7 +622,7 @@ public class ContactsServlet extends InfoServlet
             Log.i("Jetty", "On summary starring = "+i);
             boolean starred = (i == null ? false : i.intValue() > 0);
             
-            writer.println("<h1>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
+            writer.println("<h1 class='pageheader'>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
             
             writer.println("<div id='content'>");
             writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");

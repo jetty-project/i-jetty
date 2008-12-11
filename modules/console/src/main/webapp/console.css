@@ -89,7 +89,7 @@ hr {
 }
 
 #footer {
-    text-align: right;
+    text-align: left;
     font-size: 80%;
     color: #babdb6;
     padding: 1em;
@@ -158,8 +158,38 @@ td, tr {
     display: none;
 }
 
+/* Pane that contains all user info. Only used on desktop browsers with JS. */
 #userinfo {
     float: right;
     padding: 1em;
     width: 250px;
+}
+
+#user-photo-link {
+    float: right;
+    padding: 0.2em;
+}
+
+/* Hint text to say you can click to edit fields. */
+#user-edit-hint {
+    color: #babdb6;
+}
+
+/* Phone numbers table for side pane. */
+#user-numbers {
+    width: 100%;
+}
+
+/* Button to add numbers to list. */
+#user-numbers-add {
+    float: right;
+}
+
+/* Button to click to remove a phone number from the list. */
+.user-number-remove {
+    float: right;
+}
+
+img {
+    border: 0px none;
 }
