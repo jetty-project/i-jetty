@@ -182,11 +182,12 @@ public class ContactsServlet extends InfoServlet
                         //ask for the photo
                         Uri personUri = ContentUris.withAppendedId(Contacts.People.CONTENT_URI,Long.valueOf(who.trim()).longValue());
                         InputStream is = Contacts.People.openContactPhotoInputStream(getContentResolver(), personUri);
-
+                        //getContext()
                         
                         if (is == null)
                         {
-                            response.setContentType("application/octet-stream"); 
+                            //response.setContentType("application/octet-stream");
+                            response.setContentType("image/jpeg");  
                             OutputStream os = response.getOutputStream();
                             is = getServletContext().getResourceAsStream("/android.jpg");
                             IO.copy(is,os);
@@ -194,7 +195,9 @@ public class ContactsServlet extends InfoServlet
                         }
                         else
                         {
-                            response.setContentType("application/octet-stream");
+                            response.setContentType("image/png");
+                            //response.setContentType("application/octet-stream");
+                            //response.setContentType(getServletContext().getMimeType());
                             OutputStream os = response.getOutputStream();
                             IO.copy(is,os);
                         }
@@ -544,10 +547,13 @@ public class ContactsServlet extends InfoServlet
         writer.println("<tr><td>Name: </td><td><input name='name' type='text' value='" + name + "' /></td></tr>");
         writer.println("<tr><td>Starred: </td><td><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
         writer.println("<tr><td>Notes: </td><td><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
+        
+        writer.println("<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>");
+        writer.println("<tr><td>Something</td><td>Goes here soon</td></tr>");
            
         writer.println("</table>");
         
-        writer.println("<br /><button id='save'>Save</button><a href='/console/contacts/" + id + "'><button id='cancel'>Cancel</button></a></form>");
+        writer.println("<br /><button id='save'>Save</button> <a href='/console/contacts/" + (id != null ? id.toString() : "") + "'><button id='cancel'>Cancel</button></a></form>");
         writer.println("</div>");
     }
 
