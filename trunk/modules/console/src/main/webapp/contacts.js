@@ -1,4 +1,15 @@
-$(document).ready(function() {   
+var User = {
+    addresses: [ ],
+    phones: { },
+    summary : {
+        name: "",
+        id: 0,
+        notes: "",
+        starred: false,
+    },
+};
+
+$(document).ready (function () {
     var labels = { "home" : "Home",
         "mobile"    : "Mobile",
         "work"      : "Work",
@@ -9,13 +20,19 @@ $(document).ready(function() {
         ""          : "Custom..."
     };
     
-    var submitFunction = function(value, settings) {
-        var id = $('#user-id').attr ('value');
-        var new_name = $('#user-name').text();
-        var new_notes = $('#user-notes').text();
+    var submitFunction = function (value, settings) {
+        var myuser = jQuery.extend (true, user);
+        
+        myuser.summary.id = $('#user-id').attr ('value');
+        myuser.summary.name = $('#user-name').text ();
+        myuser.summary.notes = $('#user-notes').text ();
+        myuser.summary.starred = $('#user-star').hasClass ('starred');
         
         // Make name in table match that just edited
-        $('#user-' + id + ' a.userlink').text (new_name);
+        $('#user-' + id + ' a.userlink').text (myuser.summary.notes);
+        
+        console.log ("This is: ", this);
+        console.log ("myuser is: ", myuser);
         
         // FIXME: Send data to server via POST
         return value;
@@ -23,7 +40,6 @@ $(document).ready(function() {
     
     $('.userlink').click (function() {
         console.log ("This is: ", this);
-        console.log ("This with candy is: ", $(this));
         
         $('#user-notes').editable(submitFunction, { type: 'textarea', submit: 'OK' });
         $('#user-name').editable(submitFunction, { submit: 'OK' });
@@ -47,6 +63,12 @@ $(document).ready(function() {
             
             $('#user-photo').attr ('src', '/console/contacts/' + data.summary.id + '/photo');
             $('#user-photo-link').attr ('href', '/console/contacts/' + data.summary.id + '/photo');
+            
+            $('#user-star').removeClass('starred');
+            
+            if (data.summary.starred && data.summary.starred == true) {
+                $('#user-star').addClass('starred');
+            }
             
             if (data.summary.notes) {
                 $('#user-notes').text (data.summary.notes);
@@ -92,7 +114,7 @@ $(document).ready(function() {
         return false;
     });
     
-    $('#user-numbers-add').click(function () {
+    $('#user-numbers-add').click (function () {
         $('#user-numbers').removeClass ('hidden');
         var optionstr = "";
         jQuery.each(labels, function (value, label) {
@@ -126,7 +148,7 @@ $(document).ready(function() {
         return false;
     });
     
-    $('#user-notes-add').click(function () {
+    $('#user-notes-add').click (function () {
         $('#user-notes').removeClass ('hidden');
         $('#user-notes').text(' ');
         
@@ -134,7 +156,7 @@ $(document).ready(function() {
         return false;
     });
     
-    $('#user-delete').click(function () {
+    $('#user-delete').click (function () {
         var id = $('#user-id').attr ('value');
         
         $('#userinfo').hide ('slow');
@@ -142,5 +164,9 @@ $(document).ready(function() {
         
         // FIXME: Send 'delete' request 
         return false;
+    });
+    
+    $('#user-star').click (function () {
+        $('#user-star').toggleClass ('starred');
     });
 }); 
