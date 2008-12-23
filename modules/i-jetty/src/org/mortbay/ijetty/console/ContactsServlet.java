@@ -415,7 +415,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("<input type='hidden' id='user-id' />");
         writer.println("<small id='user-edit-hint'>Click on some text to edit it.</small>");
         writer.println("<h1 style='margin-top: 2px; margin-bottom: 2px;' id='user-name'></h1>");
-        writer.println("<small><a href='#' id='user-delete'>Delete</a> | <a href='#' id='user-call'>Call</a></small>");
+        writer.println("<small><div class='star' id='user-star'>*</div> | <a href='#' id='user-delete'>Delete</a> | <a href='#' id='user-call'>Call</a></small>");
         
         writer.println("<a href='#' id='user-photo-link'><img id='user-photo' alt='User photo' /></a>");
         

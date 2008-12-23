@@ -193,3 +193,25 @@ td, tr {
 img {
     border: 0px none;
 }
+
+.star:hover,
+.star:focus {
+    background-position: 0 -32px !important;
+    text-decoration: none;
+}
+
+div.star.starred {
+    background-position: 0 -16px;
+}
+
+div.star {
+    float: left;
+    display: block;
+    list-style:none;
+    margin: 0 6px 0 0;
+    padding:0px;
+    width: 16px;
+    height: 16px;
+    background: url(star-widget.png) 0 0 no-repeat;
+    text-indent: -1000em;
+}
