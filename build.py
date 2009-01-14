@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # build.py
 # Cross-platform build helper for Android applications.
 #
