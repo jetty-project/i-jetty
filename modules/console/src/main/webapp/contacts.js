@@ -21,7 +21,7 @@ $(document).ready (function () {
     };
     
     var submitFunction = function (value, settings) {
-        var myuser = jQuery.extend (true, user);
+        var myuser = jQuery.extend (true, User);
         
         myuser.summary.id = $('#user-id').attr ('value');
         myuser.summary.name = $('#user-name').text ();

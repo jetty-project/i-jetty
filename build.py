@@ -116,11 +116,12 @@ def ask_bool(msg, default_yes=True):
 def do_config(config, filename):
     config.add_section ("Paths")
     config.set ("Paths", 'sdkpath', ask("Path to Android SDK", path=True))
+    config.set ("Paths", 'sdkver', ask("SDK version", "1.0_r2"))
     
     config.add_section ("SD")
     enablesd = ask_bool("Enable SD card with emulator?")
     config.set ("SD", 'usesd', enablesd)
-    if enablesd:
+    if enablesd != "no":
         config.set ("SD", 'sdcard', ask("SD Card filename", "sdcard.img"))
         config.set ("SD", 'clean', ask_bool("Use fresh SD card every build?", False))
     
@@ -136,7 +137,7 @@ def do_config(config, filename):
     forward = ask_bool("Forward ports?", False)
     config.set ("ADB", 'forwardports', forward)
     
-    if forward:
+    if forward != "no":
         config.set ("ADB", 'forwardsrc', ask("Source port to forward", "tcp:8888"))
         config.set ("ADB", 'forwarddest', ask("Destination port to forward", "tcp:8080"))
     
@@ -157,7 +158,7 @@ def do_build (config, buildconfig, verbose=False, args=None):
     elif args.count ("build") > 0:
         build = True
     else:
-        config.getboolean ("Build", "build")
+        build = config.getboolean ("Build", "build")
         
     if args.count ("noemulator") > 0:
         emulator = False
@@ -202,6 +203,14 @@ def do_build (config, buildconfig, verbose=False, args=None):
             sys.exit(1)
         elif system == "maven":
             cmd = None
+            installcmd = "mvn install:install-file -DgroupId=android -DartifactId=android -Dversion=%s -Dpackaging=jar -Dfile=%s > build.log" % (config.get ("Paths", "sdkver"), os.path.join (androidpath, "android.jar"))
+            
+            if verbose: print "Installing artifact..."
+            ret = os.system (installcmd)
+            if ret != 0:
+                print "Error: installing artifact failed. Check build.log for details."
+                if verbose: print "Got return code %d" % ret
+                sys.exit(2)
             
             if verbose: print "Building with Maven."
             if config.getboolean ("Build", "alwaysclean"):
@@ -297,6 +306,8 @@ if __name__ == "__main__":
         
         buildconfig.read (options.specfile)
         
-        print "Using build configuration '%s'." % options.buildconfig
-        print "Building %s version %s" % (buildconfig.get ("Product", "Name"), buildconfig.get ("Product", "Version"))
+        print "Using build configuration '%s'" % options.buildconfig
+        print "Product: %s" % buildconfig.get ("Product", "Name")
+        print "Version: %s" % buildconfig.get ("Product", "Version")
+        print
         do_build (config, buildconfig, options.verbose, args)
