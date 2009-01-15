@@ -1,45 +1,33 @@
+Depedencies
+===========
+
+* Subversion
+* Java 1.5 (or 1.6, but only report bugs if they occur with 1.5)
+* Maven
+* Python
+
 How to build
 ============
-0)  Install the android.jar from your android install directory into your
-    local maven repository:
-      $ mvn install:install-file -DgroupId=android -DartifactId=android \
-        -Dversion=[android version] -Dpackaging=jar \
-        -Dfile=[path to android.jar]
-
-1)  Check out the project from code.google.com:
+   
+0) Check out the project from code.google.com:
     $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
-    
 
-2)  Build i-jetty. You will need to have maven installed:
-        $ cd i-jetty-read-only
-        $ mvn clean install -Dandroid.home=[path to your android installation]
+1) Run build.py --configure
+   Default are fine, except for port forwarding, which you will probably
+   want to enable, so you can access Jetty from your desktop webbrowser as
+   well as on the phone.
 
-3) Make an sdcard image if you do not already have one:
-        $ scripts/create-sdcard.sh
+2) Run build.py with no arguments to setup your SD card, build i-jetty, run
+   the emulator and upload the Android package.
 
-4)  Run emulator:
-        $ emulator -sdcard [path to the sdcard.img created in step 4]
-
-5)  Install i-jetty:
-        $ adb install target/i-jetty-debug.apk
-
-6)  If you want to be able to access the webapps running on the phone from
-    your desktop browser, then link up the i-jetty port on the phone to that
-    of your desktop environment. For example, assuming i-jetty is running on
-    it's default port of 8080, and you want to be able to access that on your
-    desktop as port 8888, do:
-
-        $ adb forward tcp:8888 tcp:8080
-
-7)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
+3)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
     and click "Start Jetty". You should be able to point your favorite browser
     at http://localhost:8888/ (or http://localhost:8080 on the phone) and check
     out Jetty from Android!
 
-8) There is a console webapp accessible at http://localhost:8888/console (or 
+4) There is a console webapp accessible at http://localhost:8888/console (or 
    http://localhost:8080/console on the phone). You can use it to manage
    your on-phone data such as Contacts, Call Logs etc.
-
 
 
 Using i-jetty
@@ -99,12 +87,6 @@ To fix that, you'll need to follow these steps:
 Adding photos to contacts
 =========================
 
-* Open a new emulator from your SDK directory (optionally, you can enable an
-  SD card now - check out readme.sdcard.txt). You might want to run this as a
-  background process, eg:
-  
-  $ ./emulator -sdcard ~/src/i-jetty/sdcard.img &
-
 * On the emulator, start the Contacts activity and add a few people you know.
 
 * To upload photos to associate with your contacts, the easiest way is to
@@ -113,14 +95,3 @@ Adding photos to contacts
   application to pick the image to suit the Contact. Here's an example:
   
   $ adb push /my/local/pic.jpg /sdcard/Camera/dcim
-
-Scripts
-=======
-These are intended to be called from the main checkout, since they assume that 
-path as the working directory:
-
-
-    create-sdcard.sh        -   Creates a new sdcard.img file. Accepts optional
-                                filename and image size arguments. See source 
-                                header for more info.
-
