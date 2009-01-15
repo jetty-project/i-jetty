@@ -83,7 +83,7 @@ def ask(msg, default=None, path=False, allow_empty=False, options=None):
             val = os.path.expanduser(val)
             asking = not os.path.isdir(val)
         
-        if not asking and options:
+        if not asking and not allow_empty and options:
             val = val.lower()
             
             # FIXME: Better way than using private functions?
@@ -105,7 +105,10 @@ def ask_bool(msg, default_yes=True):
     
     val = raw_input(promptstr).strip().lower()
     if len(val) == 0:
-        return "yes"
+        if default_yes:
+            return "yes"
+        else:
+            return "no"
     else:
         if val.startswith("y"):
             return "yes"
@@ -272,9 +275,11 @@ def do_build (config, buildconfig, verbose=False, args=None):
         
         print "Installing..."
         pkg = buildconfig.get ("Upload", "Package").replace ("_VERSION_", buildconfig.get ("Product", "Version"))
-        ret = os.system ("%s %s install -r %s" % (adb, device, pkg))
+        install_cmd = "%s %s install -r %s" % (adb, device, pkg)
+        ret = os.system (install_cmd)
         if ret != 0:
             print "Error: failed to install!"
+            print "Ran with: '%s'" % install_cmd
     
     if config.getboolean ("ADB", "forwardports"):
         print "Forwarding ports..."
