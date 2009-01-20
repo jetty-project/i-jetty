@@ -14,4 +14,7 @@
        <module>modules/chat</module>
        <module>modules/i-jetty</module>
    </modules>
+   <properties>
+     <jetty-version>6.1.14</jetty-version>
+   </properties>
 </project>
