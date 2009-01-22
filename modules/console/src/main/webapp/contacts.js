@@ -21,7 +21,9 @@ $(document).ready (function () {
     };
     
     var submitFunction = function (value, settings) {
-        var myuser = jQuery.extend (true, User);
+        // Quick way to clone the User object
+        // (since jQuery is lame and doesn't like non-Prototype classes)
+        var myuser = $.extend({}, User);
         
         myuser.summary.id = $('#user-id').attr ('value');
         myuser.summary.name = $('#user-name').text ();
@@ -29,12 +31,18 @@ $(document).ready (function () {
         myuser.summary.starred = $('#user-star').hasClass ('starred');
         
         // Make name in table match that just edited
-        $('#user-' + id + ' a.userlink').text (myuser.summary.notes);
+        $('#user-' + myuser.summary.id + ' a.userlink').text (myuser.summary.notes);
+        
+        // FIXME: Do phone numbers
         
         console.log ("This is: ", this);
         console.log ("myuser is: ", myuser);
         
-        // FIXME: Send data to server via POST
+        // Send data to server via POST        
+        $.post ("/console/contacts?action=4&json=1", myuser, function(data) {
+            console.log ("POST returned: ", data);
+        });
+        
         return value;
     };
     

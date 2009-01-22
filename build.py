@@ -262,8 +262,8 @@ def do_build (config, buildconfig, verbose=False, args=None):
         
         import time
         # Sleep for ten seconds before checking status
-        if verbose: print "Sleeping for 20 seconds..."
-        time.sleep (20)
+        if verbose: print "Sleeping for 40 seconds..."
+        time.sleep (40)
         
         # Wait for emulator to start (only works on recent emlators 1.0+;
         # previous were buggy)
