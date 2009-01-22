@@ -67,7 +67,7 @@ public class ContactsServlet extends InfoServlet
     private static final String __GEO_LOCATION = "geo location";
     
     // FIXME: Use a local copy when finished testing. :)
-    private static final String[] __JAVASCRIPT = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.pack.js", "/console/contacts.js" };
+    private static final String[] __JAVASCRIPT = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.mini.js", "/console/contacts.js" };
 
 
     private Map _phoneTypes = new HashMap();
@@ -271,7 +271,10 @@ public class ContactsServlet extends InfoServlet
                     {
                         response.setContentType("text/html");
                         response.setStatus(HttpServletResponse.SC_OK);
-                        doHeader(writer, request, response);
+                        if (isMobileClient(request))
+                            doHeader(writer, request, response);
+                        else
+                            doHeader(writer, request, response, __JAVASCRIPT);
                         doMenuBar(writer, request, response);
                         doDeleteUser(writer, request, response, who /*request.getParameter("id")*/);
                         doFooter (writer, request, response);
@@ -549,12 +552,46 @@ public class ContactsServlet extends InfoServlet
         writer.println("<tr><td>Notes: </td><td><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
         
         writer.println("<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>");
-        writer.println("<tr><td>Something</td><td>Goes here soon</td></tr>");
+        String str = request.getParameter("phedit");
+        int phone_editors = (str==null? 1 : Integer.parseInt(str.trim()));
+        
+        for (int i = 0; i < phone_editors; i++)
+        {
+            writer.println(createPhoneEditor(i));
+        }
            
         writer.println("</table>");
         
         writer.println("<br /><button id='save'>Save</button> <a href='/console/contacts/" + (id != null ? id.toString() : "") + "'><button id='cancel'>Cancel</button></a></form>");
         writer.println("</div>");
+    }
+    
+    private String createPhoneEditor (int id)
+    {
+        return createPhoneEditor (id, -1, "");
+    }
+    
+    private String createPhoneEditor (int id, int type, String number)
+    {
+        String[] labels = new String[] { "Home",
+            "Mobile",
+            "Work",
+            "Work Fax",
+            "Home Fax",
+            "Pager",
+            "Other",
+            "Custom..."
+        };
+        
+        String select = "<select name='phone-type-" + id + "'>";
+        for (String label : labels)
+        {
+            select += "<option value='a'>" + label + "</option>";
+        }
+        
+        select += "</select>";
+        
+        return "<tr><td>" + select + "</td><td><input type='text' style='width: 40px;' length=10>" + number + "</td></tr>";
     }
 
 
