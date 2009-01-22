@@ -67,7 +67,7 @@ public class ContactsServlet extends InfoServlet
     private static final String __GEO_LOCATION = "geo location";
     
     // FIXME: Use a local copy when finished testing. :)
-    private static final String[] __JAVASCRIPT = new String[] { "http://code.jquery.com/jquery-latest.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.pack.js", "/console/contacts.js" };
+    private static final String[] __JAVASCRIPT = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.pack.js", "/console/contacts.js" };
 
 
     private Map _phoneTypes = new HashMap();
