@@ -132,7 +132,11 @@ def do_config(config, filename):
     config.set ("Build", 'build', ask_bool("Actually build the project?"))
     config.set ("Build", 'system', ask("Build system", "maven", options=('ant', 'make', 'maven')))
     config.set ("Build", 'alwaysclean', ask_bool("Always do make clean?"))
-    config.set ("Build", 'runemulator', ask_bool("Run emulator?"))
+    
+    emulator = ask_bool("Run emulator?")
+    config.set ("Build", 'runemulator', emulator)
+    if emulator != "no":
+        config.set ("Build", 'wipedata', ask_bool("Always clear emulator data?"))
     
     config.add_section ("ADB")
     config.set ("ADB", 'usb', ask_bool("Using USB device?", False))
@@ -237,11 +241,16 @@ def do_build (config, buildconfig, verbose=False, args=None):
     # Emulator section
     adb = os.path.join (androidpath, "tools", "adb")
     if emulator:
+        wipedata = config.getboolean ("Build", "wipedata")
+        
         print "Launching emulator..."
         cmd = os.path.join (androidpath, "tools", "emulator")
         
         if usesd:
             cmd += " -sdcard %s" % sdcard
+        
+        if wipedata:
+            cmd += " -wipe-data"
         
         if verbose: print "Running '%s' in background." % cmd
         if os.name == "nt":
