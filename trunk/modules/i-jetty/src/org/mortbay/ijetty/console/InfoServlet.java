@@ -38,7 +38,7 @@ public abstract class InfoServlet extends HttpServlet
     private String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>", "I told you we should've taken a left!" };
     
     // FIXME: Use a local copy when finished testing. :)
-    private static final String[] _javascript = new String[] { "http://code.jquery.com/jquery-latest.min.js", "http://tablesorter.com/jquery.tablesorter.min.js" };
+    private static final String[] _javascript = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js" };
 
     public ContentResolver getContentResolver ()
     {
