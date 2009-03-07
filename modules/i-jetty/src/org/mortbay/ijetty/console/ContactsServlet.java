@@ -66,6 +66,15 @@ public class ContactsServlet extends InfoServlet
     private static final String __IM = "IM";
     private static final String __GEO_LOCATION = "geo location";
     
+    private static final String[] __LABELS = new String[] { "Home",
+            "Mobile",
+            "Work",
+            "Work Fax",
+            "Home Fax",
+            "Pager",
+            "Other"
+        };
+    
     // FIXME: Use a local copy when finished testing. :)
     private static final String[] __JAVASCRIPT = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.mini.js", "/console/contacts.js" };
 
@@ -249,11 +258,13 @@ public class ContactsServlet extends InfoServlet
                     }
                     else
                     {
+                        str = request.getParameter("another");
+                        
                         response.setContentType("text/html");
                         response.setStatus(HttpServletResponse.SC_OK);
                         doHeader(writer, request, response);
                         doMenuBar(writer, request, response);
-                        doSaveUser(writer, request, response, request.getParameter("id"));
+                        doSaveUser(writer, request, response, request.getParameter("id"), (str != null && str != ""));
                         doFooter (writer, request, response);
                     }
                     break;
@@ -352,7 +363,7 @@ public class ContactsServlet extends InfoServlet
      * @throws ServletException
      * @throws IOException
      */
-    protected void doSaveUser (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id)
+    protected void doSaveUser (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id, boolean editing)
     throws ServletException, IOException
     {
         ContentValues person = new ContentValues();
@@ -376,15 +387,22 @@ public class ContactsServlet extends InfoServlet
         
         //show the details for a particular user
         response.setStatus(HttpServletResponse.SC_OK);
-        if (isMobileClient(request)) {
-            // Go back to the user's page, since we don't like iframes on
-            // tiny screens.
-            doUserContent(writer, request, response, id);
+        if (!editing)
+        {
+            if (isMobileClient(request)) {
+                // Go back to the user's page, since we don't like iframes on
+                // tiny screens.
+                doUserContent(writer, request, response, id);
+            }
+            else
+            {
+                // Just go back to the user selection page (the one with an iframe).
+                doBaseContent(writer, request, response);
+            }
         }
         else
         {
-            // Just go back to the user selection page (the one with an iframe).
-            doBaseContent(writer, request, response);
+            doEditUser(writer, request, response, id);
         }
     }
     
@@ -516,6 +534,9 @@ public class ContactsServlet extends InfoServlet
         
         boolean editing = !(id == null || id.trim().equals(""));
         
+        String str = request.getParameter("phedit");
+        int phone_editors = (str==null? 1 : Integer.parseInt(str.trim()));
+        
         if (editing)
         {
             writer.println("<h1 class='pageheader'>Editing contact</h1>");
@@ -528,7 +549,7 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("<div id='content'>");
         
-        writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE+"\" method='post'>");
+        writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE+"&phedit=" + (phone_editors + 1) + "\" method='post'>");
         if (id != null)
             writer.println("<input type='hidden' name='id' value='" + id + "'>");
         writer.println("<table>");
@@ -552,17 +573,17 @@ public class ContactsServlet extends InfoServlet
         writer.println("<tr><td>Notes: </td><td><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
         
         writer.println("<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>");
-        String str = request.getParameter("phedit");
-        int phone_editors = (str==null? 1 : Integer.parseInt(str.trim()));
         
         for (int i = 0; i < phone_editors; i++)
         {
             writer.println(createPhoneEditor(i));
         }
+        
+        writer.println("<tr><td colspan='2'><input type='submit' name='another' id='another' value='Add another' /></form></td></tr>");
            
         writer.println("</table>");
         
-        writer.println("<br /><button id='save'>Save</button> <a href='/console/contacts/" + (id != null ? id.toString() : "") + "'><button id='cancel'>Cancel</button></a></form>");
+        writer.println("<br /><input type='submit' name='save' id='save' value='Save' /> <a href='/console/contacts/" + (id != null ? id.toString() : "") + "'><button id='cancel'>Cancel</button></a></form>");
         writer.println("</div>");
     }
     
@@ -572,26 +593,18 @@ public class ContactsServlet extends InfoServlet
     }
     
     private String createPhoneEditor (int id, int type, String number)
-    {
-        String[] labels = new String[] { "Home",
-            "Mobile",
-            "Work",
-            "Work Fax",
-            "Home Fax",
-            "Pager",
-            "Other",
-            "Custom..."
-        };
-        
+    {        
         String select = "<select name='phone-type-" + id + "'>";
-        for (String label : labels)
+        int idx = 0;
+        for (String label : __LABELS)
         {
-            select += "<option value='a'>" + label + "</option>";
+            select += "<option value='" + idx + "'>" + label + "</option>";
+            idx++;
         }
         
         select += "</select>";
         
-        return "<tr><td>" + select + "</td><td><input type='text' style='width: 40px;' length=10>" + number + "</td></tr>";
+        return "<tr><td>" + select + "</td><td><input type='text' style='width: 120px;' length='12'>" + number + "</td></tr>";
     }
 
 
