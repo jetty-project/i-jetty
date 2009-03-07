@@ -96,11 +96,12 @@ public abstract class InfoServlet extends HttpServlet
         {
             writer.print("        <li>");
             
-            String[] splitPath = _navBarItems[i].split("/");
+            /*String[] splitPath = _navBarItems[i].split("/");
             if (path.endsWith(splitPath[splitPath.length - 1]))
                 writer.print("<strong>"+_navBarLabels[i]+"</strong>");
-            else
-                writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
+            else*/
+            
+            writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
             
             writer.println("</li>");
         }
