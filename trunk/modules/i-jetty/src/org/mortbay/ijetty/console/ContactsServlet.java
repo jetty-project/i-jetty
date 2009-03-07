@@ -373,17 +373,68 @@ public class ContactsServlet extends InfoServlet
         
         id = (id == null? id : id.trim());
         id = (id == null? id : ("".equals(id) ? null : id));
-
-        if (id != null)
-        {   
-            User.save(getContentResolver(), person, id);
-            Log.i("Jetty", "Updating user id "+id);
-        }
-        else
-        {
+        
+        boolean created = false;
+        
+        if (id == null) {
+            // Create it first if necessary (so we can save phone data)
             id = User.create(getContentResolver(), person);
             Log.i("Jetty", "Inserted new user id "+id);
+            created = true;
         }
+                
+        // Loop through all our phone numbers that were POSTed
+        boolean done = false;
+        int idx = 0;
+        Uri phoneUri = Uri.withAppendedPath(Uri.withAppendedPath(Contacts.People.CONTENT_URI, id), Contacts.People.Phones.CONTENT_DIRECTORY); 
+        
+        // FIXME: WHY DOES THIS NOT WORK?
+        // We can't delete via phoneUri, since it won't let us
+        // We need to loop each phone and delete based off row ID
+        
+        // Clear them first
+        /*try
+        {
+            if (!created) {
+                User.PhoneCollection phones = User.getPhones(getContentResolver(), id);
+                ContentValues phone;
+                if (phones != null) {
+                    while ((phone = phones.next() ) != null)
+                    {
+                        getContentResolver().delete(, null, null);
+                    }
+                }
+            }
+        }
+        catch (Exception e) {
+            Log.w("Jetty", "Failed to delete phone stuff", e);
+        }*/
+        
+        // Now append them all.
+        while (!done) {
+            String typestr = request.getParameter("phone-type-" + idx);
+            if (typestr == null) {
+                done = true;
+            } else {
+                String numberstr = request.getParameter("phone-number-" + idx).trim();
+                int type = Integer.parseInt (typestr);
+                
+                // Don't insert empty entries
+                if (!"".equals(numberstr)) {
+                    ContentValues numberValues = new ContentValues();
+                    numberValues.put(Contacts.Phones.NUMBER, numberstr);
+                    numberValues.put(Contacts.Phones.TYPE, type);
+                    
+                    getContentResolver().insert(phoneUri, numberValues);
+                    Log.i("Jetty", "Inserted new phone " + numberstr + " (type code " + type + ")");
+                }
+                
+                idx++;
+            }
+        }
+        
+        User.save(getContentResolver(), person, id);
+        Log.i("Jetty", "Updating user id "+id);
         
         //show the details for a particular user
         response.setStatus(HttpServletResponse.SC_OK);
@@ -572,11 +623,30 @@ public class ContactsServlet extends InfoServlet
         writer.println("<tr><td>Starred: </td><td><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
         writer.println("<tr><td>Notes: </td><td><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
         
-        writer.println("<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>");
+        writer.println("<tr><td colspan='2'><h2>Phone numbers</h2><br /><small>(set to empty to delete)</td></tr>");
+        
+        int phone_editor_id = 0;
+        
+        User.PhoneCollection phones = User.getPhones(getContentResolver(), id);
+        ContentValues phone;
+        if (phones != null) {
+            while ((phone = phones.next() ) != null)
+            {  
+                
+                String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
+                String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
+                
+                int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
+                String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
+                
+                writer.println(createPhoneEditor(phone_editor_id, type, number));
+                phone_editor_id++;
+            }
+        }
         
         for (int i = 0; i < phone_editors; i++)
         {
-            writer.println(createPhoneEditor(i));
+            writer.println(createPhoneEditor(phone_editor_id + i));
         }
         
         writer.println("<tr><td colspan='2'><input type='submit' name='another' id='another' value='Add another' /></form></td></tr>");
@@ -593,18 +663,25 @@ public class ContactsServlet extends InfoServlet
     }
     
     private String createPhoneEditor (int id, int type, String number)
+    {
+        return createPhoneEditor (id, type, number, "");
+    }
+    
+    private String createPhoneEditor (int id, int type, String number, String phonelabel)
     {        
         String select = "<select name='phone-type-" + id + "'>";
-        int idx = 0;
+        String selected = " selected='selected'";
+        int idx = 1;    // offset of 1, as 0 is reserved (since HOME=1, MOBILE=2, etc, and CUSTOM=0)
+        
         for (String label : __LABELS)
         {
-            select += "<option value='" + idx + "'>" + label + "</option>";
+            select += "<option value='" + idx + "'" + (type == id ? selected : "") + ">" + label + "</option>";
             idx++;
         }
         
         select += "</select>";
         
-        return "<tr><td>" + select + "</td><td><input type='text' style='width: 120px;' length='12'>" + number + "</td></tr>";
+        return "<tr><td>" + select + "</td><td><input type='text' name='phone-number-" + id + "' id='phone-number-" + id + "' style='width: 120px;' length='12' value='" + number + "' />" + (phonelabel != "" ? (" " + phonelabel) : "") + "</td></tr>";
     }
 
 
@@ -737,12 +814,16 @@ public class ContactsServlet extends InfoServlet
         {  
             String style = getRowStyle(row);
             writer.println("<tr class='"+style+"'>");
+            
             String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
             String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
+            
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
             String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
-            printCell(writer, (label==null?"":"<span class='label'>"+label+"</span>"), style);
+            printCell(writer, phoneType, style);
+            
             String encodedNumber = number;
+            
             try
             {
                 encodedNumber = URLEncoder.encode(number, "UTF-8");             
@@ -751,8 +832,10 @@ public class ContactsServlet extends InfoServlet
             {
                 Log.w("Jetty", "Encoding telephone number failed");
             }
-            printCell(writer, (number==null?"&nbsp;":"<a href=\"/console/contacts/"+who+"?action="+__ACTION_CALL+"&number="+encodedNumber+"\">"+number+"</a>&nbsp;<span class='qualifier'>["+phoneType+"]</span>"), style);
+            
+            printCell(writer, (number==null?"Unknown":"<a href=\"/console/contacts/"+who+"?action="+__ACTION_CALL+"&number="+encodedNumber+"\">"+number+"</a>" + (label == null ? "" : "&nbsp;<span class='phone-label'>("+label+")</span>")), style);
             writer.println("</tr>");
+            
             row++;
         }
         writer.println("</table>");
@@ -776,7 +859,7 @@ public class ContactsServlet extends InfoServlet
         
         String lastNumber;
         
-        if (numbers.size () > 1)
+        if (numbers.size () >= 1)
         {
             lastNumber = numbers.remove (numbers.size() - 1);
             
