@@ -10,14 +10,15 @@ var User = {
 };
 
 $(document).ready (function () {
-    var labels = { "home" : "Home",
-        "mobile"    : "Mobile",
-        "work"      : "Work",
-        "work-fax"  : "Work Fax",
-        "home-fax"  : "Home Fax",
-        "pager"     : "Pager",
-        "other"     : "Other",
-        ""          : "Custom..."
+    var labels = { 
+    		1 : "Home",
+    		2 : "Mobile",
+    		3 : "Work",
+    		4 : "Work Fax",
+    		5 : "Home Fax",
+    		6 : "Pager",
+    		7 : "Other",
+    		8 : "Custom..."
     };
     
     var submitFunction = function (value, settings) {
@@ -92,11 +93,8 @@ $(document).ready (function () {
                     looped = true;
                     
                     var label = 'Unknown';
-                    if (info.type == 'null' && info.label && info.label != 'null' && info.label.length > 0) {
+                    if (info.label)
                         label = info.label;
-                    } else {
-                        label = info.type.substr(0, 1).toUpperCase() + info.type.substr(1);
-                    }
                     
                     // FIXME: Make this properly editable.
                     $('#user-numbers').append ('<tr><td><span class="user-number-label-editable">' + label + '</span></td><td><a href="#" class="user-number-remove"><img src="/console/list-remove.png" alt="Remove" /></a><span class="user-number-editable">' + number + '</span></td></tr>');

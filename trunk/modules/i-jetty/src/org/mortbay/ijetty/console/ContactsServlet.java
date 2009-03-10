@@ -21,7 +21,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -30,14 +33,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.HttpStatus;
-import org.mortbay.ijetty.console.User.PhoneCollection;
 import org.mortbay.util.IO;
 import org.mortbay.util.URIUtil;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Contacts;
 import android.util.Log;
@@ -52,53 +52,52 @@ public class ContactsServlet extends InfoServlet
     private static final int __ACTION_SAVE = 4;
 
 
-    private static final String __WORK = "work";
-    private static final String __HOME = "home";
-    private static final String __OTHER = "other";
+
     private static final String __POSTAL = "postal";
-    private static final String __MOBILE = "mobile";
-    private static final String __PAGER = "pager";
-    private static final String __WORK_FAX = "work fax";
-    private static final String __HOME_FAX = "home fax";
+ 
     private static final String __PRIMARY = "primary";
     private static final String __EMAIL = "email";
-    private static final String __CUSTOM = "custom";
+
     private static final String __IM = "IM";
     private static final String __GEO_LOCATION = "geo location";
     
-    private static final String[] __LABELS = new String[] { "Home",
-            "Mobile",
-            "Work",
-            "Work Fax",
-            "Home Fax",
-            "Pager",
-            "Other"
-        };
+    private static enum __INFO_TYPE {Mobile, Home, Work, WorkFax, HomeFax, Pager, Other, Custom, Email, IM};
+    private static EnumMap<__INFO_TYPE, String> __TYPE_LABELS = new EnumMap<__INFO_TYPE, String>(__INFO_TYPE.class);
+    
     
     // FIXME: Use a local copy when finished testing. :)
     private static final String[] __JAVASCRIPT = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.mini.js", "/console/contacts.js" };
 
 
-    private Map _phoneTypes = new HashMap();
-    private Map _contactEmailTypes = new HashMap();
+    private Map<Integer, __INFO_TYPE> _phoneTypes = new HashMap<Integer, __INFO_TYPE>();
+    private Map<Integer, __INFO_TYPE> _contactEmailTypes = new HashMap<Integer, __INFO_TYPE>();
     private Map _postalTypes = new HashMap();
     
 
     
     public ContactsServlet ()
     {
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_MOBILE), __MOBILE);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_HOME), __HOME);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_WORK), __WORK);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_FAX_WORK), __WORK_FAX);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_FAX_HOME), __HOME_FAX);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_PAGER), __PAGER);
-        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_OTHER), __OTHER);
+        __TYPE_LABELS.put(__INFO_TYPE.Mobile, "Mobile");
+        __TYPE_LABELS.put(__INFO_TYPE.Home, "Home");
+        __TYPE_LABELS.put(__INFO_TYPE.Work, "Work");
+        __TYPE_LABELS.put(__INFO_TYPE.HomeFax, "Home Fax");
+        __TYPE_LABELS.put(__INFO_TYPE.WorkFax, "Work Fax");
+        __TYPE_LABELS.put(__INFO_TYPE.Pager, "Pager");
+        __TYPE_LABELS.put(__INFO_TYPE.Other, "Other");
+        __TYPE_LABELS.put(__INFO_TYPE.Custom, "Custom");
         
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_HOME), __HOME);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_WORK), __WORK);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_OTHER), __OTHER);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_CUSTOM), __CUSTOM);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_MOBILE), __INFO_TYPE.Mobile);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_HOME), __INFO_TYPE.Home);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_WORK), __INFO_TYPE.Work);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_FAX_WORK), __INFO_TYPE.WorkFax);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_FAX_HOME), __INFO_TYPE.HomeFax);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_PAGER), __INFO_TYPE.Pager);
+        _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_OTHER), __INFO_TYPE.Other);
+        
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_HOME), __INFO_TYPE.Home);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_WORK), __INFO_TYPE.Work);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_OTHER), __INFO_TYPE.Other);
+        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_CUSTOM), __INFO_TYPE.Custom);
   
         //_contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.ISPRIMARY), __PRIMARY);
         
@@ -383,56 +382,75 @@ public class ContactsServlet extends InfoServlet
             created = true;
         }
                 
-        // Loop through all our phone numbers that were POSTed
-        boolean done = false;
-        int idx = 0;
-        Uri phoneUri = Uri.withAppendedPath(Uri.withAppendedPath(Contacts.People.CONTENT_URI, id), Contacts.People.Phones.CONTENT_DIRECTORY); 
+        // Loop through all our phone numbers that were POSTed     
+        List<String> deletedPhones = new ArrayList<String>();
         
-        // FIXME: WHY DOES THIS NOT WORK?
-        // We can't delete via phoneUri, since it won't let us
-        // We need to loop each phone and delete based off row ID
-        
-        // Clear them first
-        /*try
+        Map<String, String[]> modifiedPhones = new HashMap<String, String[]>();
+        Enumeration enumeration = request.getParameterNames();
+        while (enumeration.hasMoreElements())
         {
-            if (!created) {
-                User.PhoneCollection phones = User.getPhones(getContentResolver(), id);
-                ContentValues phone;
-                if (phones != null) {
-                    while ((phone = phones.next() ) != null)
-                    {
-                        getContentResolver().delete(, null, null);
-                    }
+            String name = (String)enumeration.nextElement();
+            if (name.startsWith("del-"))
+            {
+                //a phone to delete
+                String phId = name.substring(4);
+                Log.d("Jetty", "Phone to delete: "+phId+" from "+name);
+                String val = request.getParameter(name);
+                if ("del".equals(val))
+                {
+                    deletedPhones.add(phId);
+                }
+            }
+            else if (name.startsWith("phone-type-"))
+            { 
+                String phId = name.substring(11);
+                if (!deletedPhones.contains(phId))
+                {
+                    Log.d("Jetty", "Modified phone "+phId+" from "+name);
+                    String typeStr = request.getParameter(name);
+                    String number = request.getParameter("phone-number-"+phId);
+                    String[] phInfo = new String[2];
+                    phInfo[0] = typeStr;
+                    phInfo[1] = number;
+                    modifiedPhones.put(phId, phInfo);
                 }
             }
         }
-        catch (Exception e) {
-            Log.w("Jetty", "Failed to delete phone stuff", e);
-        }*/
-        
-        // Now append them all.
-        while (!done) {
-            String typestr = request.getParameter("phone-type-" + idx);
-            if (typestr == null) {
-                done = true;
-            } else {
-                String numberstr = request.getParameter("phone-number-" + idx).trim();
-                int type = Integer.parseInt (typestr);
-                
-                // Don't insert empty entries
-                if (!"".equals(numberstr)) {
+      
+        //Handle addition and modifications
+        for (String key: modifiedPhones.keySet())
+        {
+            String[] phInfo = modifiedPhones.get(key);
+            if ("x".equals(key))
+            {
+                //new phone
+                if (phInfo[1] != null && !"".equals(phInfo[1]))
+                {
+                    Log.d("Jetty", "Adding new phone with number "+phInfo[1]+" and type "+phInfo[1]);
                     ContentValues numberValues = new ContentValues();
-                    numberValues.put(Contacts.Phones.NUMBER, numberstr);
-                    numberValues.put(Contacts.Phones.TYPE, type);
-                    
-                    getContentResolver().insert(phoneUri, numberValues);
-                    Log.i("Jetty", "Inserted new phone " + numberstr + " (type code " + type + ")");
+                    numberValues.put(Contacts.Phones.NUMBER, phInfo[1]);
+                    numberValues.put(Contacts.Phones.TYPE, phInfo[0]);
+                    Phone.addPhone(getContentResolver(), numberValues, id);
                 }
-                
-                idx++;
+            }
+            else
+            {
+                //possibly modified phone, save anyway
+                Log.d("Jetty", "Saving phone id="+key+" with number "+phInfo[1]+" and type "+phInfo[0]);
+                ContentValues numberValues = new ContentValues();
+                numberValues.put(Contacts.Phones.NUMBER, phInfo[1]);
+                numberValues.put(Contacts.Phones.TYPE, phInfo[0]);
+                Phone.savePhone(getContentResolver(), numberValues, key, id);
             }
         }
+    
         
+        //Get rid of the deleted phones
+        for (String phId : deletedPhones)
+        {
+            Phone.deletePhone(getContentResolver(), phId, id);
+            Log.d("Jetty", "Deleted phone "+phId);
+        }
         User.save(getContentResolver(), person, id);
         Log.i("Jetty", "Updating user id "+id);
         
@@ -519,7 +537,7 @@ public class ContactsServlet extends InfoServlet
         writer.print(", \"phones\" : ");
         
         //query for all phone details
-        User.PhoneCollection phones = User.getPhones(getContentResolver(), who);
+        Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(), who);
         formatPhonesJSON (who, phones, writer);
         phones.close();
         
@@ -552,7 +570,7 @@ public class ContactsServlet extends InfoServlet
         formatSummaryUserDetails (values, writer);
        
         //query for all phone details
-        User.PhoneCollection phones = User.getPhones(getContentResolver(), who);
+        Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(), who);
         formatPhones (who, phones, writer);
         phones.close();
         
@@ -584,10 +602,7 @@ public class ContactsServlet extends InfoServlet
         boolean starred = false;
         
         boolean editing = !(id == null || id.trim().equals(""));
-        
-        String str = request.getParameter("phedit");
-        int phone_editors = (str==null? 1 : Integer.parseInt(str.trim()));
-        
+            
         if (editing)
         {
             writer.println("<h1 class='pageheader'>Editing contact</h1>");
@@ -600,7 +615,7 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("<div id='content'>");
         
-        writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE+"&phedit=" + (phone_editors + 1) + "\" method='post'>");
+        writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE + "\" method='post'>");
         if (id != null)
             writer.println("<input type='hidden' name='id' value='" + id + "'>");
         writer.println("<table>");
@@ -618,70 +633,62 @@ public class ContactsServlet extends InfoServlet
             }            
         }
         
-        writer.println("<tr><td colspan='2'><h2>General</h2></td></tr>");
-        writer.println("<tr><td>Name: </td><td><input name='name' type='text' value='" + name + "' /></td></tr>");
-        writer.println("<tr><td>Starred: </td><td><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
-        writer.println("<tr><td>Notes: </td><td><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
+        writer.println("<tr><td colspan='3'><h2>General</h2></td></tr>");
+        writer.println("<tr><td>Name: </td><td colspan='2' ><input name='name' type='text' value='" + name + "' /></td></tr>");
+        writer.println("<tr><td>Starred: </td><td colspan='2' ><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
+        writer.println("<tr><td>Notes: </td><td colspan='2'  ><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
         
-        writer.println("<tr><td colspan='2'><h2>Phone numbers</h2><br /><small>(set to empty to delete)</td></tr>");
+        writer.println("<tr><td colspan='3'><h2>Phone numbers</h2></td></tr>");
         
         int phone_editor_id = 0;
         
-        User.PhoneCollection phones = User.getPhones(getContentResolver(), id);
-        ContentValues phone;
-        if (phones != null) {
-            while ((phone = phones.next() ) != null)
-            {  
-                
+        Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(), id);
+
+        if (phones != null)
+        {
+            ContentValues phone;
+            while ((phone = phones.next()) != null)
+            {
+                String phoneId = phone.getAsString(android.provider.BaseColumns._ID);
                 String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
                 String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
-                
                 int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
-                String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
-                
-                writer.println(createPhoneEditor(phone_editor_id, type, number));
+                writer.println(createPhoneEditor(phoneId, label,type,number));
                 phone_editor_id++;
             }
         }
-        
-        for (int i = 0; i < phone_editors; i++)
-        {
-            writer.println(createPhoneEditor(phone_editor_id + i));
-        }
-        
-        writer.println("<tr><td colspan='2'><input type='submit' name='another' id='another' value='Add another' /></form></td></tr>");
-           
+
+
+        //Put on a spare one so they can add another number
+        writer.println(createPhoneEditor("x", "", -1, ""));
+       // writer.println("<tr><td colspan='2'><input type='submit' name='another' id='another' value='Add another' /></form></td></tr>");
         writer.println("</table>");
-        
         writer.println("<br /><input type='submit' name='save' id='save' value='Save' /> <a href='/console/contacts/" + (id != null ? id.toString() : "") + "'><button id='cancel'>Cancel</button></a></form>");
         writer.println("</div>");
     }
     
-    private String createPhoneEditor (int id)
-    {
-        return createPhoneEditor (id, -1, "");
-    }
+ 
+
     
-    private String createPhoneEditor (int id, int type, String number)
-    {
-        return createPhoneEditor (id, type, number, "");
-    }
-    
-    private String createPhoneEditor (int id, int type, String number, String phonelabel)
+    private String createPhoneEditor (String id, String label, int type, String number)
     {        
         String select = "<select name='phone-type-" + id + "'>";
         String selected = " selected='selected'";
-        int idx = 1;    // offset of 1, as 0 is reserved (since HOME=1, MOBILE=2, etc, and CUSTOM=0)
-        
-        for (String label : __LABELS)
+
+        for (Integer i : _phoneTypes.keySet())
         {
-            select += "<option value='" + idx + "'" + (type == id ? selected : "") + ">" + label + "</option>";
-            idx++;
-        }
-        
+            __INFO_TYPE t = _phoneTypes.get(i);
+            select += "<option value='" + i + "'" + (type == i.intValue() ? selected : "") + ">" + __TYPE_LABELS.get(t) + "</option>";
+        }   
         select += "</select>";
         
-        return "<tr><td>" + select + "</td><td><input type='text' name='phone-number-" + id + "' id='phone-number-" + id + "' style='width: 120px;' length='12' value='" + number + "' />" + (phonelabel != "" ? (" " + phonelabel) : "") + "</td></tr>";
+        String row = "<tr>";
+        if (!"x".equals(id))
+            row += "<td><input type='checkbox' name='del-"+id+"' value='del'>Delete</input></td>";
+        else
+            row+= "<td>&nbsp;</td>";
+        row += "<td>" + select + "</td><td><input type='text' name='phone-number-" + id + "' id='phone-number-" + id + "' style='width: 120px;' length='12' value='" + number + "' /></td></tr>";
+        return row;
     }
 
 
@@ -804,7 +811,7 @@ public class ContactsServlet extends InfoServlet
     }
     
 
-    private void formatPhones (String who, PhoneCollection phones, PrintWriter writer)
+    private void formatPhones (String who, Phone.PhoneCollection phones, PrintWriter writer)
     {
         writer.println("<h2>Phone Numbers</h2>");
         writer.println("<table id='phones' style='border: 0px none;'>");
@@ -819,7 +826,7 @@ public class ContactsServlet extends InfoServlet
             String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
             
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
-            String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
+            String phoneType= __TYPE_LABELS.get(_phoneTypes.get(Integer.valueOf(type)));
             printCell(writer, phoneType, style);
             
             String encodedNumber = number;
@@ -841,7 +848,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("</table>");
     }
     
-    private void formatPhonesJSON (String who, PhoneCollection phones, PrintWriter writer)
+    private void formatPhonesJSON (String who, Phone.PhoneCollection phones, PrintWriter writer)
     {
         ContentValues phone;
         writer.print ("{ ");
@@ -849,12 +856,11 @@ public class ContactsServlet extends InfoServlet
         
         while ((phone = phones.next() ) != null)
         {  
+            String id = phone.getAsString(android.provider.BaseColumns._ID);
             String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
             String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
-            String phoneType=(String)_phoneTypes.get(Integer.valueOf(type));
-            
-            numbers.add ("'" + number + "' : { 'label' : '" + (label == null ? "" : label.replace("'", "\\'")) + "', 'type' : '" + phoneType + "' }");
+            numbers.add ("'" + number + "' : { 'label' : '" + (label == null ? "" : label.replace("'", "\\'")) + "', 'type' : " + type + ", 'id': '"+id+"' }");
         }
         
         String lastNumber;
@@ -903,7 +909,7 @@ public class ContactsServlet extends InfoServlet
                 }
                 default:
                 {
-                  typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
+                  typeStr = __TYPE_LABELS.get(_contactEmailTypes.get(Integer.valueOf(type)));
                 }
             }
 
