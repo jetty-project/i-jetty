@@ -9,40 +9,13 @@ import android.provider.Contacts;
 
 public class User
 {
-    public static abstract class AbstractCollection
-    {
-        protected Cursor cursor;
-        
-        public abstract ContentValues cursorToValues (Cursor cursor);
-        
-        public AbstractCollection (Cursor cursor)
-        {
-            this.cursor = cursor;    
-        }
-
-        public ContentValues next ()
-        {
-            ContentValues values = null;
-
-            if (cursor.moveToNext())
-            {
-                return cursorToValues(cursor);
-            }
-            
-            return values;
-        }
-
-        public void close ()
-        {
-            cursor.close();
-        } 
-    }
+  
     /**
      * UserCollection
      *
      * Inner class wrapping a Cursor over Contacts
      */
-    public static class UserCollection extends AbstractCollection
+    public static class UserCollection extends DatabaseCollection
     {
         public UserCollection (Cursor cursor)
         {
@@ -51,26 +24,14 @@ public class User
 
         public ContentValues cursorToValues(Cursor cursor)
         {
-            return cursorToUserValues(cursor);
+           return cursorToUserValues(cursor);
         }
        
     }
     
+  
     
-    public static class PhoneCollection extends AbstractCollection
-    {
-        public PhoneCollection (Cursor cursor)
-        {
-            super(cursor);
-        }
-        
-        public ContentValues cursorToValues(Cursor cursor)
-        {
-            return cursorToPhoneValues(cursor);
-        }
-    }
-    
-    public static class ContactMethodsCollection extends AbstractCollection
+    public static class ContactMethodsCollection extends DatabaseCollection
     {
         public ContactMethodsCollection(Cursor cursor)
         {
@@ -78,35 +39,50 @@ public class User
         }    
         public ContentValues cursorToValues(Cursor cursor)
         {
-            return cursorToContactMethodsValues(cursor);
+            if (cursor == null)
+                return null;
+            
+            ContentValues values = new ContentValues();
+            String val;
+            val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.DATA));
+            values.put(Contacts.ContactMethodsColumns.DATA, val);
+            val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.AUX_DATA));
+            values.put(Contacts.ContactMethodsColumns.AUX_DATA,val);
+            val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.LABEL));
+            values.put(Contacts.ContactMethodsColumns.LABEL, val);
+            Integer intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.ISPRIMARY)));
+            values.put(Contacts.ContactMethodsColumns.ISPRIMARY, intVal);
+            intVal = new Integer(cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.KIND)));
+            values.put(Contacts.ContactMethodsColumns.KIND, intVal);
+            intVal = new Integer(cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.TYPE)));
+            values.put(Contacts.ContactMethodsColumns.TYPE, intVal);
+            return values;
         }
     }
 
     
-    static final String[] baseProjection = new String[] {
-            android.provider.BaseColumns._ID,
-            android.provider.Contacts.PeopleColumns.DISPLAY_NAME,
-            android.provider.Contacts.PeopleColumns.NOTES,
-            android.provider.Contacts.PeopleColumns.STARRED
-    };
+    static final String[] baseProjection = 
+        new String[] 
+                   {
+                       android.provider.BaseColumns._ID,
+                       android.provider.Contacts.PeopleColumns.DISPLAY_NAME,
+                       android.provider.Contacts.PeopleColumns.NOTES,
+                       android.provider.Contacts.PeopleColumns.STARRED
+                   };
     
-    static final String[] contactMethodsProjection = new String[] {
-            android.provider.BaseColumns._ID,
-            android.provider.Contacts.ContactMethodsColumns.DATA,
-            android.provider.Contacts.ContactMethodsColumns.AUX_DATA,
-            android.provider.Contacts.ContactMethodsColumns.KIND,
-            android.provider.Contacts.ContactMethodsColumns.LABEL,
-            android.provider.Contacts.ContactMethodsColumns.TYPE,
-            android.provider.Contacts.ContactMethodsColumns.ISPRIMARY
-    };
-    
-    static final String[] phonesProjection = new String[] {
-            android.provider.BaseColumns._ID,
-            android.provider.Contacts.PhonesColumns.LABEL,
-            android.provider.Contacts.PhonesColumns.NUMBER,
-            android.provider.Contacts.PhonesColumns.NUMBER_KEY,
-            android.provider.Contacts.PhonesColumns.TYPE      
-    };
+    static final String[] contactMethodsProjection = 
+        new String[] 
+                   {
+                       android.provider.BaseColumns._ID,
+                       android.provider.Contacts.ContactMethodsColumns.DATA,
+                       android.provider.Contacts.ContactMethodsColumns.AUX_DATA,
+                       android.provider.Contacts.ContactMethodsColumns.KIND,
+                       android.provider.Contacts.ContactMethodsColumns.LABEL,
+                       android.provider.Contacts.ContactMethodsColumns.TYPE,
+                       android.provider.Contacts.ContactMethodsColumns.ISPRIMARY
+                   };
+
+
     
     
     /**
@@ -214,28 +190,6 @@ public class User
     
     
     /**
-     * getPhones
-     * 
-     * Get the phone numbers for a Contact.
-     * 
-     * @param resolver
-     * @param id
-     * @return
-     */
-    public static PhoneCollection getPhones (ContentResolver resolver, String id)
-    {
-        if (id == null)
-            return null;
-        
-        String[] whereArgs = new String[]{id};
-        return new PhoneCollection (resolver.query(Contacts.Phones.CONTENT_URI, phonesProjection, 
-                "people."+android.provider.BaseColumns._ID+" = ?", 
-                whereArgs, Contacts.PhonesColumns.TYPE+" ASC"));
-    }
-    
-    
-    
-    /**
      * getContactMethods
      * 
      * Get the ContactMethods for a Contact.
@@ -256,9 +210,7 @@ public class User
                 whereArgs, Contacts.ContactMethodsColumns.KIND +" DESC"));
     }
     
-    
-    
-    private static ContentValues cursorToUserValues (Cursor cursor)
+    public static ContentValues cursorToUserValues(Cursor cursor)
     {
         if (cursor == null)
             return null;
@@ -276,48 +228,6 @@ public class User
         
         val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
         values.put(Contacts.PeopleColumns.NOTES, val);
-        return values;
-    }
-    
-    private static ContentValues cursorToPhoneValues (Cursor cursor)
-    {
-        if (cursor == null)
-            return null;
-        
-        ContentValues values = new ContentValues();
-        String val;
-        val =  cursor.getString(cursor.getColumnIndex(Contacts.PhonesColumns.LABEL));
-        values.put(Contacts.PhonesColumns.LABEL, val);
-        
-        val = cursor.getString(cursor.getColumnIndex(Contacts.PhonesColumns.NUMBER));
-        values.put (Contacts.PhonesColumns.NUMBER, val);
-        
-        Integer intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.PhonesColumns.TYPE)));
-        values.put(Contacts.PhonesColumns.TYPE, intVal);
-        
-        return values;
-    }
-    
-    
-    private static ContentValues cursorToContactMethodsValues (Cursor cursor)
-    {
-        if (cursor == null)
-            return null;
-        
-        ContentValues values = new ContentValues();
-        String val;
-        val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.DATA));
-        values.put(Contacts.ContactMethodsColumns.DATA, val);
-        val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.AUX_DATA));
-        values.put(Contacts.ContactMethodsColumns.AUX_DATA,val);
-        val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.LABEL));
-        values.put(Contacts.ContactMethodsColumns.LABEL, val);
-        Integer intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.ISPRIMARY)));
-        values.put(Contacts.ContactMethodsColumns.ISPRIMARY, intVal);
-        intVal = new Integer(cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.KIND)));
-        values.put(Contacts.ContactMethodsColumns.KIND, intVal);
-        intVal = new Integer(cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.TYPE)));
-        values.put(Contacts.ContactMethodsColumns.TYPE, intVal);
         return values;
     }
 }

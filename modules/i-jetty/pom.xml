@@ -16,22 +16,48 @@
       <dependency>
          <groupId>android</groupId>
          <artifactId>android</artifactId>
-         <version>1.0_r2</version>
+         <version>${android-version}</version>
+         <scope>system</scope>
+         <systemPath>${android.home}/android.jar</systemPath>
       </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>${jetty-version}</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+<!--
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api-2.5</artifactId>
+      <version>6.1.14</version>
+      <scope>provided</scope>
+    </dependency>
+-->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-util5</artifactId>
-      <version>${jetty-version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-client</artifactId>
-      <version>${jetty-version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.mortbay.ijetty</groupId>
@@ -55,6 +81,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
+          <version>2.0</version>
           <executions>
             <execution>
               <id>unpack-dependencies</id>
@@ -65,16 +92,17 @@
               <configuration>
                 <classifier>sources</classifier>
                 <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                <excludes>org/mortbay/log/Slf4jLog.java</excludes>
+<!--
                 <artifactItems>
                   <artifactItem>
                     <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>servlet-api-2.5</artifactId>
+                    <artifactId>servlet-api</artifactId>
                   </artifactItem>
                   <artifactItem>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jetty-util</artifactId>
-                    <excludes>org/mortbay/log/Slf4jLog.java</excludes>
-                    <includes>**/**</includes>
+                    <excludes>**/**</excludes>
                   </artifactItem>
                   <artifactItem>
                     <groupId>org.mortbay.jetty</groupId>
@@ -89,6 +117,7 @@
                     <artifactId>jetty-client</artifactId>
                   </artifactItem>
                 </artifactItems>
+-->
                 <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
               </configuration>
             </execution>

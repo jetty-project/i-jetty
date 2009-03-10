@@ -75,14 +75,14 @@
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
-      <version>6.1.12.rc2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>1.0_r2</version>
-      <scope>provided</scope>
+      <version>${android-version}</version>
+      <scope>system</scope>
+      <systemPath>${android.home}/android.jar</systemPath>
     </dependency>
   </dependencies>
 </project>
