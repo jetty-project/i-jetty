@@ -81,8 +81,6 @@
       <groupId>android</groupId>
       <artifactId>android</artifactId>
       <version>${android-version}</version>
-      <scope>system</scope>
-      <systemPath>${android.home}/android.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

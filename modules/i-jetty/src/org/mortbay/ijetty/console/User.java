@@ -30,35 +30,6 @@ public class User
     }
     
   
-    
-    public static class ContactMethodsCollection extends DatabaseCollection
-    {
-        public ContactMethodsCollection(Cursor cursor)
-        {
-            super(cursor);
-        }    
-        public ContentValues cursorToValues(Cursor cursor)
-        {
-            if (cursor == null)
-                return null;
-            
-            ContentValues values = new ContentValues();
-            String val;
-            val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.DATA));
-            values.put(Contacts.ContactMethodsColumns.DATA, val);
-            val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.AUX_DATA));
-            values.put(Contacts.ContactMethodsColumns.AUX_DATA,val);
-            val = cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.LABEL));
-            values.put(Contacts.ContactMethodsColumns.LABEL, val);
-            Integer intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.ContactMethodsColumns.ISPRIMARY)));
-            values.put(Contacts.ContactMethodsColumns.ISPRIMARY, intVal);
-            intVal = new Integer(cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.KIND)));
-            values.put(Contacts.ContactMethodsColumns.KIND, intVal);
-            intVal = new Integer(cursor.getString(cursor.getColumnIndex(Contacts.ContactMethodsColumns.TYPE)));
-            values.put(Contacts.ContactMethodsColumns.TYPE, intVal);
-            return values;
-        }
-    }
 
     
     static final String[] baseProjection = 
@@ -67,22 +38,12 @@ public class User
                        android.provider.BaseColumns._ID,
                        android.provider.Contacts.PeopleColumns.DISPLAY_NAME,
                        android.provider.Contacts.PeopleColumns.NOTES,
-                       android.provider.Contacts.PeopleColumns.STARRED
+                       android.provider.Contacts.PeopleColumns.STARRED,
+                       android.provider.Contacts.PeopleColumns.SEND_TO_VOICEMAIL,
+                       android.provider.Contacts.PeopleColumns.CUSTOM_RINGTONE
                    };
     
-    static final String[] contactMethodsProjection = 
-        new String[] 
-                   {
-                       android.provider.BaseColumns._ID,
-                       android.provider.Contacts.ContactMethodsColumns.DATA,
-                       android.provider.Contacts.ContactMethodsColumns.AUX_DATA,
-                       android.provider.Contacts.ContactMethodsColumns.KIND,
-                       android.provider.Contacts.ContactMethodsColumns.LABEL,
-                       android.provider.Contacts.ContactMethodsColumns.TYPE,
-                       android.provider.Contacts.ContactMethodsColumns.ISPRIMARY
-                   };
-
-
+   
     
     
     /**
@@ -188,27 +149,7 @@ public class User
     }
 
     
-    
-    /**
-     * getContactMethods
-     * 
-     * Get the ContactMethods for a Contact.
-     * 
-     * @param resolver
-     * @param id
-     * @return
-     */
-    public static ContactMethodsCollection getContactMethods (ContentResolver resolver, String id)
-    {
-        if (id == null)
-            return null;
-        
-        String[] whereArgs = new String[]{id};
-        return new ContactMethodsCollection (resolver.query(Contacts.ContactMethods.CONTENT_URI, 
-                contactMethodsProjection, 
-                "people."+android.provider.BaseColumns._ID+" = ?", 
-                whereArgs, Contacts.ContactMethodsColumns.KIND +" DESC"));
-    }
+   
     
     public static ContentValues cursorToUserValues(Cursor cursor)
     {
@@ -228,6 +169,12 @@ public class User
         
         val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
         values.put(Contacts.PeopleColumns.NOTES, val);
+        
+        intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.SEND_TO_VOICEMAIL)));
+        values.put(Contacts.PeopleColumns.SEND_TO_VOICEMAIL, intVal);
+        
+        val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.CUSTOM_RINGTONE));
+        values.put(Contacts.PeopleColumns.CUSTOM_RINGTONE, val);
         return values;
     }
 }
