@@ -61,7 +61,7 @@ public class ContactsServlet extends InfoServlet
     private static final String __IM = "IM";
     private static final String __GEO_LOCATION = "geo location";
     
-    private static enum __INFO_TYPE {Mobile, Home, Work, WorkFax, HomeFax, Pager, Other, Custom, Email, IM};
+    private static enum __INFO_TYPE {Mobile, Home, Work, WorkFax, HomeFax, Pager, Other, Custom, Email, IM, Postal, Phone, Organization};
     private static EnumMap<__INFO_TYPE, String> __TYPE_LABELS = new EnumMap<__INFO_TYPE, String>(__INFO_TYPE.class);
     
     
@@ -70,8 +70,9 @@ public class ContactsServlet extends InfoServlet
 
 
     private Map<Integer, __INFO_TYPE> _phoneTypes = new HashMap<Integer, __INFO_TYPE>();
-    private Map<Integer, __INFO_TYPE> _contactEmailTypes = new HashMap<Integer, __INFO_TYPE>();
-    private Map _postalTypes = new HashMap();
+    private Map<Integer, __INFO_TYPE> _contactTypes = new HashMap<Integer, __INFO_TYPE>();
+    private Map<Integer, __INFO_TYPE> _contactKinds = new HashMap<Integer, __INFO_TYPE>();
+ 
     
 
     
@@ -85,6 +86,10 @@ public class ContactsServlet extends InfoServlet
         __TYPE_LABELS.put(__INFO_TYPE.Pager, "Pager");
         __TYPE_LABELS.put(__INFO_TYPE.Other, "Other");
         __TYPE_LABELS.put(__INFO_TYPE.Custom, "Custom");
+        __TYPE_LABELS.put(__INFO_TYPE.Phone, "Phone");
+        __TYPE_LABELS.put(__INFO_TYPE.Postal, "Postal");
+        __TYPE_LABELS.put(__INFO_TYPE.IM, "IM");
+        __TYPE_LABELS.put(__INFO_TYPE.Email, "Email");
         
         _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_MOBILE), __INFO_TYPE.Mobile);
         _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_HOME), __INFO_TYPE.Home);
@@ -94,17 +99,15 @@ public class ContactsServlet extends InfoServlet
         _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_PAGER), __INFO_TYPE.Pager);
         _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_OTHER), __INFO_TYPE.Other);
         
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_HOME), __INFO_TYPE.Home);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_WORK), __INFO_TYPE.Work);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_OTHER), __INFO_TYPE.Other);
-        _contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_CUSTOM), __INFO_TYPE.Custom);
-  
-        //_contactEmailTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.ISPRIMARY), __PRIMARY);
+        _contactTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_HOME), __INFO_TYPE.Home);
+        _contactTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_WORK), __INFO_TYPE.Work);
+        _contactTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_OTHER), __INFO_TYPE.Other);
+        _contactTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.TYPE_CUSTOM), __INFO_TYPE.Custom);
         
-        /*_postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_HOME_TYPE), __HOME);
-        _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_OTHER_TYPE), __OTHER);
-        _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_POSTAL_TYPE), __POSTAL);
-        _postalTypes.put(Integer.valueOf(Contacts.ContactMethodsColumns.POSTAL_KIND_WORK_TYPE), __WORK);*/
+        _contactKinds.put(Integer.valueOf(Contacts.KIND_EMAIL), __INFO_TYPE.Email);
+        _contactKinds.put(Integer.valueOf(Contacts.KIND_IM), __INFO_TYPE.IM);
+        _contactKinds.put(Integer.valueOf(Contacts.KIND_PHONE), __INFO_TYPE.Phone);
+        _contactKinds.put(Integer.valueOf(Contacts.KIND_POSTAL), __INFO_TYPE.Postal);
     }
     
     
@@ -369,6 +372,7 @@ public class ContactsServlet extends InfoServlet
         person.put(Contacts.People.NAME, request.getParameter("name"));
         person.put(Contacts.People.NOTES, request.getParameter("notes"));
         person.put(Contacts.People.STARRED, request.getParameter("starred") != null ? 1 : 0);
+        person.put(Contacts.People.SEND_TO_VOICEMAIL, request.getParameter("voicemail") != null ? 1 :0);
         
         id = (id == null? id : id.trim());
         id = (id == null? id : ("".equals(id) ? null : id));
@@ -381,76 +385,124 @@ public class ContactsServlet extends InfoServlet
             Log.i("Jetty", "Inserted new user id "+id);
             created = true;
         }
-                
-        // Loop through all our phone numbers that were POSTed     
-        List<String> deletedPhones = new ArrayList<String>();
-        
-        Map<String, String[]> modifiedPhones = new HashMap<String, String[]>();
+                   
+        List<String> deletedPhones = new ArrayList<String>();      
+        Map<String, ContentValues> modifiedPhones = new HashMap<String, ContentValues>();
+        List<String> deletedContacts = new ArrayList<String>();      
+        Map<String, ContentValues> modifiedContacts = new HashMap<String, ContentValues>();
         Enumeration enumeration = request.getParameterNames();
         while (enumeration.hasMoreElements())
         {
             String name = (String)enumeration.nextElement();
-            if (name.startsWith("del-"))
+            if (name.startsWith("phone-del-"))
             {
                 //a phone to delete
-                String phId = name.substring(4);
+                String phId = name.substring(10);
                 Log.d("Jetty", "Phone to delete: "+phId+" from "+name);
                 String val = request.getParameter(name);
                 if ("del".equals(val))
-                {
                     deletedPhones.add(phId);
-                }
+            }
+            else if (name.startsWith("contact-del-"))
+            {
+                String methodId = name.substring(12);
+                Log.d("Jetty", "Contact method to delete: "+methodId+" from "+name);
+                String val = request.getParameter(name);
+                if ("del".equals(val))
+                    deletedContacts.add(methodId);
             }
             else if (name.startsWith("phone-type-"))
             { 
                 String phId = name.substring(11);
-                if (!deletedPhones.contains(phId))
+                if (request.getParameter("phone-del-"+phId) == null)
                 {
                     Log.d("Jetty", "Modified phone "+phId+" from "+name);
                     String typeStr = request.getParameter(name);
                     String number = request.getParameter("phone-number-"+phId);
-                    String[] phInfo = new String[2];
-                    phInfo[0] = typeStr;
-                    phInfo[1] = number;
-                    modifiedPhones.put(phId, phInfo);
+                    ContentValues phone = new ContentValues();
+                    phone.put(Contacts.Phones.NUMBER, number);
+                    phone.put(Contacts.Phones.TYPE, typeStr);
+                    modifiedPhones.put(phId, phone);
+                }
+            }
+            else if (name.startsWith("contact-kind-"))
+            {
+                String methodId = name.substring(13);
+                Log.d("Jetty", "Possible contact modification: "+methodId);
+                if (request.getParameter("contact-del-"+methodId) == null)
+                { 
+                    String kind = request.getParameter(name);
+                    String type = request.getParameter("contact-type-"+methodId);
+                    String val = request.getParameter("contact-val-"+methodId);
+                    ContentValues contactMethod = new ContentValues();
+                    contactMethod.put(Contacts.ContactMethodsColumns.KIND, kind);
+                    contactMethod.put(Contacts.ContactMethodsColumns.TYPE, type);
+                    contactMethod.put(Contacts.ContactMethodsColumns.DATA, val);
+                    Log.d("Jetty", "Modified contact "+methodId+" kind="+kind+" type="+type+" val="+val);
+                    modifiedContacts.put(methodId, contactMethod);
                 }
             }
         }
       
-        //Handle addition and modifications
+        //Handle addition and modifications to phones
         for (String key: modifiedPhones.keySet())
         {
-            String[] phInfo = modifiedPhones.get(key);
+            ContentValues phone = modifiedPhones.get(key);
             if ("x".equals(key))
             {
-                //new phone
-                if (phInfo[1] != null && !"".equals(phInfo[1]))
+                //new phone, check a number has been given
+                String number = phone.getAsString(Contacts.Phones.NUMBER);
+                if (number != null && !"".equals(number))
                 {
-                    Log.d("Jetty", "Adding new phone with number "+phInfo[1]+" and type "+phInfo[1]);
-                    ContentValues numberValues = new ContentValues();
-                    numberValues.put(Contacts.Phones.NUMBER, phInfo[1]);
-                    numberValues.put(Contacts.Phones.TYPE, phInfo[0]);
-                    Phone.addPhone(getContentResolver(), numberValues, id);
+                    Log.d("Jetty", "Adding new phone with number "+number);
+                    Phone.addPhone(getContentResolver(), phone, id);
                 }
             }
             else
             {
                 //possibly modified phone, save anyway
-                Log.d("Jetty", "Saving phone id="+key+" with number "+phInfo[1]+" and type "+phInfo[0]);
-                ContentValues numberValues = new ContentValues();
-                numberValues.put(Contacts.Phones.NUMBER, phInfo[1]);
-                numberValues.put(Contacts.Phones.TYPE, phInfo[0]);
-                Phone.savePhone(getContentResolver(), numberValues, key, id);
+                Log.d("Jetty", "Saving phone id="+key);
+                Phone.savePhone(getContentResolver(), phone, key, id);
             }
-        }
-    
-        
+        }        
         //Get rid of the deleted phones
         for (String phId : deletedPhones)
         {
             Phone.deletePhone(getContentResolver(), phId, id);
             Log.d("Jetty", "Deleted phone "+phId);
         }
+        
+        
+        //Handle addition and modifications to contacts
+        for (String key: modifiedContacts.keySet())
+        {
+            ContentValues contactMethod = modifiedContacts.get(key);
+            if ("x".equals(key))
+            {
+                //could be a new contact method, check if any data has been provided
+                String data = contactMethod.getAsString(Contacts.ContactMethodsColumns.DATA);
+                Log.d("Jetty", "Data for new contact method : "+data);
+                if (data != null && !"".equals(data))
+                {
+                    Log.d("Jetty", "Adding new contact method with data "+data);
+                    ContactMethod.addContactMethod(getContentResolver(), contactMethod, id);
+                }
+            }
+            else
+            {
+                //modified contact method, save it
+                Log.d("Jetty", "Saving contact method "+key);
+                ContactMethod.saveContactMethod(getContentResolver(), contactMethod, key, id);
+            }
+        }
+        
+        //Get rid of deleted contacts
+        for (String methodId: deletedContacts)
+        {
+            ContactMethod.deleteContactMethod(getContentResolver(), methodId, id);
+        }
+        
+        
         User.save(getContentResolver(), person, id);
         Log.i("Jetty", "Updating user id "+id);
         
@@ -544,7 +596,7 @@ public class ContactsServlet extends InfoServlet
         writer.print(", \"addresses\" : ");
         
         //query for all contact details
-        User.ContactMethodsCollection contactMethods = User.getContactMethods(getContentResolver(), who);
+        ContactMethod.ContactMethodsCollection contactMethods = ContactMethod.getContactMethods(getContentResolver(), who);
         formatContactMethodsJSON (who, contactMethods, writer);
         contactMethods.close(); 
         
@@ -575,7 +627,7 @@ public class ContactsServlet extends InfoServlet
         phones.close();
         
         //query for all contact details
-        User.ContactMethodsCollection contactMethods = User.getContactMethods(getContentResolver(), who);
+        ContactMethod.ContactMethodsCollection contactMethods = ContactMethod.getContactMethods(getContentResolver(), who);
         formatContactMethods (who, contactMethods, writer);
         contactMethods.close(); 
         
@@ -600,6 +652,7 @@ public class ContactsServlet extends InfoServlet
         String name = "";
         String notes = "";
         boolean starred = false;
+        boolean voicemail = false;
         
         boolean editing = !(id == null || id.trim().equals(""));
             
@@ -628,22 +681,20 @@ public class ContactsServlet extends InfoServlet
                 name = user.getAsString(Contacts.PeopleColumns.DISPLAY_NAME);
                 notes = user.getAsString(Contacts.PeopleColumns.NOTES);
                 Integer i = user.getAsInteger(Contacts.PeopleColumns.STARRED);
-                Log.i("Jetty", "User starring = "+i);
                 starred = (i == null ? false : i.intValue() > 0);
+                i = user.getAsInteger(Contacts.PeopleColumns.SEND_TO_VOICEMAIL);
+                voicemail = (i == null? false : i.intValue() > 0);
             }            
         }
         
         writer.println("<tr><td colspan='3'><h2>General</h2></td></tr>");
         writer.println("<tr><td>Name: </td><td colspan='2' ><input name='name' type='text' value='" + name + "' /></td></tr>");
         writer.println("<tr><td>Starred: </td><td colspan='2' ><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
+        writer.println("<tr><td>Send to Voicemail: </td><td colspan='2'><input name='voicemail' type='checkbox' "+(voicemail? "checked='checked'" : "") + " /><td></tr>");
         writer.println("<tr><td>Notes: </td><td colspan='2'  ><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
         
-        writer.println("<tr><td colspan='3'><h2>Phone numbers</h2></td></tr>");
-        
-        int phone_editor_id = 0;
-        
+        writer.println("<tr><td colspan='3'><h2>Phone numbers</h2></td></tr>"); 
         Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(), id);
-
         if (phones != null)
         {
             ContentValues phone;
@@ -654,14 +705,29 @@ public class ContactsServlet extends InfoServlet
                 String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
                 int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
                 writer.println(createPhoneEditor(phoneId, label,type,number));
-                phone_editor_id++;
             }
         }
-
-
         //Put on a spare one so they can add another number
         writer.println(createPhoneEditor("x", "", -1, ""));
-       // writer.println("<tr><td colspan='2'><input type='submit' name='another' id='another' value='Add another' /></form></td></tr>");
+        
+        writer.println("<tr><td colspan='3'><h2>Contact Methods</h2></td></tr>"); 
+        ContactMethod.ContactMethodsCollection contactMethods = ContactMethod.getContactMethods(getContentResolver(), id);
+        if (contactMethods != null)
+        {
+            ContentValues contactMethod;
+            while ((contactMethod = contactMethods.next()) != null)
+            {
+                String contactMethodId = contactMethod.getAsString(android.provider.BaseColumns._ID);
+                String label = contactMethod.getAsString(Contacts.ContactMethodsColumns.LABEL);
+                String value = contactMethod.getAsString(Contacts.ContactMethodsColumns.DATA);
+                int type = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.TYPE).intValue();
+                int kind = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.KIND).intValue();
+                writer.println(createContactMethodEditor(contactMethodId, type, kind, label, value));
+            }
+        }
+        //Put on a spare one so they can add another
+        writer.println(createContactMethodEditor("x", -1, -1, "", ""));
+        
         writer.println("</table>");
         writer.println("<br /><input type='submit' name='save' id='save' value='Save' /> <a href='/console/contacts/" + (id != null ? id.toString() : "") + "'><button id='cancel'>Cancel</button></a></form>");
         writer.println("</div>");
@@ -684,10 +750,40 @@ public class ContactsServlet extends InfoServlet
         
         String row = "<tr>";
         if (!"x".equals(id))
-            row += "<td><input type='checkbox' name='del-"+id+"' value='del'>Delete</input></td>";
+            row += "<td><input type='checkbox' name='phone-del-"+id+"' value='del'>Delete</input></td>";
         else
             row+= "<td>&nbsp;</td>";
         row += "<td>" + select + "</td><td><input type='text' name='phone-number-" + id + "' id='phone-number-" + id + "' style='width: 120px;' length='12' value='" + number + "' /></td></tr>";
+        return row;
+    }
+    
+    
+    private String createContactMethodEditor (String id, int type, int kind, String label, String value)
+    {  
+        String row = "<tr>";
+        if (!"x".equals(id))
+            row += "<td><input type='checkbox' name='contact-del-"+id+"' value='del'>Delete</input></td>";
+        else
+            row += "<td>&nbsp;</td>";
+        
+        String kindSelect = "<select name='contact-kind-"+id+"'>";
+        for (Integer i: _contactKinds.keySet())
+        {
+            __INFO_TYPE t = _contactKinds.get(i);
+            kindSelect += "<option value='"+i+"'"+(kind == i.intValue()? " selected='selected'": "")+">"+__TYPE_LABELS.get(t)+"</option>";
+        }
+        kindSelect += "</select>";
+        
+        String typeSelect = "<select name='contact-type-"+id+"'>";
+        for (Integer i: _contactTypes.keySet())
+        {
+            __INFO_TYPE t = _contactTypes.get(i);
+            typeSelect += "<option value='"+i+"'"+(type == i.intValue()? " selected='selected'": "")+">"+__TYPE_LABELS.get(t)+"</option>";
+        }
+        typeSelect += "</select>";
+    
+        row +="<td>"+kindSelect+"</td><td>"+typeSelect+"</td><td><input type='text' name='contact-val-"+id+"' style='width: 120px;' length='12' value='"+value+"'/></td>";
+        row +="</tr>";
         return row;
     }
 
@@ -722,10 +818,9 @@ public class ContactsServlet extends InfoServlet
                 String company = null;
                 String notes = user.getAsString(Contacts.PeopleColumns.NOTES);
                 Integer i = user.getAsInteger(Contacts.PeopleColumns.STARRED);
-                Log.i("Jetty", "On read user starring = "+i);
+                
                 boolean starred = (i == null ? false : i.intValue() > 0);
                 printCell (writer, (starred?"<span class='big'>*</span>":"&nbsp;"), style);
-
                 printCell(writer, "<a class='userlink' href='/console/contacts/"+id+"/'><img src=\"/console/contacts/"+id+"/photo\""+" /></a>", style);
                 printCell(writer, "<a class='userlink' href=\"/console/contacts/"+id+"\">"+name+"</a>", style);
                 writer.println("</tr>");
@@ -757,10 +852,10 @@ public class ContactsServlet extends InfoServlet
             String title = null;
             String company = null;
             String notes = values.getAsString(Contacts.PeopleColumns.NOTES);
-
             Integer i = values.getAsInteger(Contacts.PeopleColumns.STARRED);   
-            Log.i("Jetty", "On summary starring = "+i);
             boolean starred = (i == null ? false : i.intValue() > 0);
+            i = values.getAsInteger(Contacts.PeopleColumns.SEND_TO_VOICEMAIL);
+            boolean voicemail = (i==null ? false: i.intValue() > 0);
             
             writer.println("<h1 class='pageheader'>"+(starred?"<span class='big'>*</span>&nbsp;":"")+(title==null?"":title+"&nbsp;")+(name==null?"Unknown":name)+"</h1>");
             
@@ -768,6 +863,8 @@ public class ContactsServlet extends InfoServlet
             writer.println("<h2>Photo</h2><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a>");
             if (company!=null)
                 writer.println("<p>Company: "+company+"</h3></p>");
+            if (voicemail)
+                writer.println("<p>Goes to Voicemail</p>");
             writer.println("<h2>Notes</h2>");
             writer.println("<table id='notes' style='border: 0px none;'>");
             writer.println("<tr>"); 
@@ -882,7 +979,7 @@ public class ContactsServlet extends InfoServlet
     }
     
 
-    private void formatContactMethods (String who, User.ContactMethodsCollection contactMethods, PrintWriter writer)
+    private void formatContactMethods (String who, ContactMethod.ContactMethodsCollection contactMethods, PrintWriter writer)
     {
         writer.println("<h2>Addresses</h2>");
         writer.println("<table id='addresses' style='border: 0px none;'>");
@@ -909,7 +1006,7 @@ public class ContactsServlet extends InfoServlet
                 }
                 default:
                 {
-                  typeStr = __TYPE_LABELS.get(_contactEmailTypes.get(Integer.valueOf(type)));
+                  typeStr = __TYPE_LABELS.get(_contactTypes.get(Integer.valueOf(type)));
                 }
             }
 
@@ -964,7 +1061,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("</table>");
     }  
     
-    private void formatContactMethodsJSON (String who, User.ContactMethodsCollection contactMethods, PrintWriter writer)
+    private void formatContactMethodsJSON (String who, ContactMethod.ContactMethodsCollection contactMethods, PrintWriter writer)
     {
         writer.print ("[ ]");
     }
