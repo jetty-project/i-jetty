@@ -180,6 +180,10 @@ td, tr {
     width: 100%;
 }
 
+#user-contacts {
+	width: 100%;
+}
+
 /* Button to add numbers to list. */
 #user-numbers-add {
     float: right;

@@ -25,6 +25,11 @@ public abstract class DatabaseCollection
 
         return values;
     }
+    
+    public boolean hasNext ()
+    {
+        return !cursor.isLast();
+    }
 
     public void close ()
     {

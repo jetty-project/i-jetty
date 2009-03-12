@@ -1,11 +1,18 @@
 package org.mortbay.ijetty.console;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+
+import org.mortbay.util.IO;
+
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Contacts;
+import android.util.Log;
 
 public class User
 {
@@ -65,9 +72,29 @@ public class User
         //Uri uri = resolver.insert(Contacts.People.CONTENT_URI, values);
         return  String.valueOf(ContentUris.parseId(uri));
     }
-    
-    
-    
+
+
+    public static void savePhoto (ContentResolver resolver, String id, File photo)
+    {
+        if (resolver == null)
+            return;
+        if (photo == null)
+            return;
+        if (id == null)
+            return;
+        Uri uri = Uri.withAppendedPath(Contacts.People.CONTENT_URI, id);
+        try
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IO.copy(new FileInputStream(photo), out);
+            Contacts.People.setPhotoData(resolver, uri, out.toByteArray());
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Problem converting photo to bytes for "+photo.getAbsolutePath(), e);
+        }
+    }
+
     /**
      * save
      * 

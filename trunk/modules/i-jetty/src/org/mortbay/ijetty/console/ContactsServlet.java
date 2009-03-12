@@ -15,6 +15,7 @@
 
 package org.mortbay.ijetty.console;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -50,19 +51,9 @@ public class ContactsServlet extends InfoServlet
     private static final int __ACTION_ADD = 2;
     private static final int __ACTION_DEL = 3;
     private static final int __ACTION_SAVE = 4;
-
-
-
-    private static final String __POSTAL = "postal";
- 
-    private static final String __PRIMARY = "primary";
-    private static final String __EMAIL = "email";
-
-    private static final String __IM = "IM";
-    private static final String __GEO_LOCATION = "geo location";
     
     private static enum __INFO_TYPE {Mobile, Home, Work, WorkFax, HomeFax, Pager, Other, Custom, Email, IM, Postal, Phone, Organization};
-    private static EnumMap<__INFO_TYPE, String> __TYPE_LABELS = new EnumMap<__INFO_TYPE, String>(__INFO_TYPE.class);
+    private static EnumMap<__INFO_TYPE, String> __LABELS = new EnumMap<__INFO_TYPE, String>(__INFO_TYPE.class);
     
     
     // FIXME: Use a local copy when finished testing. :)
@@ -78,18 +69,18 @@ public class ContactsServlet extends InfoServlet
     
     public ContactsServlet ()
     {
-        __TYPE_LABELS.put(__INFO_TYPE.Mobile, "Mobile");
-        __TYPE_LABELS.put(__INFO_TYPE.Home, "Home");
-        __TYPE_LABELS.put(__INFO_TYPE.Work, "Work");
-        __TYPE_LABELS.put(__INFO_TYPE.HomeFax, "Home Fax");
-        __TYPE_LABELS.put(__INFO_TYPE.WorkFax, "Work Fax");
-        __TYPE_LABELS.put(__INFO_TYPE.Pager, "Pager");
-        __TYPE_LABELS.put(__INFO_TYPE.Other, "Other");
-        __TYPE_LABELS.put(__INFO_TYPE.Custom, "Custom");
-        __TYPE_LABELS.put(__INFO_TYPE.Phone, "Phone");
-        __TYPE_LABELS.put(__INFO_TYPE.Postal, "Postal");
-        __TYPE_LABELS.put(__INFO_TYPE.IM, "IM");
-        __TYPE_LABELS.put(__INFO_TYPE.Email, "Email");
+        __LABELS.put(__INFO_TYPE.Mobile, "Mobile");
+        __LABELS.put(__INFO_TYPE.Home, "Home");
+        __LABELS.put(__INFO_TYPE.Work, "Work");
+        __LABELS.put(__INFO_TYPE.HomeFax, "Home Fax");
+        __LABELS.put(__INFO_TYPE.WorkFax, "Work Fax");
+        __LABELS.put(__INFO_TYPE.Pager, "Pager");
+        __LABELS.put(__INFO_TYPE.Other, "Other");
+        __LABELS.put(__INFO_TYPE.Custom, "Custom");
+        __LABELS.put(__INFO_TYPE.Phone, "Phone");
+        __LABELS.put(__INFO_TYPE.Postal, "Postal");
+        __LABELS.put(__INFO_TYPE.IM, "IM");
+        __LABELS.put(__INFO_TYPE.Email, "Email");
         
         _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_MOBILE), __INFO_TYPE.Mobile);
         _phoneTypes.put(Integer.valueOf(Contacts.PhonesColumns.TYPE_HOME), __INFO_TYPE.Home);
@@ -386,6 +377,12 @@ public class ContactsServlet extends InfoServlet
             created = true;
         }
                    
+        File photo = (File)request.getAttribute("new-pic");
+        if (photo != null)
+        {
+            //a new picture for the user has been uploaded
+           User.savePhoto(getContentResolver(), id, photo);
+        }
         List<String> deletedPhones = new ArrayList<String>();      
         Map<String, ContentValues> modifiedPhones = new HashMap<String, ContentValues>();
         List<String> deletedContacts = new ArrayList<String>();      
@@ -668,7 +665,7 @@ public class ContactsServlet extends InfoServlet
         
         writer.println("<div id='content'>");
         
-        writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE + "\" method='post'>");
+        writer.println("<form action=\"/console/contacts?action="+__ACTION_SAVE + "\" method='post' enctype='multipart/form-data'>");
         if (id != null)
             writer.println("<input type='hidden' name='id' value='" + id + "'>");
         writer.println("<table>");
@@ -692,7 +689,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("<tr><td>Starred: </td><td colspan='2' ><input name='starred' type='checkbox' " + (starred ? "checked='checked'" : "") + " /></td></tr>");
         writer.println("<tr><td>Send to Voicemail: </td><td colspan='2'><input name='voicemail' type='checkbox' "+(voicemail? "checked='checked'" : "") + " /><td></tr>");
         writer.println("<tr><td>Notes: </td><td colspan='2'  ><textarea name='notes'>" + (notes != null ? notes : "") + "</textarea></td></tr>");
-        
+        writer.println("<tr><td colspan='2'><a href='/console/contacts/"+id+"/photo'><img src=\"/console/contacts/"+id+"/photo\""+"/></a></td><td><input type='file' name='new-pic'>Change photo</input></td>");
         writer.println("<tr><td colspan='3'><h2>Phone numbers</h2></td></tr>"); 
         Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(), id);
         if (phones != null)
@@ -744,7 +741,7 @@ public class ContactsServlet extends InfoServlet
         for (Integer i : _phoneTypes.keySet())
         {
             __INFO_TYPE t = _phoneTypes.get(i);
-            select += "<option value='" + i + "'" + (type == i.intValue() ? selected : "") + ">" + __TYPE_LABELS.get(t) + "</option>";
+            select += "<option value='" + i + "'" + (type == i.intValue() ? selected : "") + ">" + __LABELS.get(t) + "</option>";
         }   
         select += "</select>";
         
@@ -770,7 +767,7 @@ public class ContactsServlet extends InfoServlet
         for (Integer i: _contactKinds.keySet())
         {
             __INFO_TYPE t = _contactKinds.get(i);
-            kindSelect += "<option value='"+i+"'"+(kind == i.intValue()? " selected='selected'": "")+">"+__TYPE_LABELS.get(t)+"</option>";
+            kindSelect += "<option value='"+i+"'"+(kind == i.intValue()? " selected='selected'": "")+">"+__LABELS.get(t)+"</option>";
         }
         kindSelect += "</select>";
         
@@ -778,7 +775,7 @@ public class ContactsServlet extends InfoServlet
         for (Integer i: _contactTypes.keySet())
         {
             __INFO_TYPE t = _contactTypes.get(i);
-            typeSelect += "<option value='"+i+"'"+(type == i.intValue()? " selected='selected'": "")+">"+__TYPE_LABELS.get(t)+"</option>";
+            typeSelect += "<option value='"+i+"'"+(type == i.intValue()? " selected='selected'": "")+">"+__LABELS.get(t)+"</option>";
         }
         typeSelect += "</select>";
     
@@ -923,7 +920,7 @@ public class ContactsServlet extends InfoServlet
             String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
             
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
-            String phoneType= __TYPE_LABELS.get(_phoneTypes.get(Integer.valueOf(type)));
+            String phoneType= __LABELS.get(_phoneTypes.get(Integer.valueOf(type)));
             printCell(writer, phoneType, style);
             
             String encodedNumber = number;
@@ -949,32 +946,18 @@ public class ContactsServlet extends InfoServlet
     {
         ContentValues phone;
         writer.print ("{ ");
-        ArrayList<String> numbers = new ArrayList<String>();
-        
+        StringBuffer buff = new StringBuffer();
         while ((phone = phones.next() ) != null)
         {  
             String id = phone.getAsString(android.provider.BaseColumns._ID);
             String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
             String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
-            numbers.add ("'" + number + "' : { 'label' : '" + (label == null ? "" : label.replace("'", "\\'")) + "', 'type' : " + type + ", 'id': '"+id+"' }");
+            buff.append ("'" + number + "' : { 'label' : '" + (label == null ? "" : label.replace("'", "\\'")) + "', 'type' : " + type + ", 'id': '"+id+"' }");
+            if (phones.hasNext())
+                buff.append(", ");
         }
-        
-        String lastNumber;
-        
-        if (numbers.size () >= 1)
-        {
-            lastNumber = numbers.remove (numbers.size() - 1);
-            
-            for (String number : numbers)
-            {
-                writer.print (number + ", ");
-            }
-            
-            // Last item shouldn't end with comma
-            writer.print (lastNumber);
-        }
-        
+        writer.print(buff.toString());
         writer.print(" }");
     }
     
@@ -1006,52 +989,45 @@ public class ContactsServlet extends InfoServlet
                 }
                 default:
                 {
-                  typeStr = __TYPE_LABELS.get(_contactTypes.get(Integer.valueOf(type)));
+                  typeStr = __LABELS.get(_contactTypes.get(Integer.valueOf(type)));
                 }
             }
 
+            String kindStr = __LABELS.get(_contactKinds.get(Integer.valueOf(kind)));
             switch (kind)
             {
                 case Contacts.KIND_EMAIL:
                 {
-                        printCell(writer, "<span class='label'>"+__EMAIL+":</span>", style);
-                        printCell(writer, "<a href=\"mailto:"+data+"\">"+data+" ["+typeStr+"]</a>", style);
-                        printCell(writer, "", style);
-                        break;
+
+                    printCell(writer, "<span class='label'>"+kindStr+":</span>", style);
+                    printCell(writer, "<a href=\"mailto:"+data+"\">"+data+"</a>", style);
+                    printCell(writer, typeStr, style);
+                    break;
                 }
                 case Contacts.KIND_IM:
                 {
-                        printCell(writer, "<span class='label'>"+__IM+":</span>", style);
-                        printCell(writer, data, style);
-                        printCell(writer, "", style);
-                        break;
+                    printCell(writer, "<span class='label'>"+kindStr+":</span>", style);
+                    printCell(writer, data, style);
+                    printCell(writer, typeStr, style);
+                    break;
                 }
                 case Contacts.KIND_POSTAL:
                 {
-                        printCell(writer, "<span class='label'>"+__POSTAL+":</span>", style);
-                        printCell(writer, data+"&nbsp;<span class='qualifier'>["+typeStr+"]</span>", style);
-                        printCell(writer, "", style);
-                        break;
+                    printCell(writer, "<span class='label'>"+kindStr+":</span>", style);
+                    printCell(writer, data, style);
+                    printCell(writer, typeStr, style);
+                    break;
                 }
-/*
-                case Contacts.ContactMethodsColumns.LOCATION_KIND:
-                {
-                        printCell(writer, "<span class='label'>"+__GEO_LOCATION+":</span>", style);
-                        String typeStr = (String)_contactEmailTypes.get(Integer.valueOf(type));
-                        printCell(writer, "<span class='qualifier'>["+typeStr+"]</span>&nbsp;"+data, style);
-                        printCell(writer, auxData, style);
-                        break;
-                }
-*/
                 default:
                 {
-                        if (data!=null)
-                                printCell(writer, data, style);
-                        if (auxData!=null)
-                                printCell(writer, data, style);
-                        
-                        printCell (writer, "Kind = " + kind + "; type = " + type, style);
-                        break;
+                    printCell(writer, kindStr, style);
+                    if (data!=null)
+                        printCell(writer, data, style);
+                    if (auxData!=null)
+                        printCell(writer, data, style);
+
+                    printCell (writer, typeStr, style);
+                    break;
                 }
             }
             writer.println("</tr>");
@@ -1063,7 +1039,23 @@ public class ContactsServlet extends InfoServlet
     
     private void formatContactMethodsJSON (String who, ContactMethod.ContactMethodsCollection contactMethods, PrintWriter writer)
     {
-        writer.print ("[ ]");
+        writer.print ("[");
+        ContentValues contactMethod;
+        StringBuffer buff = new StringBuffer();
+        while ((contactMethod = contactMethods.next()) != null)
+        { 
+            String data = contactMethod.getAsString(Contacts.ContactMethodsColumns.DATA);
+            String auxData = contactMethod.getAsString(Contacts.ContactMethodsColumns.AUX_DATA);
+            String label = contactMethod.getAsString(Contacts.ContactMethodsColumns.LABEL);
+            int isPrimary = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.ISPRIMARY).intValue();
+            int kind = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.KIND).intValue();
+            int type = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.TYPE).intValue();
+            buff.append("{ 'data': '"+data+"', 'aux': '"+auxData+"', " + (label!=null?" 'label': '"+label+"'":"") + ", 'primary': "+isPrimary+", 'kind': "+kind+", 'type': "+type+"}");
+            if (contactMethods.hasNext())
+                buff.append(",");
+        }
+        writer.print(buff.toString());
+        writer.print ("]");
     }
     
     private void printCell (PrintWriter writer, String cellContent, String cellStyle)
