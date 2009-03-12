@@ -29,6 +29,11 @@
 		<servlet-class>org.mortbay.ijetty.console.SettingsServlet</servlet-class>
 	</servlet>
 	
+	<filter>
+	    <filter-name>MultiPart</filter-name>
+	    <filter-class>org.mortbay.servlet.MultiPartFilter</filter-class>
+	</filter>
+	
 	<servlet-mapping>
 		<servlet-name>ContactsServlet</servlet-name>
 		<url-pattern>/contacts/*</url-pattern>
@@ -45,6 +50,10 @@
 		<servlet-name>IPServlet</servlet-name>
 		<url-pattern>/network/*</url-pattern>
 	</servlet-mapping>
+	<filter-mapping>
+	    <filter-name>MultiPart</filter-name>
+	    <url-pattern>/contacts/*</url-pattern>
+	</filter-mapping>
 	
     <security-constraint>
       <web-resource-collection>

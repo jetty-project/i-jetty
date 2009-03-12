@@ -95,6 +95,8 @@ $(document).ready (function () {
                     var label = 'Unknown';
                     if (info.label)
                         label = info.label;
+                    else
+                    	label = labels[info.type];
                     
                     // FIXME: Make this properly editable.
                     $('#user-numbers').append ('<tr><td><span class="user-number-label-editable">' + label + '</span></td><td><a href="#" class="user-number-remove"><img src="/console/list-remove.png" alt="Remove" /></a><span class="user-number-editable">' + number + '</span></td></tr>');
@@ -107,6 +109,22 @@ $(document).ready (function () {
                 }
             } else {
                 $('#user-numbers').addClass ('hidden');
+            }
+            
+            looped = false;
+            if (data.contacts) {
+            	jQuery.each(data.contacts, function (number, info) {
+            		looped=true;
+            		$('#user-contacts').append("<tr><td><span class='contact-label-editable'>"+kinds[info.kind]+"</span><td><span class='contact-label-editable'>"+labels[info.type]+"</span></td><td><span class='contact-editable'>"+info.data+"</span>"+(info.aux?"<span class='contact-editable'>"+info.aux+"</span>":"")+"</td></tr>");
+            	}
+            }
+            else
+            	$('#user-contacts').addClass('hidden');
+            
+            if (looped) {
+            	   $('.contact-label-editable').editable(submitFunction, { type: 'select', submit: 'OK', 'data': labels });
+                   $('.contact-editable').editable(submitFunction, { submit: 'OK' });
+                   $('#user-contacts').removeClass ('hidden');
             }
         });
         
