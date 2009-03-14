@@ -19,10 +19,16 @@ import os
 from optparse import OptionParser
 import ConfigParser
 
+try:
+    import hashlib
+except ImportError:
+    import md5
+
 # md5sums of android.jar
 # for future use of version checking applications before build
 android_releases = {
-    "1.0r2" : "8cce78264a998882faece5ff8618803e"
+    "1.0_r2" : "8cce78264a998882faece5ff8618803e",
+    "1.1_r1" : "95c651eb8f5689776987e06d26c58a79"
 }
 
 parser = OptionParser (usage="%prog [options]", version="%prog 1.0", description="Helps with building Android applications.")
@@ -51,6 +57,21 @@ parser.add_option('-v', '--verbose',
 (options, args) = parser.parse_args()
 
 # Handy utilities
+def md5file(filename):
+    """Return the hex digest of a file without loading it all into memory"""
+    fh = open(filename)
+    try:
+        digest = hashlib.md5()
+    except:
+        digest = md5.new()
+    while 1:
+        buf = fh.read(4096)
+        if buf == "":
+            break
+        digest.update(buf)
+    fh.close()
+    return digest.hexdigest()
+
 def pretty_fail(msg, exception, return_code=1):
     print "Error: %s" % msg
     print "Exception:"
@@ -118,8 +139,28 @@ def ask_bool(msg, default_yes=True):
 # Mode-specific functions
 def do_config(config, filename):
     config.add_section ("Paths")
-    config.set ("Paths", 'sdkpath', ask("Path to Android SDK", path=True))
-    config.set ("Paths", 'sdkver', ask("SDK version", "1.0_r2"))
+    sdkpath = ask("Path to Android SDK", path=True)
+    config.set ("Paths", 'sdkpath', sdkpath)
+    
+    androidjar = os.path.join (sdkpath, "android.jar")
+    if not os.path.isfile (androidjar):
+        print "Error: cannot find android.jar inside Android SDK path."
+        sys.exit(1)
+        
+    md5sum = md5file (androidjar).lower()
+    sdkver = None
+    for release in android_releases:
+        release_sum = android_releases[release].lower()
+        if release_sum == md5sum:
+            sdkver = release
+    
+    if sdkver is None:
+        print "Could not guess SDK version."
+        sdkver = ask("SDK version", "1.1_r1")
+    else:
+        print "Guessed SDK version %s" % sdkver
+    
+    config.set ("Paths", 'sdkver', sdkver)
     
     config.add_section ("SD")
     enablesd = ask_bool("Enable SD card with emulator?")

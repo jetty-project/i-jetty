@@ -5,6 +5,7 @@ Depedencies
 * Java 1.5 (or 1.6, but only report bugs if they occur with 1.5)
 * Maven
 * Python
+* Google Android SDK
 
 How to build
 ============
