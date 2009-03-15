@@ -21,7 +21,7 @@ import ConfigParser
 
 try:
     import hashlib
-except ImportError:
+except ImportERROR:
     import md5
 
 # md5sums of android.jar
@@ -73,7 +73,7 @@ def md5file(filename):
     return digest.hexdigest()
 
 def pretty_fail(msg, exception, return_code=1):
-    print "Error: %s" % msg
+    print "ERROR: %s" % msg
     print "Exception:"
     print exception
     sys.exit(return_code)
@@ -137,14 +137,14 @@ def ask_bool(msg, default_yes=True):
             return "no"
 
 # Mode-specific functions
-def do_config(config, filename):
+def do_config(config, filename, productSDK):
     config.add_section ("Paths")
     sdkpath = ask("Path to Android SDK", path=True)
     config.set ("Paths", 'sdkpath', sdkpath)
     
     androidjar = os.path.join (sdkpath, "android.jar")
     if not os.path.isfile (androidjar):
-        print "Error: cannot find android.jar inside Android SDK path."
+        print "ERROR: cannot find android.jar inside Android SDK path."
         sys.exit(1)
         
     md5sum = md5file (androidjar).lower()
@@ -159,6 +159,17 @@ def do_config(config, filename):
         sdkver = ask("SDK version", "1.1_r1")
     else:
         print "Guessed SDK version %s" % sdkver
+    
+    if productSDK != sdkver:
+        print
+        print "WARNING: the SDK version you're using does not match"
+        print "the one that the software has been built for. There may"
+        print "be build errors due to changes in API."
+        print
+        print "Your API version is %s, while %s is required." % (sdkver, productSDK)
+        print
+        if ask_bool("Do you wish to continue?", False) == 'no':
+            sys.exit(0)
     
     config.set ("Paths", 'sdkver', sdkver)
     
@@ -229,11 +240,11 @@ def do_build (config, buildconfig, verbose=False, args=None):
         size = 60 * 1024 * 1024 # 60 MB
         sdcard = config.get ("SD", "sdcard")
         if not os.path.isfile (sdcard):
-            print "Warning: SD card does not exist. Creating..."
+            print "WARNING: SD card does not exist. Creating..."
             os.system (os.path.join (androidpath, "tools", "mksdcard") + (" %d %s" % (size, sdcard)))
         elif config.getboolean ("SD", "clean"):
             if os.path.exists (sdcard + ".lock"):
-                print "Warning: cannot clean out SD card; locked."
+                print "WARNING: cannot clean out SD card; locked."
             else:
                 print "Cleaning SD card..."
                 os.remove (sdcard)
@@ -244,10 +255,10 @@ def do_build (config, buildconfig, verbose=False, args=None):
         print "Building..."
         system = config.get ("Build", "system").lower()
         if system == "make":
-            print "Error: I don't know how to build with 'make' yet!"
+            print "ERROR: I don't know how to build with 'make' yet!"
             sys.exit(1)
         elif system == "ant":
-            print "Error: I don't know how to build with 'ant' yet!"
+            print "ERROR: I don't know how to build with 'ant' yet!"
             sys.exit(1)
         elif system == "maven":
             cmd = None
@@ -256,24 +267,24 @@ def do_build (config, buildconfig, verbose=False, args=None):
             if verbose: print "Installing artifact..."
             ret = os.system (installcmd)
             if ret != 0:
-                print "Error: installing artifact failed. Check build.log for details."
+                print "ERROR: installing artifact failed. Check build.log for details."
                 if verbose: print "Got return code %d" % ret
                 sys.exit(2)
             
             if verbose: print "Building with Maven."
             if config.getboolean ("Build", "alwaysclean"):
-                cmd = "mvn clean install -Dandroid.home=%s > build.log" % androidpath
+                cmd = "mvn clean install -Dandroid.home=%s -Dandroid-version=%s > build.log" % (androidpath, config.get ("Paths", "sdkver"))
             else:
-                cmd = "mvn install -Dandroid.home=%s > build.log" % androidpath
+                cmd = "mvn install -Dandroid.home=%s -Dandroid-version > build.log" % (androidpath, config.get ("Paths", "sdkver"))
             
             if verbose: print "Executing: %s" % cmd
             ret = os.system (cmd)
             if ret != 0:
-                print "Error: Build failed. Check build.log for details."
+                print "ERROR: Build failed. Check build.log for details."
                 if verbose: print "Got return code %d" % ret
                 sys.exit(2)
         else:
-            print "Error: unknown build system '%s'."
+            print "ERROR: unknown build system '%s'."
             sys.exit(1)
         
     elif verbose:
@@ -328,7 +339,7 @@ def do_build (config, buildconfig, verbose=False, args=None):
         install_cmd = "%s %s install -r %s" % (adb, device, pkg)
         ret = os.system (install_cmd)
         if ret != 0:
-            print "Error: failed to install!"
+            print "ERROR: failed to install!"
             print "Ran with: '%s'" % install_cmd
     
     if config.getboolean ("ADB", "forwardports"):
@@ -343,10 +354,16 @@ if __name__ == "__main__":
     buildconfig = ConfigParser.SafeConfigParser ()
     
     if options.configmode:
-        do_config (config, options.buildconfig)
+        if not os.path.isfile (options.specfile):
+            print "ERROR: Product spec file '%s' does not exist."
+            print "Please create one before attempting to build!"
+            sys.exit(1)
+        
+        buildconfig.read (options.specfile)
+        do_config (config, options.buildconfig, buildconfig.get ("Product", "SDK"))
     else:
         if not os.path.isfile (options.buildconfig):
-            print "Error: Configuration file '%s' does not exist." % options.buildconfig
+            print "ERROR: Configuration file '%s' does not exist." % options.buildconfig
             print "*** Did you remember to run with --configure first? ***"
             sys.exit(1)
         try:
@@ -355,7 +372,7 @@ if __name__ == "__main__":
             pretty_fail ("Failed to read configuration file: %s" % options.buildconfig, e)
         
         if not os.path.isfile (options.specfile):
-            print "Error: Product spec file '%s' does not exist."
+            print "ERROR: Product spec file '%s' does not exist."
             print "Please create one before attempting to build!"
             sys.exit(1)
         
