@@ -57,7 +57,7 @@ public class ContactsServlet extends InfoServlet
     
     
     // FIXME: Use a local copy when finished testing. :)
-    private static final String[] __JAVASCRIPT = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js", "http://www.appelsiini.net/download/jquery.jeditable.mini.js", "/console/contacts.js" };
+    private static final String[] __JAVASCRIPT = new String[] {"/console/jquery.js", "/console/jquery.tablesorter.min.js", "/console/jquery.jeditable.js", "/console/contacts.js"};
 
 
     private Map<Integer, __INFO_TYPE> _phoneTypes = new HashMap<Integer, __INFO_TYPE>();
@@ -139,7 +139,7 @@ public class ContactsServlet extends InfoServlet
             str = request.getParameter("json");
             json = (str==null ? false : Integer.parseInt(str.trim()) == 1);
             
-            Log.i("Jetty", "who="+who+" what="+what+" action="+action);
+            Log.i("Jetty", "who="+who+" what="+what+" action="+action+" json="+json);
             
             switch (action)
             {
@@ -148,22 +148,29 @@ public class ContactsServlet extends InfoServlet
                     if ((what == null) && (who != null))
                     {
                         //default: nothing specific to do, show user info
-                        PrintWriter writer = response.getWriter();
+                        
                         if (json)
                         {
-                            response.setContentType("application/json");
+                            Log.i("Jetty", "Sending json data for user");
+                            response.setContentType("text/json; charset=utf-8");
                             response.setStatus(HttpServletResponse.SC_OK);
+                            PrintWriter writer = response.getWriter(); 
                             doUserContentJSON(writer, request, response, who);
+                            writer.write("\r\n");
+                            writer.close();
                         }
+                        
                         else
-                        {
+                        { 
                             response.setContentType("text/html");
                             response.setStatus(HttpServletResponse.SC_OK);
+                            PrintWriter writer = response.getWriter();
                             doHeader(writer, request, response);
                             doMenuBar(writer, request, response);
                             doUserContent(writer, request, response, who);
                             doFooter (writer, request, response);
                         }
+                        
                     }
                     else if ((what == null) && (who == null))
                     {
@@ -188,12 +195,10 @@ public class ContactsServlet extends InfoServlet
                         
                         if (is == null)
                         {
-                            //response.setContentType("application/octet-stream");
                             response.setContentType("image/jpeg");  
                             OutputStream os = response.getOutputStream();
                             is = getServletContext().getResourceAsStream("/android.jpg");
                             IO.copy(is,os);
-                            //response.sendError(HttpStatus.SC_NOT_FOUND);
                         }
                         else
                         {
@@ -333,30 +338,12 @@ public class ContactsServlet extends InfoServlet
     protected void doSaveUserJSON (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id)
     throws ServletException, IOException
     {
-        if (!true)
-        {            
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        
+        doSaveUserInfo(writer, request, response, id);
         response.setStatus(HttpServletResponse.SC_OK);
-        writer.println("{ \"status\": \"OK\" }");
+        doUserContentJSON(writer, request, response, id);
     }
         
-    
-    /**
-     * doSaveUser
-     * 
-     * Save edited or added User info.
-     * 
-     * @param writer
-     * @param request
-     * @param response
-     * @param id
-     * @throws ServletException
-     * @throws IOException
-     */
-    protected void doSaveUser (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id, boolean editing)
+    protected void doSaveUserInfo (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id)  
     throws ServletException, IOException
     {
         ContentValues person = new ContentValues();
@@ -505,6 +492,25 @@ public class ContactsServlet extends InfoServlet
         
         //show the details for a particular user
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+    
+    
+    /**
+     * doSaveUser
+     * 
+     * Save edited or added User info.
+     * 
+     * @param writer
+     * @param request
+     * @param response
+     * @param id
+     * @throws ServletException
+     * @throws IOException
+     */
+    protected void doSaveUser (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id, boolean editing)
+    throws ServletException, IOException
+    {
+        doSaveUserInfo (writer, request, response, id);
         if (!editing)
         {
             if (isMobileClient(request)) {
@@ -549,7 +555,10 @@ public class ContactsServlet extends InfoServlet
     throws ServletException, IOException
     {
         // This HTML is used for the side pane for desktop browsers that use Javascript.
-        writer.println("<h1 class='pageheader'>Contact List</h1><div id='content'>");
+        
+        writer.println("<h1 id='pg-head' class='pageheader'>Contact List</h1>");
+        /*
+        writer.println("<div id='content'>");
         writer.println("<div class='hidden' id='userinfo'><form onsubmit='return false;'>");
         writer.println("<input type='hidden' id='user-id' />");
         writer.println("<small id='user-edit-hint'>Click on some text to edit it.</small>");
@@ -565,7 +574,7 @@ public class ContactsServlet extends InfoServlet
         writer.println("<table id='user-numbers' class='hidden'></table>");
         
         writer.println("</form></div>");
-        
+        */
         // Print out the table that everyone can read.
         User.UserCollection users =  User.getAll(getContentResolver());
 
@@ -590,7 +599,7 @@ public class ContactsServlet extends InfoServlet
         formatPhonesJSON (who, phones, writer);
         phones.close();
         
-        writer.print(", \"addresses\" : ");
+        writer.print(", \"contacts\" : ");
         
         //query for all contact details
         ContactMethod.ContactMethodsCollection contactMethods = ContactMethod.getContactMethods(getContentResolver(), who);
@@ -890,15 +899,15 @@ public class ContactsServlet extends InfoServlet
             boolean starred = (i == null ? false : i.intValue() > 0);
             String starredStr = new Boolean(starred).toString();
             
-            writer.print ("{ 'name': '" + name.replace("'", "\\'") + "', ");
-            writer.print ("'id': " + id + ", ");
-            writer.print ("'starred': " + starredStr);
+            writer.print ("{\"name\": \"" + name.replace("\'", "\\'") + "\", ");
+            writer.print ("\"id\": " + id + ", ");
+            writer.print ("\"starred\": " + starredStr);
             
             if (company != null)
-                writer.print (", 'company': '" + company.replace("'", "\\'") + "'");
+                writer.print (", \"company\": \"" + company.replace("'", "\\'") + "\"");
                 
             if (notes != null)
-                writer.print (", 'notes': '" + notes.replace("'", "\\'") + "'");
+                writer.print (", \"notes\": \"" + notes.replace("'", "\\'") + "\"");
             
             writer.print (" }");
         }
@@ -953,7 +962,7 @@ public class ContactsServlet extends InfoServlet
             String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
             String number = phone.getAsString(Contacts.PhonesColumns.NUMBER);
             int type = phone.getAsInteger(Contacts.PhonesColumns.TYPE).intValue();
-            buff.append ("'" + number + "' : { 'label' : '" + (label == null ? "" : label.replace("'", "\\'")) + "', 'type' : " + type + ", 'id': '"+id+"' }");
+            buff.append ("\"" + number + "\" : { \"label\" : \"" + (label == null ? "" : label.replace("\'", "\\'")) + "\", \"type\" : " + type + ", \"id\": \""+id+"\" }");
             if (phones.hasNext())
                 buff.append(", ");
         }
@@ -1050,7 +1059,7 @@ public class ContactsServlet extends InfoServlet
             int isPrimary = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.ISPRIMARY).intValue();
             int kind = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.KIND).intValue();
             int type = contactMethod.getAsInteger(Contacts.ContactMethodsColumns.TYPE).intValue();
-            buff.append("{ 'data': '"+data+"', 'aux': '"+auxData+"', " + (label!=null?" 'label': '"+label+"'":"") + ", 'primary': "+isPrimary+", 'kind': "+kind+", 'type': "+type+"}");
+            buff.append("{ \"data\": \""+data+"\", \"aux\": \""+auxData+"\",  \"label\": \""+(label==null?"\"":label+"\"") + ", \"primary\": "+isPrimary+", \"kind\": "+kind+", \"type\": "+type+"}");
             if (contactMethods.hasNext())
                 buff.append(",");
         }

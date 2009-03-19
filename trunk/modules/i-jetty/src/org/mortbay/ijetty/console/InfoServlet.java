@@ -68,7 +68,7 @@ public abstract class InfoServlet extends HttpServlet
             
             // Make any tables we have sortable
             // (we assume that two of the scripts we add are jQuery and tablesorter)
-            writer.println ("    <script>$(document).ready(function() { $('table').tablesorter(); });</script>");
+            //writer.println ("    <script>$(document).ready(function() { $('table').tablesorter(); });</script>");
         }
         
         writer.println("</head>");
