@@ -272,7 +272,7 @@ var User =
             $.ajax(
                    {
                        type: 'GET',
-                       url: 'http://localhost:8888/console/contacts/2/?json=1',
+                       url: uri,
                        dataType: 'json',
                        beforeSend: function(xhr)
                                    {
@@ -303,10 +303,10 @@ var User =
 $(document).ready (
                    function () 
                    {
-                       var content = $("div id='content'>");
+                       var content = $("<div id='content'>");
                        
                        var div = $("<div class='hidden' id='userinfo'>");
-                       content.append(form);
+                       content.append(div);
                        
                        var form = $("<form onsubmit='return false;'>");
                        div.append(form);
@@ -342,9 +342,9 @@ $(document).ready (
                        p.after(h2b);
                        var tbl = $("<table id='user-numbers' class='hidden'>");
                        h2b.after(tbl);
-                                
+                               
                        console.log("document ready");
-                       $('#pg-header').after(content);
+                       $('#pg-head').after(content);
                        $('.userlink').click(User.editUser);
                    }); 
 
