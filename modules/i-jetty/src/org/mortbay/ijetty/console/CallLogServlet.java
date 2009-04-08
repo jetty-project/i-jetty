@@ -32,7 +32,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.CallLog;
 
-import org.mortbay.ijetty.console.InfoServlet;
+import org.mortbay.ijetty.console.HTMLHelper;
 
 public class CallLogServlet extends HttpServlet
 {
@@ -86,10 +86,10 @@ public class CallLogServlet extends HttpServlet
         {
             response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
-            InfoServlet.doHeader (writer, request, response);
-            InfoServlet.doMenuBar(writer, request, response);
+            HTMLHelper.doHeader (writer, request, response);
+            HTMLHelper.doMenuBar(writer, request, response);
             doContent(writer, request, response);
-            InfoServlet.doFooter (writer, request, response);
+            HTMLHelper.doFooter (writer, request, response);
         }
     }
     
@@ -151,7 +151,7 @@ public class CallLogServlet extends HttpServlet
             int row = 0;
             while (cursor.moveToNext())
             {  
-                String style = InfoServlet.getRowStyle(row);
+                String style = HTMLHelper.getRowStyle(row);
                 writer.println("<tr>");
                 for (int i=0;i<colNames.length;i++)
                 {
@@ -216,7 +216,7 @@ public class CallLogServlet extends HttpServlet
             int row = 0;
             while (cursor.moveToNext())
             {  
-                String style = InfoServlet.getRowStyle(row);
+                String style = HTMLHelper.getRowStyle(row);
                 for (int i=0;i<colNames.length;i++)
                 {
                     String val=cursor.getString(i);

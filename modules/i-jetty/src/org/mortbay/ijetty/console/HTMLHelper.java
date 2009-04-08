@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import android.database.Cursor;
 
-public class InfoServlet 
+public class HTMLHelper 
 {
     private static String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
     private static String[] _navBarItems = {"/console/contacts/index.html", "/console/settings","/console/calls", "/console/network"};

@@ -27,9 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.Settings;
-import android.provider.Settings.NameValueTable;
-
-import org.mortbay.ijetty.console.InfoServlet;
 
 public class SettingsServlet extends HttpServlet
 {
@@ -54,10 +51,10 @@ public class SettingsServlet extends HttpServlet
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();
-        InfoServlet.doHeader(writer, request, response);
-        InfoServlet.doMenuBar(writer, request, response);
+        HTMLHelper.doHeader(writer, request, response);
+        HTMLHelper.doMenuBar(writer, request, response);
         doContent(writer, request, response);
-        InfoServlet.doFooter (writer, request, response);
+        HTMLHelper.doFooter (writer, request, response);
     }
     
     protected void doContent(PrintWriter writer, HttpServletRequest request,
@@ -80,7 +77,7 @@ public class SettingsServlet extends HttpServlet
             i++;
         }
         
-        InfoServlet.formatTable(cols, cursor, writer);
+        HTMLHelper.formatTable(cols, cursor, writer);
         writer.println("</div>");
     }
 
