@@ -332,7 +332,14 @@ var User =
         
         renderUsers: function ()
         {
-            $("#userinfo").remove();
+            if (!User.mobileBrowser)
+            {
+                $("#userinfo").remove();
+            }
+            else
+            {
+                $("#content").append("<div id='contacts'></div>");
+            }
             $("#contacts").html("");
             var data = User.users;
             $("#pg-head").html("Contact List");
