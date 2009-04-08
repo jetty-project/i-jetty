@@ -89,10 +89,12 @@ hr {
 }
 
 #footer {
+	clear: both;
     text-align: left;
     font-size: 80%;
     color: #babdb6;
     padding: 1em;
+    width: 100%;
 }
 
 table {
@@ -158,11 +160,15 @@ td, tr {
     display: none;
 }
 
+#contacts {
+  float: left;
+}
+	
 /* Pane that contains all user info. Only used on desktop browsers with JS. */
 #userinfo {
-    float: right;
+	float: right;
     padding: 1em;
-    width: 250px;
+
 }
 
 #user-photo-link {
