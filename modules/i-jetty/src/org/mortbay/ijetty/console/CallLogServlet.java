@@ -22,37 +22,53 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.CallLog;
 
 import org.mortbay.ijetty.console.InfoServlet;
 
-public class CallLogServlet extends InfoServlet
+public class CallLogServlet extends HttpServlet
 {
-        public static final String __ACKNOWLEDGED = "Acknowledged";
-        public static final String __DURATION = "Duration (secs)";
-        public static final String __INCOMING = "incoming";
-        public static final String __OUTGOING = "outgoing";
-        public static final String __MISSED = "missed";
-        public static final String __YES = "yes";
-        public static final String __NO = "no";
-        
-        public static final String __CSV_DELIM = ",";
+    public static final String __ACKNOWLEDGED = "Acknowledged";
+    public static final String __DURATION = "Duration (secs)";
+    public static final String __INCOMING = "incoming";
+    public static final String __OUTGOING = "outgoing";
+    public static final String __MISSED = "missed";
+    public static final String __YES = "yes";
+    public static final String __NO = "no";
 
-        public Map _logTypeMap = new HashMap();
-        
-        public CallLogServlet ()
-        {
-                _logTypeMap.put(Integer.valueOf(CallLog.Calls.INCOMING_TYPE), __INCOMING);
-                _logTypeMap.put(Integer.valueOf(CallLog.Calls.OUTGOING_TYPE), __OUTGOING);
-                _logTypeMap.put(Integer.valueOf(CallLog.Calls.MISSED_TYPE), __MISSED);
-        }
+    public static final String __CSV_DELIM = ",";
+
+    public Map _logTypeMap = new HashMap();
+    private ContentResolver resolver;
     
-    @Override
+    
+    public CallLogServlet ()
+    {
+        _logTypeMap.put(Integer.valueOf(CallLog.Calls.INCOMING_TYPE), __INCOMING);
+        _logTypeMap.put(Integer.valueOf(CallLog.Calls.OUTGOING_TYPE), __OUTGOING);
+        _logTypeMap.put(Integer.valueOf(CallLog.Calls.MISSED_TYPE), __MISSED);
+    }
+
+
+    public void init(ServletConfig config) throws ServletException
+    {
+        super.init(config);
+        resolver = (ContentResolver)getServletContext().getAttribute("contentResolver");
+    }
+
+    public ContentResolver getContentResolver()
+    {
+        return resolver;
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         PrintWriter writer = response.getWriter();
@@ -70,14 +86,14 @@ public class CallLogServlet extends InfoServlet
         {
             response.setContentType("text/html");
             response.setStatus(HttpServletResponse.SC_OK);
-            doHeader (writer, request, response);
-            doMenuBar(writer, request, response);
+            InfoServlet.doHeader (writer, request, response);
+            InfoServlet.doMenuBar(writer, request, response);
             doContent(writer, request, response);
-            doFooter (writer, request, response);
+            InfoServlet.doFooter (writer, request, response);
         }
     }
     
-    @Override
+ 
     protected void doContent(PrintWriter writer, HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException
     {
@@ -135,7 +151,7 @@ public class CallLogServlet extends InfoServlet
             int row = 0;
             while (cursor.moveToNext())
             {  
-                String style = getRowStyle(row);
+                String style = InfoServlet.getRowStyle(row);
                 writer.println("<tr>");
                 for (int i=0;i<colNames.length;i++)
                 {
@@ -200,7 +216,7 @@ public class CallLogServlet extends InfoServlet
             int row = 0;
             while (cursor.moveToNext())
             {  
-                String style = getRowStyle(row);
+                String style = InfoServlet.getRowStyle(row);
                 for (int i=0;i<colNames.length;i++)
                 {
                     String val=cursor.getString(i);

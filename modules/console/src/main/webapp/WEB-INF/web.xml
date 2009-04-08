@@ -8,10 +8,13 @@
   	<display-name>IJetty Console</display-name>
   	
 	<servlet>
-		<servlet-name>ContactsServlet</servlet-name>
+		<servlet-name>ContactsHTMLServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.ContactsServlet</servlet-class>
 	</servlet>
-	
+		<servlet>
+		<servlet-name>ContactsJSONServlet</servlet-name>
+		<servlet-class>org.mortbay.ijetty.console.ContactsJSONServlet</servlet-class>
+	</servlet>
 	<servlet>
 		<servlet-name>CallLogServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.CallLogServlet</servlet-class>
@@ -35,8 +38,12 @@
 	</filter>
 	
 	<servlet-mapping>
-		<servlet-name>ContactsServlet</servlet-name>
-		<url-pattern>/contacts/dyn/*</url-pattern>
+		<servlet-name>ContactsHTMLServlet</servlet-name>
+		<url-pattern>/contacts/html/*</url-pattern>
+	</servlet-mapping>	
+	<servlet-mapping>
+		<servlet-name>ContactsJSONServlet</servlet-name>
+		<url-pattern>/contacts/json/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CallLogServlet</servlet-name>
@@ -52,7 +59,8 @@
 	</servlet-mapping>
 	<filter-mapping>
 	    <filter-name>MultiPart</filter-name>
-	    <url-pattern>/contacts/dyn/*</url-pattern>
+	    <url-pattern>/contacts/json/*</url-pattern>
+	    <url-pattern>/contacts/html/*</url-pattern>
 	</filter-mapping>
 	
     <security-constraint>

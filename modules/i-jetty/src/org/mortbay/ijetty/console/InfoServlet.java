@@ -17,40 +17,29 @@ package org.mortbay.ijetty.console;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 import java.util.Random;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.util.URIUtil;
-
-import android.content.ContentResolver;
 import android.database.Cursor;
-import android.util.Log;
 
-public abstract class InfoServlet extends HttpServlet
+public class InfoServlet 
 {
-    private String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
-    private String[] _navBarItems = {"/console/contacts", "/console/settings","/console/calls", "/console/network"};
-    private String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>", "I told you we should've taken a left!" };
+    private static String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
+    private static String[] _navBarItems = {"/console/contacts/index.html", "/console/settings","/console/calls", "/console/network"};
+    private static String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>", "I told you we should've taken a left!" };
     
-    // FIXME: Use a local copy when finished testing. :)
-    private static final String[] _javascript = new String[] { "http://jqueryjs.googlecode.com/files/jquery-1.3.min.js", "http://tablesorter.com/jquery.tablesorter.min.js" };
+   
 
-    public ContentResolver getContentResolver ()
+    
+    public static void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        return (ContentResolver)getServletContext().getAttribute("contentResolver");
+        doHeader(writer, request, response, null);
     }
     
-    protected void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-        doHeader(writer, request, response, _javascript);
-    }
-    
-    protected void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response, String[] scripts) throws ServletException, IOException
+    public static void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response, String[] scripts) throws ServletException, IOException
     {
         writer.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
         writer.println("<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>");
@@ -75,7 +64,7 @@ public abstract class InfoServlet extends HttpServlet
         writer.println("<body>");
     }
     
-    protected void doFooter (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public static void doFooter (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         Random generator = new Random();
         
@@ -87,7 +76,7 @@ public abstract class InfoServlet extends HttpServlet
         writer.println("</html>");
     }
     
-    protected void doMenuBar (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public static void doMenuBar (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         writer.println("    <div id='navigation'><ul>");
         String path = request.getServletPath();
@@ -109,22 +98,13 @@ public abstract class InfoServlet extends HttpServlet
         writer.println("    <div id='page' style='min-height: 400px;'>");
     }
     
-    protected abstract void doContent (PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
+  
     
     
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
-        PrintWriter writer = response.getWriter();
-        doHeader(writer, request, response);
-        doMenuBar(writer, request, response);
-        doContent(writer, request, response);
-        doFooter (writer, request, response);
-    }
+   
 
  
-    protected void formatTable (String[] colNames, Cursor cursor, PrintWriter writer)
+    public static void formatTable (String[] colNames, Cursor cursor, PrintWriter writer)
     {   
         if (colNames!=null && cursor!=null && writer!=null)
         {
@@ -155,7 +135,7 @@ public abstract class InfoServlet extends HttpServlet
         }
     }
     
-    protected String getRowStyle (int row)
+    public static String getRowStyle (int row)
     {
         if (row%2==0)
             return "";
@@ -164,6 +144,7 @@ public abstract class InfoServlet extends HttpServlet
 
     }
     
+    /*
     protected boolean isMobileClient (HttpServletRequest request)
     {
         String useragent = request.getHeader("User-Agent");
@@ -174,4 +155,5 @@ public abstract class InfoServlet extends HttpServlet
         
         return false;
     }
+    */
 }

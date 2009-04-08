@@ -51,7 +51,7 @@ var User =
         
         getUsers: function (successfn, errfn)
         {
-            var uri =  "/console/contacts/dyn?json=1";
+            var uri =  "/console/contacts/json/";
             console.log("uri = "+uri);
             $.ajax(
                    {
@@ -90,7 +90,7 @@ var User =
         
         getUserDetails: function ()
         {
-            var uri = $(this).attr('href') + "?json=1";
+            var uri = $(this).attr('href');
             console.log("uri = "+uri);
             $.ajax(
                    {
@@ -131,6 +131,7 @@ var User =
         
         refreshUsers: function ()
         {
+            console.log("In refreshUsers");
             //Set a timeout as the async xhr request often completes before the form submission
             setTimeout("User.getUsers(User.checkResponseVersion, User.errResponseVersion)",
                        1000);
@@ -138,8 +139,11 @@ var User =
         
         checkResponseVersion: function (response)
         {
+            console.log("In checkResponseVersion with User.version="+User.version+", response.version="+response.version);
             if (User.version == response.version)
+            {
                 User.refreshUsers();
+            }
             else
             {
                 User.version = response.version; 
@@ -170,7 +174,7 @@ var User =
             $.ajax (
                     {
                         type: 'POST',
-                        url: "/console/contacts/dyn/"+User.summary.id+"/?action="+User.action_del+"&json=1",
+                        url: "/console/contacts/json/"+User.summary.id+"/?action="+User.action_del,
                         dataType: 'json',
                         success: function (response)
                         {
@@ -212,6 +216,7 @@ var User =
         
         saveUser: function ()
         {     
+            console.log("in SaveUser");
            User.refreshUsers();
         },
         
@@ -239,14 +244,14 @@ var User =
         {            
             $("#userinfo").remove();
             var html = "<div id='userinfo'>";
-            html += "<form id='uform' method='POST' action='/console/contacts/dyn/?action="+User.action_save+"&json=1' enctype='multipart/form-data' target='hidden-target' onSubmit='User.saveUser(); return true;'>";
+            html += "<form id='uform' method='POST' action='/console/contacts/json/?action="+User.action_save+"' enctype='multipart/form-data' target='hidden-target' onSubmit='User.saveUser(); return true;'>";
             html += "<input type='hidden' name='id' value='" + User.summary.id + "'>";
             html += "<table><tr><td colspan='3'><h2>General</h2></td></tr>";
             html += "<tr><td>Name: </td><td colspan='2' ><input name='name' type='text' value='" + User.summary.name + "' /></td></tr>";
             html += "<tr><td>Starred: </td><td colspan='2' ><input name='starred' type='checkbox' " + (User.summary.starred ? "checked='checked'" : "") + " /></td></tr>";
             html += "<tr><td>Send to Voicemail: </td><td colspan='2'><input name='voicemail' type='checkbox' "+(User.summary.voicemail? "checked='checked'" : "") + " /><td></tr>";
             html += "<tr><td>Notes: </td><td colspan='2'  ><textarea name='notes'>" + (User.summary.notes != null ? User.summary.notes : "") + "</textarea></td></tr>";
-            html += "<tr><td colspan='2'><a href='/console/contacts/dyn/"+User.summary.id+"/photo'><img src='/console/contacts/dyn/"+User.summary.id+"/photo' /></a></td><td><input type='file' name='new-pic'>Change photo</input></td>";
+            html += "<tr><td colspan='2'><a href='/console/contacts/json/"+User.summary.id+"/photo'><img src='/console/contacts/json/"+User.summary.id+"/photo' /></a></td><td><input type='file' name='new-pic'>Change photo</input></td>";
             html += "<tr><td colspan='3'><h2>Phone numbers</h2></td></tr>";
             for (var p in User.phones)
             {
@@ -266,8 +271,8 @@ var User =
             html += "<br /><input type='submit' id='save' value='Save'/> ";  
             
             if (User.summary.id)
-                html += "<button id='del' onclick='User.deleteUser();'>Delete</button>";
-            html += "<button id='cancel' onclick='User.cancelEdit();'>Cancel</button>";
+                html += "<button id='del' onclick='User.deleteUser(); return false;'>Delete</button>";
+            html += "<button id='cancel' onclick='User.cancelEdit(); return false;'>Cancel</button>";
             html += "</form>";
             var content = $("#content");
             //if a mobile browser, we want to change the div content,
@@ -352,8 +357,8 @@ var User =
                     rows += "<td><span class='big'>*</span></td>";
                 else
                     rows += "<td>&nbsp;</td>";
-                rows += "<td><a class='userlink' href='/console/contacts/dyn/"+data[d].id+"'><img src='/console/contacts/dyn/"+data[d].id+"/photo'/></a></td>";
-                rows += "<td><a class='userlink' href='/console/contacts/dyn/"+data[d].id+"'>"+data[d].name+"</a></td>";
+                rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'><img src='/console/contacts/json/"+data[d].id+"/photo'/></a></td>";
+                rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'>"+data[d].name+"</a></td>";
                 rows +="</tr>";
             }
             $("#ulist").append(rows);
