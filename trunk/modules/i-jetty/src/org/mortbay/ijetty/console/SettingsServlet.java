@@ -18,21 +18,48 @@ package org.mortbay.ijetty.console;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.Settings;
 import android.provider.Settings.NameValueTable;
 
 import org.mortbay.ijetty.console.InfoServlet;
 
-public class SettingsServlet extends InfoServlet
+public class SettingsServlet extends HttpServlet
 {
     private static final String __HUMAN_ID = "ID";
+    private ContentResolver resolver;
 
-    @Override
+
+    public void init(ServletConfig config) throws ServletException
+    {
+        super.init(config);
+        resolver = (ContentResolver)getServletContext().getAttribute("contentResolver");
+    }
+
+    public ContentResolver getContentResolver()
+    {
+        return resolver;
+    }
+
+    
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        PrintWriter writer = response.getWriter();
+        InfoServlet.doHeader(writer, request, response);
+        InfoServlet.doMenuBar(writer, request, response);
+        doContent(writer, request, response);
+        InfoServlet.doFooter (writer, request, response);
+    }
+    
     protected void doContent(PrintWriter writer, HttpServletRequest request,
             HttpServletResponse response) throws ServletException, IOException
     {
@@ -53,7 +80,7 @@ public class SettingsServlet extends InfoServlet
             i++;
         }
         
-        formatTable(cols, cursor, writer);
+        InfoServlet.formatTable(cols, cursor, writer);
         writer.println("</div>");
     }
 
