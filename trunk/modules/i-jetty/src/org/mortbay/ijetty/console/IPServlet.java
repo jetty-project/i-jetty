@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.ijetty.console.InfoServlet;
+import org.mortbay.ijetty.console.HTMLHelper;
 
 import android.content.ContentResolver;
 
@@ -52,10 +52,10 @@ public class IPServlet extends HttpServlet
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();
-        InfoServlet.doHeader(writer, request, response);
-        InfoServlet.doMenuBar(writer, request, response);
+        HTMLHelper.doHeader(writer, request, response);
+        HTMLHelper.doMenuBar(writer, request, response);
         doContent(writer, request, response);
-        InfoServlet.doFooter (writer, request, response);
+        HTMLHelper.doFooter (writer, request, response);
     }
 
     protected void doContent(PrintWriter writer, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException

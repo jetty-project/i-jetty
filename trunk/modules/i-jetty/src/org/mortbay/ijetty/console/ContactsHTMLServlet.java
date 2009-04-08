@@ -30,7 +30,7 @@ import android.content.ContentValues;
 import android.provider.Contacts;
 import android.util.Log;
 
-public class ContactsServlet extends AbstractContactsServlet
+public class ContactsHTMLServlet extends AbstractContactsServlet
 {   
     private static enum __INFO_TYPE {Mobile, Home, Work, WorkFax, HomeFax, Pager, Other, Custom, Email, IM, Postal, Phone, Organization};
     private static EnumMap<__INFO_TYPE, String> __LABELS = new EnumMap<__INFO_TYPE, String>(__INFO_TYPE.class);
@@ -40,7 +40,7 @@ public class ContactsServlet extends AbstractContactsServlet
     private Map<Integer, __INFO_TYPE> _contactKinds = new HashMap<Integer, __INFO_TYPE>();
     
     
-    public ContactsServlet ()
+    public ContactsHTMLServlet ()
     {
         __LABELS.put(__INFO_TYPE.Mobile, "Mobile");
         __LABELS.put(__INFO_TYPE.Home, "Home");
@@ -82,10 +82,10 @@ public class ContactsServlet extends AbstractContactsServlet
         PrintWriter writer = response.getWriter();
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
-        InfoServlet.doHeader(writer, request, response);
-        InfoServlet.doMenuBar(writer, request, response);
+        HTMLHelper.doHeader(writer, request, response);
+        HTMLHelper.doMenuBar(writer, request, response);
         doEditUser(writer, request, response, null);
-        InfoServlet.doFooter (writer, request, response);
+        HTMLHelper.doFooter (writer, request, response);
     }
 
 
@@ -104,11 +104,11 @@ public class ContactsServlet extends AbstractContactsServlet
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
         response.setStatus(HttpServletResponse.SC_OK);
-        InfoServlet.doHeader(writer, request, response);
-        InfoServlet.doMenuBar(writer, request, response);
+        HTMLHelper.doHeader(writer, request, response);
+        HTMLHelper.doMenuBar(writer, request, response);
         doDeleteUser(writer, request, response, who);
         doGetUsers(writer, request, response);
-        InfoServlet.doFooter (writer, request, response);
+        HTMLHelper.doFooter (writer, request, response);
     }
 
 
@@ -119,10 +119,10 @@ public class ContactsServlet extends AbstractContactsServlet
         PrintWriter writer = response.getWriter();
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
-        InfoServlet.doHeader(writer, request, response);
-        InfoServlet.doMenuBar(writer, request, response);
+        HTMLHelper.doHeader(writer, request, response);
+        HTMLHelper.doMenuBar(writer, request, response);
         doEditUser(writer, request, response, who);
-        InfoServlet.doFooter (writer, request, response);
+        HTMLHelper.doFooter (writer, request, response);
     }
 
 
@@ -161,10 +161,10 @@ public class ContactsServlet extends AbstractContactsServlet
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
         response.setStatus(HttpServletResponse.SC_OK);
-        InfoServlet.doHeader(writer, request, response);
-        InfoServlet.doMenuBar(writer, request, response);
+        HTMLHelper.doHeader(writer, request, response);
+        HTMLHelper.doMenuBar(writer, request, response);
         saveUserFormData(request, response, request.getParameter("id"));
-        InfoServlet.doFooter (writer, request, response);
+        HTMLHelper.doFooter (writer, request, response);
     }
 
    
@@ -408,7 +408,7 @@ public class ContactsServlet extends AbstractContactsServlet
             ContentValues user = null;
             while ((user = users.next()) != null)
             {  
-                String style = InfoServlet.getRowStyle(row);           
+                String style = HTMLHelper.getRowStyle(row);           
 
                 String id = user.getAsString(android.provider.BaseColumns._ID);  
                 writer.println("<tr"+style+" id='contact-" + id + "'>");
@@ -491,7 +491,7 @@ public class ContactsServlet extends AbstractContactsServlet
         ContentValues phone;
         while ((phone = phones.next() ) != null)
         {  
-            String style = InfoServlet.getRowStyle(row);
+            String style = HTMLHelper.getRowStyle(row);
             writer.println("<tr class='"+style+"'>");
             
             String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
@@ -532,7 +532,7 @@ public class ContactsServlet extends AbstractContactsServlet
         
         while ((contactMethod = contactMethods.next()) != null)
         { 
-            String style = InfoServlet.getRowStyle(row);
+            String style = HTMLHelper.getRowStyle(row);
             writer.println("<tr class='"+style+"'>");
             String data = contactMethod.getAsString(Contacts.ContactMethodsColumns.DATA);
             String auxData = contactMethod.getAsString(Contacts.ContactMethodsColumns.AUX_DATA);
