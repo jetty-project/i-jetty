@@ -36,7 +36,7 @@
 	
 	<servlet-mapping>
 		<servlet-name>ContactsServlet</servlet-name>
-		<url-pattern>/contacts/*</url-pattern>
+		<url-pattern>/contacts/dyn/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CallLogServlet</servlet-name>
@@ -52,7 +52,7 @@
 	</servlet-mapping>
 	<filter-mapping>
 	    <filter-name>MultiPart</filter-name>
-	    <url-pattern>/contacts/*</url-pattern>
+	    <url-pattern>/contacts/dyn/*</url-pattern>
 	</filter-mapping>
 	
     <security-constraint>
