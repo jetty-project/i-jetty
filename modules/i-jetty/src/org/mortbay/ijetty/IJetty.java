@@ -18,8 +18,11 @@ package org.mortbay.ijetty;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -32,6 +35,7 @@ import org.mortbay.util.IO;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -242,6 +246,22 @@ public class IJetty extends Activity
     
     public void setupJetty ()
     {
+       
+        boolean update = false;
+        PackageInfo pi = null;
+        try
+        {
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
+            Log.i("Jetty", "Running jetty version="+pi.versionCode);
+            int storedVersion = getStoredJettyVersion();
+            Log.i("Jetty", "On disk jetty version="+storedVersion);
+            if (pi.versionCode > storedVersion)
+                update = true;
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Problem determining jetty version", e);
+        }
         //create the jetty dir structure
         File jettyDir = new File(__JETTY_DIR);
         if (!jettyDir.exists())
@@ -263,7 +283,7 @@ public class IJetty extends Activity
             etcDir.mkdirs();
 
         File webdefaults = new File (etcDir, "webdefault.xml");
-        if (!webdefaults.exists())
+        if (!webdefaults.exists() || update)
         {
             //get the webdefaults.xml file out of resources
             try
@@ -279,7 +299,7 @@ public class IJetty extends Activity
             }
         }
         File realm = new File (etcDir, "realm.properties"); 
-        if (!realm.exists())
+        if (!realm.exists() || update)
         {
             try
             {
@@ -304,13 +324,78 @@ public class IJetty extends Activity
         //Must be deployed by webapp deployer to get the Android ContentResolver
         //setting.
         File consoleWar = new File (webappsDir, "console");
+        if (update)
+        {
+            Installer.deleteWebapp(consoleWar);
+            Log.i("Jetty", "Cleaned console webapp for update");
+        }
+        
         boolean exists = consoleWar.exists();
         String[] files = consoleWar.list();
-        
-        if (!exists || files == null || files.length == 0)
+        if (!exists || files==null || files.length==0)
         {
             InputStream is = this.getClassLoader().getResourceAsStream("console.war");
             Installer.install(is, "/console", webappsDir, "console", false);
+            Log.i("Jetty", "Loaded console webapp");
+        }
+        
+        setStoredJettyVersion(pi.versionCode);
+    }
+    
+    protected int getStoredJettyVersion ()
+    {
+        File jettyDir = new File(__JETTY_DIR);
+        if (!jettyDir.exists())
+            return -1;
+        File versionFile = new File (jettyDir, "version.code");
+        if (!versionFile.exists())
+            return -1;
+        int val = -1;
+        ObjectInputStream ois = null;
+        try
+        {
+            ois = new ObjectInputStream(new FileInputStream(versionFile));
+            val = ois.readInt();
+            return val;
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Problem reading version.code", e);
+            return -1;
+        }
+        finally
+        {
+            if (ois != null)
+            {
+                try { ois.close();}catch (Exception e){Log.d("Jetty", "Error closing version.code input stream", e);}
+            }
+        }
+    }
+    
+    protected void setStoredJettyVersion (int version)
+    {
+        File jettyDir = new File(__JETTY_DIR);
+        if (!jettyDir.exists())
+            return;
+        File versionFile = new File (jettyDir, "version.code");
+        ObjectOutputStream oos = null;
+        try
+        {
+            FileOutputStream fos = new FileOutputStream(versionFile);
+            oos = new ObjectOutputStream(fos);
+            oos.writeInt(version);
+            oos.flush();
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Problem writing jetty version", e);
+        }
+        finally
+        {
+            if (oos != null)
+            {
+                try { oos.close();}catch (Exception e){Log.d("Jetty", "Error closing version.code output stream", e);}
+            }
         }
     }
 }
