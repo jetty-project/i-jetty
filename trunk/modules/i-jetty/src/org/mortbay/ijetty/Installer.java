@@ -174,6 +174,7 @@ public class Installer
             {
                 deleteWebapp(f);
             }
+            webapp.delete();
         }
         else
             webapp.delete();
