@@ -89,12 +89,12 @@ hr {
 }
 
 #footer {
-	clear: both;
+    clear: both;
     text-align: left;
     font-size: 80%;
     color: #babdb6;
     padding: 1em;
-    width: 100%;
+    /*width: 100%;*/
 }
 
 table {
