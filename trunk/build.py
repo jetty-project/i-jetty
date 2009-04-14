@@ -242,7 +242,7 @@ def do_build (config, buildconfig, verbose=False, args=None):
         if not os.path.isfile (sdcard):
             print "WARNING: SD card does not exist. Creating..."
             os.system (os.path.join (androidpath, "tools", "mksdcard") + (" %d %s" % (size, sdcard)))
-        elif config.getboolean ("SD", "clean"):
+        elif config.getboolean ("SD", "clean") and args.count ("noclean") == 0:
             if os.path.exists (sdcard + ".lock"):
                 print "WARNING: cannot clean out SD card; locked."
             else:
