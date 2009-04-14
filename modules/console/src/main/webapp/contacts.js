@@ -379,7 +379,7 @@ var User =
                 rows +="</tr>";
             }
             $("#ulist").append(rows);
-            $("#contacts").append("<button id='add' onclick='User.addUser();'>Add</button>");
+            $("#contacts").append("<br /><button id='add' onclick='User.addUser();'>Add</button>");
             $('.userlink').click(User.getUserDetails);
         }
   

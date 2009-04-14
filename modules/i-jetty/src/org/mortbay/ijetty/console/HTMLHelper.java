@@ -27,12 +27,9 @@ import android.database.Cursor;
 
 public class HTMLHelper 
 {
-    private static String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network"};
-    private static String[] _navBarItems = {"/console/contacts/index.html", "/console/settings","/console/calls", "/console/network"};
-    private static String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>", "I told you we should've taken a left!" };
-    
-   
-
+    private static String[] _navBarLabels = {"Contacts", "System Settings", "Call Logs", "Network", "Media"};
+    private static String[] _navBarItems = {"/console/contacts/index.html", "/console/settings/","/console/calls/", "/console/network/", "/console/media/"};
+    private static String[] _phrases = { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!", "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>" };
     
     public static void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
@@ -85,23 +82,17 @@ public class HTMLHelper
         {
             writer.print("        <li>");
             
-            /*String[] splitPath = _navBarItems[i].split("/");
+            String[] splitPath = _navBarItems[i].split("/");
             if (path.endsWith(splitPath[splitPath.length - 1]))
-                writer.print("<strong>"+_navBarLabels[i]+"</strong>");
-            else*/
-            
-            writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
+                writer.print("<a href='"+_navBarItems[i]+"'><strong>"+_navBarLabels[i]+"</strong></a>");
+            else
+                writer.print("<a href='"+_navBarItems[i]+"'>"+_navBarLabels[i]+"</a>");
             
             writer.println("</li>");
         }
         writer.println("    </ul></div>");
-        writer.println("    <div id='page' style='min-height: 400px;'>");
+        writer.println("    <div id='page'>");
     }
-    
-  
-    
-    
-   
 
  
     public static void formatTable (String[] colNames, Cursor cursor, PrintWriter writer)
