@@ -40,10 +40,11 @@ import android.net.Uri;
 import android.database.Cursor;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.util.Log;
 
 public class MediaBrowserServlet extends HttpServlet
 {
-    private Uri[] __MEDIA_URIS = { MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.INTERNAL_CONTENT_URI };
+    private Uri[] __MEDIA_URIS = { MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MediaStore.Audio.Media.INTERNAL_CONTENT_URI  };
     
     private ContentResolver resolver;
 
@@ -91,21 +92,14 @@ public class MediaBrowserServlet extends HttpServlet
             Uri contenturi = __MEDIA_URIS[type];
             Uri content = Uri.withAppendedPath(contenturi, item);
             
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(resolver, content);
-            if (bitmap != null) {
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
-                ByteArrayInputStream stream = new ByteArrayInputStream(bytes.toByteArray());
-                
-                response.setContentType("image/png");
-                response.setStatus(HttpServletResponse.SC_OK);
-                OutputStream os = response.getOutputStream();
-                IO.copy(stream,os);
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
+            response.setContentType(resolver.getType(content));
+            response.setStatus(HttpServletResponse.SC_OK);
+            InputStream stream = resolver.openInputStream(content);
+            OutputStream os = response.getOutputStream();
+            IO.copy(stream, os);
+            
         } catch (Exception e) {
+            Log.w("Jetty", "Failed to fetch media", e);
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
@@ -131,7 +125,6 @@ public class MediaBrowserServlet extends HttpServlet
         for (Uri contenturi : __MEDIA_URIS)
         {
             Cursor cur = resolver.query (contenturi, null, null, null, null);
-            //cur.moveToFirst();
             while (cur.moveToNext())
             {
                 Long rowid = cur.getLong (cur.getColumnIndexOrThrow(BaseColumns._ID));
