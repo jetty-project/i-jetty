@@ -44,8 +44,16 @@ import android.util.Log;
 
 public class MediaBrowserServlet extends HttpServlet
 {
-    private Uri[] __MEDIA_URIS = { MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Audio.Media.INTERNAL_CONTENT_URI, MediaStore.Video.Media.INTERNAL_CONTENT_URI  };
-    private String[] __MEDIA_LABELS = { "External images", "External audio", "External video", "Internal images", "Internal audio", "Internal video" };
+    private Uri[] __MEDIA_URIS = {
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        MediaStore.Images.Media.INTERNAL_CONTENT_URI,
+        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+        MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+        MediaStore.Video.Media.INTERNAL_CONTENT_URI
+    };
+    
+    private String[] __MEDIA_LABELS = { "Images", "Audio", "Video" };
     
     private ContentResolver resolver;
 
@@ -119,13 +127,15 @@ public class MediaBrowserServlet extends HttpServlet
         
         Integer type = 0;
         int count = 0;
+        boolean new_list = true;
         
         for (Uri contenturi : __MEDIA_URIS)
         {
-            count = 0;
-            
-            writer.println("<h2>" + __MEDIA_LABELS[type] + "</h2>");
-            writer.println("<ul>");
+            if (type % 2 == 0)
+            {
+                writer.println("<h2>" + __MEDIA_LABELS[type / 2] + "</h2>");
+                writer.println("<ul>");
+            }
             
             Cursor cur = resolver.query (contenturi, null, null, null, null);
             while (cur.moveToNext())
@@ -139,10 +149,14 @@ public class MediaBrowserServlet extends HttpServlet
             
             type++;
             
-            if (count == 0)
-                writer.println("<li>No media items found on this phone.</li>");
+            if (type % 2 == 0)
+            {
+                if (count == 0)
+                    writer.println("<li>No media items found on this phone.</li>");
+                count = 0;
             
-            writer.println("</ul>");
+                writer.println("</ul>");
+            }
         }
         
         writer.println("</div>");
