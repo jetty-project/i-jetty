@@ -218,7 +218,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>${android.home}/tools/dx</executable>
+                  <executable>${android.home}/${android.platform}/tools/dx</executable>
                   <arguments>
                     <!-- argument>-JXmx1024M</argument -->
                     <argument>--dex</argument>
@@ -239,7 +239,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>${android.home}/tools/aapt</executable>
+                  <executable>${android.home}/${android.platform}/tools/aapt</executable>
                   <arguments>
                     <argument>package</argument>
                     <argument>-f</argument>
@@ -248,7 +248,7 @@
                     <argument>-S</argument>
                     <argument>${basedir}/res</argument>
                     <argument>-I</argument>
-                    <argument>${android.home}/android.jar</argument>
+                    <argument>${android.home}/${android.platform}/android.jar</argument>
                     <argument>-F</argument>
                     <argument>${project.build.directory}/${artifactId}-resources.apk</argument>
                   </arguments>
@@ -276,6 +276,8 @@
                         <argument>${basedir}/src</argument>
                         <argument>-rf</argument>
                         <argument>${project.build.directory}/included-wars</argument>
+                        <argument>-nf</argument>
+                        <argument>${android.home}/${android.platform}</argument>
                     </arguments>
                 </configuration>
               </execution>
