@@ -18,6 +18,7 @@ import sys
 import os
 from optparse import OptionParser
 import ConfigParser
+import time
 
 try:
     import hashlib
@@ -165,6 +166,7 @@ def do_config(config, filename, productSDK):
                 print "android.jar does not exist for the given platform!"
             
         config.set ("Paths", 'platform', platform)
+        androidjar = os.path.join (platformsdir, platform, "android.jar")
     else:
         config.set ("Paths", 'platform', 'default')
         
@@ -208,8 +210,26 @@ def do_config(config, filename, productSDK):
     
     emulator = ask_bool("Run emulator?")
     config.set ("Build", 'runemulator', emulator)
-    if emulator != "no":
+    if emulator == "yes":
         config.set ("Build", 'wipedata', ask_bool("Always clear emulator data?"))
+    
+    config.add_section ("Emulator")
+    if newsdk:
+        create_avd = ask_bool ("Would you like to create an AVD?")
+        if create_avd == "yes":
+            # FIXME: Probably nicer to parse the output of `android list targets`
+            print "To get a list of target IDs, run `android list targets` from"
+            print "your SDK tools directory."
+            print 
+            print "Usually, 1 = 1.1 and 2 = 1.5"
+            target = ask ("Target ID of the AVD you wish to create?", "2")
+            avd = str(int(time.time()))
+            os.system (os.path.join (sdkpath, "tools", "android") + " create avd --name " + avd + " --target " + target)
+            config.set ("Emulator", "avd", avd)
+        else:
+            config.set ("Emulator", "avd", ask("AVD name to use?"))
+    else:
+        config.set ("Emulator", "avd", "default")
     
     config.add_section ("ADB")
     config.set ("ADB", 'usb', ask_bool("Using USB device?", False))
@@ -331,6 +351,10 @@ def do_build (config, buildconfig, verbose=False, args=None):
         
         if wipedata:
             cmd += " -wipe-data"
+            
+        if platform != "default":
+            # assume new sdk if platform string is 'default'
+            cmd += " @" + config.get ("Emulator", "avd")
         
         if verbose: print "Running '%s' in background." % cmd
         if os.name == "nt":
@@ -340,7 +364,6 @@ def do_build (config, buildconfig, verbose=False, args=None):
             # Works in most unix shells
             os.system(cmd + " &")
         
-        import time
         # Sleep for ten seconds before checking status
         if verbose: print "Sleeping for 40 seconds..."
         time.sleep (40)
