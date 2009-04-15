@@ -25,11 +25,13 @@ except ImportERROR:
     import md5
 
 # md5sums of android.jar
-# for future use of version checking applications before build
-android_releases = {
-    "1.0_r2" : "8cce78264a998882faece5ff8618803e",
-    "1.1_r1" : "95c651eb8f5689776987e06d26c58a79"
+ANDROID_RELEASES = {
+    "1.0_r2"  : "8cce78264a998882faece5ff8618803e",
+    "1.1_r1"  : "95c651eb8f5689776987e06d26c58a79",
+    "1.5_pre" : "df5836ef5a01882ecb5d8c3a06c24761",
 }
+
+DEFAULT_PLATFORM = "android-1.5"
 
 parser = OptionParser (usage="%prog [options]", version="%prog 1.0", description="Helps with building Android applications.")
 parser.add_option('--configure',
@@ -106,9 +108,7 @@ def ask(msg, default=None, path=False, allow_empty=False, options=None):
         
         if not asking and not allow_empty and options:
             val = val.lower()
-            
-            # FIXME: Better way than using private functions?
-            asking = not options.__contains__(val)
+            asking = options.count(val) > 0
         
         if asking:
           print "Bad input. Try again."
@@ -143,14 +143,35 @@ def do_config(config, filename, productSDK):
     config.set ("Paths", 'sdkpath', sdkpath)
     
     androidjar = os.path.join (sdkpath, "android.jar")
+    platformsdir = os.path.join (sdkpath, "platforms")
+    newsdk = False
+    
     if not os.path.isfile (androidjar):
-        print "ERROR: cannot find android.jar inside Android SDK path."
-        sys.exit(1)
+        if not os.path.isdir (platformsdir):
+            print "ERROR: cannot find android.jar inside Android SDK path."
+            sys.exit(1)
+        else:
+            newsdk = True
+    
+    if newsdk:
+        platform_options = os.listdir(platformsdir)
+        valid = False
+        platform = None
+        while not valid:
+            platform = ask("Platform?", DEFAULT_PLATFORM, options=platform_options)
+            if os.path.isfile (os.path.join (platformsdir, platform, "android.jar")):
+                valid = True
+            else:
+                print "android.jar does not exist for the given platform!"
+            
+        config.set ("Paths", 'platform', platform)
+    else:
+        config.set ("Paths", 'platform', 'default')
         
     md5sum = md5file (androidjar).lower()
     sdkver = None
-    for release in android_releases:
-        release_sum = android_releases[release].lower()
+    for release in ANDROID_RELEASES:
+        release_sum = ANDROID_RELEASES[release].lower()
         if release_sum == md5sum:
             sdkver = release
     
@@ -251,6 +272,13 @@ def do_build (config, buildconfig, verbose=False, args=None):
                 os.system (os.path.join (androidpath, "tools", "mksdcard") + (" %d %s" % (size, sdcard)))
     
     # Build section
+    android_jar = os.path.join (androidpath, "android.jar")
+    platform = config.get ("Paths", "platform")
+    platform_maven_str = ""
+    if platform != "default":
+        platform_maven_str = os.path.join ("platforms", platform)
+        android_jar = os.path.join (androidpath, "platforms", platform, "android.jar")
+    
     if build:
         print "Building..."
         system = config.get ("Build", "system").lower()
@@ -262,7 +290,7 @@ def do_build (config, buildconfig, verbose=False, args=None):
             sys.exit(1)
         elif system == "maven":
             cmd = None
-            installcmd = "mvn install:install-file -DgroupId=android -DartifactId=android -Dversion=%s -Dpackaging=jar -Dfile=%s > build.log" % (config.get ("Paths", "sdkver"), os.path.join (androidpath, "android.jar"))
+            installcmd = "mvn install:install-file -DgroupId=android -DartifactId=android -Dversion=%s -Dpackaging=jar -Dfile=%s > build.log" % (config.get ("Paths", "sdkver"), android_jar)
             
             if verbose: print "Installing artifact..."
             ret = os.system (installcmd)
@@ -273,9 +301,9 @@ def do_build (config, buildconfig, verbose=False, args=None):
             
             if verbose: print "Building with Maven."
             if config.getboolean ("Build", "alwaysclean"):
-                cmd = "mvn clean install -Dandroid.home=%s -Dandroid-version=%s > build.log" % (androidpath, config.get ("Paths", "sdkver"))
+                cmd = "mvn clean install -Dandroid.home=%s -Dandroid.platform=%s -Dandroid-version=%s > build.log" % (androidpath, platform_maven_str, config.get ("Paths", "sdkver"))
             else:
-                cmd = "mvn install -Dandroid.home=%s -Dandroid-version > build.log" % (androidpath, config.get ("Paths", "sdkver"))
+                cmd = "mvn install -Dandroid.home=%s -Dandroid.platform=%s -Dandroid-version > build.log" % (androidpath, platform_maven_str, config.get ("Paths", "sdkver"))
             
             if verbose: print "Executing: %s" % cmd
             ret = os.system (cmd)
@@ -379,7 +407,8 @@ if __name__ == "__main__":
         buildconfig.read (options.specfile)
         
         print "Using build configuration '%s'" % options.buildconfig
-        print "Product: %s" % buildconfig.get ("Product", "Name")
-        print "Version: %s" % buildconfig.get ("Product", "Version")
+        print "Product:     %s" % buildconfig.get ("Product", "Name")
+        print "Version:     %s" % buildconfig.get ("Product", "Version")
+        print "SDK version: %s" % config.get ("Paths", "sdkver")
         print
         do_build (config, buildconfig, options.verbose, args)
