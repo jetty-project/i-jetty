@@ -115,8 +115,6 @@ public class MediaBrowserServlet extends HttpServlet
         HTMLHelper.doHeader(writer, request, response);
         HTMLHelper.doMenuBar(writer, request, response);
         
-        List <Uri> media = new ArrayList <Uri> ();
-    
         writer.println("<h1 class='pageheader'>Media</h1><div id='content'>");
         
         Integer type = 0;
@@ -135,7 +133,6 @@ public class MediaBrowserServlet extends HttpServlet
                 Long rowid = cur.getLong (cur.getColumnIndexOrThrow(BaseColumns._ID));
                 String name = cur.getString (cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
                 
-                media.add (Uri.withAppendedPath(contenturi, rowid.toString()));
                 writer.println("<li><a href='/console/media/" + type.toString() + "/" + rowid.toString() + "'>" + name + "</a></li>");
                 count++;
             }
