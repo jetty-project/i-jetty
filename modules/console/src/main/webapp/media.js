@@ -16,6 +16,8 @@ var Media =
                 dataType: 'json',
                 beforeSend: function(xhr)
                 {
+                    $("#" + type).empty();
+                    $("#" + type).append ("Loading...");
                     xhr.setRequestHeader('Connection', 'Keep-Alive');
                     return true;
                 },
@@ -27,7 +29,10 @@ var Media =
                 },
                 error: function(xhr, reason, exception) 
                 { 
-                    console.log("GET media list failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                    errormsg = "GET media list for " + type + " failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception;
+                    console.log(errormsg);
+                    $("#" + type).empty();
+                    $("#" + type).append ("<strong>Failed to get " + type + "!</strong><br />Error:<br /><pre>" + errormsg + "</pre>");
                 }
             });
             return false; 
@@ -67,9 +72,9 @@ var Media =
                 var item = media[itemidx];
                 
                 if (type == "images") {
-                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><div class='thumb'><img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/></div></a><p>" + item.title + "</p></div>";
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><div class='thumb'>&nbsp;<img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/>&nbsp;</div></a><p>" + item.title + "</p></div>";
                 } else if (type == "audio") {
-                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><div class='thumb'><img src='/console/audio.png' alt='" + item.title + "'/></div></a><p>" + item.title;
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "' onclick='return playMedia(this);'><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + item.title;
                     
                     if (item.artist != null || item.album != null) {
                         html += "<span class='trackinfo'>";
@@ -121,8 +126,40 @@ if (console == null && document.console == null) {
     };
 }
 
-
 $(document).ready (function () {
     Media.getAllMedia();
     console.log("document ready");
 }); 
+
+function reloadMedia (type) {
+    Media.getMedia(type);
+    return false;
+}
+
+function stopMedia(elem) {
+    $("#hidden-target")[0].src = "about:blank";
+    elem.childNodes[0].childNodes[1].src = "/console/audio.png";
+    document.currentPlaying = null;
+    return false;
+}
+
+document.currentPlaying = null;
+
+function playMedia (elem) {
+    if (document.currentPlaying == elem) {
+        stopMedia(document.currentPlaying);
+        return false;
+    } else if (document.currentPlaying != null) {
+        stopMedia(document.currentPlaying);
+    }
+    
+    console.log ('elem = ', elem);
+    var href = elem.href;
+    href = href.replace ("fetch", "embed"); // go to embed url location for iframe
+    $("#hidden-target")[0].src = href;
+    
+    // music should start loading now, so change the image to a stop button
+    elem.childNodes[0].childNodes[1].src = "/console/stop.png";
+    document.currentPlaying = elem;
+    return false;
+}

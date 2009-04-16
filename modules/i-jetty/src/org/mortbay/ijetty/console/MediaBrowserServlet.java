@@ -78,8 +78,6 @@ public class MediaBrowserServlet extends HttpServlet
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        Log.w("Jetty", "Running doGet in MediaBrowserServlet.java");
-        
         String pathInfo = request.getPathInfo();
         String servletPath=request.getServletPath();
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
@@ -135,35 +133,66 @@ public class MediaBrowserServlet extends HttpServlet
                             float scaleWidth = 0;
                             float scaleHeight = 0;
                             
+                            Log.i("Jetty", "orig height = " + height + ", orig width = " + width);
+                            Log.i("Jetty", "__THUMB_HEIGHT = " + __THUMB_HEIGHT + ", __THUMB_WIDTH = " + __THUMB_WIDTH);
+                            
                             if (width > __THUMB_WIDTH)
                                 scaleWidth = ((float) __THUMB_WIDTH) / width;
                             
                             if (height > __THUMB_HEIGHT)
                                 scaleHeight = ((float) __THUMB_HEIGHT) / height;
                             
-                            if (scaleHeight < scaleWidth) 
+                            Log.i("Jetty", "scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth);
+                            
+                            if (scaleHeight < scaleWidth && scaleHeight != 0) 
                                 scaleWidth = scaleHeight;
-                            else if (scaleWidth < scaleHeight)
+                            else if (scaleWidth < scaleHeight && scaleWidth != 0)
                                 scaleHeight = scaleWidth;
                             
                             if (scaleWidth == 0)
-                                scaleWidth = 0.5f;
+                                scaleWidth = scaleHeight;
                             
                             if (scaleHeight == 0)
+                                scaleHeight = scaleWidth;
+                            
+                            Log.i("Jetty", "scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth + " (final)");
+                            
+                            if (scaleHeight == 0)
+                            {
+                                Log.w("Jetty", "scaleHeight and scaleWidth both = 0! Setting scale to 50%.");
                                 scaleHeight = 0.5f;
+                                scaleWidth = 0.5f;
+                            }
 
                             Matrix matrix = new Matrix();
                             matrix.postScale(scaleWidth, scaleHeight);
 
                             // recreate the new Bitmap
                             bitmap = Bitmap.createBitmap(bitmap_orig, 0, 0, width, height, matrix, true);
-                            response.setContentType("image/png");
+                            
                             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+                            
+                            if (resolver.getType(content) == "image/gif")
+                            {
+                                Log.i("Jetty", "Original image was gif, exporting thumb as JPEG as workaround");
+                                response.setContentType("image/gif");
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+                            }
+                            else
+                            {
+                                Log.i("Jetty", "Exporting thumb in png format");
+                                response.setContentType("image/png");
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+                            }
+                            
                             stream = new ByteArrayInputStream(bytes.toByteArray());
                         }
                         else
                         {
+                            if (height == 0 || width == 0)
+                                Log.w("Jetty", "Height or width were 0; sending original image instead!");
+                            else
+                                Log.i("Jetty", "Original was smaller than " + __THUMB_HEIGHT + "x" + __THUMB_WIDTH + ", skipping scale.");
                             // just return the original data from the DB
                             response.setContentType(resolver.getType(content));
                             stream = resolver.openInputStream(content);
@@ -174,7 +203,7 @@ public class MediaBrowserServlet extends HttpServlet
                 }
                 else
                 {
-                    Log.i("Jetty", "thumb = " + thumb);
+                    Log.i("Jetty", "Exporting original media");
                     response.setContentType(resolver.getType(content));
                     InputStream stream = resolver.openInputStream(content);
                     OutputStream os = response.getOutputStream();
@@ -245,6 +274,18 @@ public class MediaBrowserServlet extends HttpServlet
             }
             
             writer.print(" ]");
+        }
+        else if ("embed".equals(what.trim()))
+        {
+            String path = "/console/media/db/fetch/" + typestr + "/" + item;
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("text/html");
+            PrintWriter writer = response.getWriter();
+            
+            writer.println ("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26' CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95' STANDBY='Loading...' TYPE='application/x-oleobject'>");
+            writer.println ("  <PARAM NAME='FileName' VALUE=" + path + ">");
+            writer.println ("  <EMBED TYPE='application/x-mplayer2' SRC='" + path + "' NAME='MediaPlayer' WIDTH='320' HEIGHT='26' autostart='1'></EMBED>");
+            writer.println ("</OBJECT>");
         }
         else
         {
