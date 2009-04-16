@@ -147,10 +147,10 @@ public class MediaBrowserServlet extends HttpServlet
                                 scaleHeight = scaleWidth;
                             
                             if (scaleWidth == 0)
-                                scaleWidth = 0.5;
+                                scaleWidth = 0.5f;
                             
                             if (scaleHeight == 0)
-                                scaleHeight = 0.5;
+                                scaleHeight = 0.5f;
 
                             Matrix matrix = new Matrix();
                             matrix.postScale(scaleWidth, scaleHeight);
