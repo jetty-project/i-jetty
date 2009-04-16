@@ -119,27 +119,36 @@ public class MediaBrowserServlet extends HttpServlet
                     Bitmap bitmap_orig = MediaStore.Images.Media.getBitmap(resolver, content);
                     if (bitmap_orig != null)
                     {
-                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        Bitmap bitmap = null;
 
                         int width = bitmap_orig.getWidth();
-                        int height = bitmap_orig.getHeight();
-                        int newWidth = __THUMB_WIDTH;
+                        
+                        if (width > __THUMB_WIDTH || )
+                        {
+                            int height = bitmap_orig.getHeight();
+                            int newWidth = __THUMB_WIDTH;
 
-                        float scaleWidth = ((float) newWidth) / width;
-                        //float scaleHeight = ((float) newHeight) / height;
-                        float scaleHeight = scaleWidth;
+                            float scaleWidth = ((float) newWidth) / width;
+                            //float scaleHeight = ((float) newHeight) / height;
+                            float scaleHeight = scaleWidth;
 
-                        Matrix matrix = new Matrix();
-                        matrix.postScale(scaleWidth, scaleHeight);
+                            Matrix matrix = new Matrix();
+                            matrix.postScale(scaleWidth, scaleHeight);
 
-                        // recreate the new Bitmap
-                        Bitmap bitmap = Bitmap.createBitmap(bitmap_orig, 0, 0, width, height, matrix, true);
+                            // recreate the new Bitmap
+                            bitmap = Bitmap.createBitmap(bitmap_orig, 0, 0, width, height, matrix, true);
+                            response.setContentType("image/png");
+                        }
+                        else
+                        {
+                            response.setContentType(resolver.getType(content));
+                            bitmap = bitmap_orig;
+                        }
 
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
                         ByteArrayInputStream stream = new ByteArrayInputStream(bytes.toByteArray());
-                        
-                        response.setContentType("image/png");
-                        response.setStatus(HttpServletResponse.SC_OK);
                         OutputStream os = response.getOutputStream();
                         IO.copy(stream,os);
                     }
@@ -191,9 +200,25 @@ public class MediaBrowserServlet extends HttpServlet
                 while (cur.moveToNext())
                 {
                     Long rowid = cur.getLong (cur.getColumnIndexOrThrow(BaseColumns._ID));
-                    String name = cur.getString (cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
-                    writer.print (" { 'type' : " + type.toString() + ", 'id' : " + rowid.toString() + ", 'title' : '" + name.replace("'", "\\'") + "' }");
-                    if (cur.isBeforeLast())
+                    String name = cur.getString (cur.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
+                    
+                    writer.print (" { 'type' : " + type.toString() + ", 'id' : " + rowid.toString() + ", 'title' : '" + name.replace("'", "\\'") + "', ");
+                    
+                    if (contenturi == MediaStore.Audio.Media.EXTERNAL_CONTENT_URI || contenturi == MediaStore.Audio.Media.INTERNAL_CONTENT_URI)
+                    {
+                        int music = cur.getInt (cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.IS_MUSIC));
+                        if (music != 0)
+                        {
+                            String artist = cur.getString (cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+                            String album = cur.getString (cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+                            
+                            writer.print ("'artist' : '" + artist + "', 'album' : '" + album + "' ");
+                        }
+                    }
+                    
+                    writer.print ("}");
+                    
+                    if (!cur.isLast())
                         writer.print (",");
                 }
                 

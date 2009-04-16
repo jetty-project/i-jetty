@@ -48,6 +48,8 @@ var Media =
             parent = $("#" + type);
             parent.empty ();
             
+            html = "";
+            
             if (media == null || media.length == 0) {
                 parent.append ("<p>No " + type + " found on this phone.</p>");
                 return;
@@ -65,19 +67,47 @@ var Media =
                 var item = media[itemidx];
                 
                 if (type == "images") {
-                    $("#" + type).append ("<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/></a><br /><p>" + item.title + "</p></div>");
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/></a><br /><p>" + item.title + "</p></div>";
                 } else if (type == "audio") {
-                    $("#" + type).append ("<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><img src='/console/audio.png' alt='" + item.title + "'/></a><br /><p>" + item.title + "</p></div>");
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><img src='/console/audio.png' alt='" + item.title + "'/></a><br /><p>" + item.title;
+                    
+                    if (item.artist != null || item.album != null) {
+                        html += "<span class='trackinfo'>";
+                    }
+                    
+                    if (item.artist != null) {
+                        if (item.artist.length == 0) {
+                            html += "<br />Unknown Artist";
+                        } else {
+                            html += "<br />" + item.artist;
+                        }
+                    }
+                    
+                    if (item.album != null) {
+                        if (item.album.length == 0) {
+                            html += "<br />Unknown Album";
+                        } else {
+                            html += "<br />" + item.album;
+                        }
+                    }
+                    
+                    if (item.artist != null || item.album != null) {
+                        html += "</span>";
+                    }
+                    
+                    html += "</p></div>";
                 } else {
-                    $("#" + type).append ("<li><a href='/console/media/db/fetch/" + item.type + "/" + item.id + ">" + item.title + "</a></li>");
+                    html += "<li><a href='/console/media/db/fetch/" + item.type + "/" + item.id + ">" + item.title + "</a></li>";
                 }
             }
             
             if (type == "images" || type == "audio") {
-                parent.append ("<div class='spacer'>&nbsp;</div>");
+                html += "<div class='spacer'>&nbsp;</div>";
             } else {
-                parent.append ("</ul>");
+                html += "</ul>";
             }
+            
+            parent.append (html);
         }
 };
 
