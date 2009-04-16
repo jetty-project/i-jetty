@@ -254,7 +254,7 @@
                   </arguments>
                 </configuration>
               </execution>
-              
+              <!-- Make a debug version ie signed with the default certificate --> 
               <execution>
                 <id>finish-package</id>
                 <phase>package</phase>
@@ -285,4 +285,55 @@
           </plugin>
       </plugins>
    </build>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>release</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+         <plugins>
+           <!-- Make a release version ie unsigned --> 
+           <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>finish-package</id>
+                <phase>package</phase>
+                <goals>
+                    <goal>exec</goal>
+                </goals>
+                <configuration>
+                    <executable>${android.home}/tools/apkbuilder</executable>
+                    <arguments>
+                        <argument>${project.build.directory}/${artifactId}-${project.version}.apk</argument>
+                        <argument>-v</argument>
+                        <argument>-u</argument>
+                        <argument>-z</argument>
+                        <argument>${project.build.directory}/${artifactId}-resources.apk</argument>
+                        <argument>-f</argument>
+                        <argument>${project.build.directory}/classes.dex</argument>
+                        <argument>-rf</argument>
+                        <argument>${project.build.directory}/generated-sources</argument>
+                        <argument>-rf</argument>
+                        <argument>${basedir}/src</argument>
+                        <argument>-rf</argument>
+                        <argument>${project.build.directory}/included-wars</argument>
+                        <argument>-nf</argument>
+                        <argument>${android.home}/${android.platform}</argument>
+                    </arguments>
+                </configuration>
+              </execution>
+            </executions>
+           </plugin>
+         </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
