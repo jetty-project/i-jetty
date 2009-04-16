@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.ijetty.console.HTMLHelper;
 import org.mortbay.util.IO;
+import org.mortbay.util.URIUtil;
 
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
@@ -40,6 +42,7 @@ import android.net.Uri;
 import android.database.Cursor;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.util.Log;
 
 public class MediaBrowserServlet extends HttpServlet
@@ -54,6 +57,7 @@ public class MediaBrowserServlet extends HttpServlet
     };
     
     private String[] __MEDIA_LABELS = { "Images", "Audio", "Video" };
+    private int __THUMB_WIDTH = 120;
     
     private ContentResolver resolver;
 
@@ -67,100 +71,141 @@ public class MediaBrowserServlet extends HttpServlet
     {
         return resolver;
     }
+    
+    
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        Log.w("Jetty", "Running doGet in MediaBrowserServlet.java");
+        
         String pathInfo = request.getPathInfo();
+        String servletPath=request.getServletPath();
+        String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
+        
         if (pathInfo == null) {
-            // If nothing was passed (including ending /)
-            // just do default stuff
-            doBody(request, response);
-            return;
-        }
-        
-        String typestr = null;
-        String item = null;
-        
-        StringTokenizer strtok = new StringTokenizer(pathInfo, "/");
-        if (strtok.hasMoreElements())          
-            typestr = strtok.nextToken();
-        
-        if (strtok.hasMoreElements())          
-            item = strtok.nextToken();
-        
-        if (typestr == null || item == null) {
-            // Either type and item weren't found (both required)
-            doBody(request, response);
-            return;
-        }
-        
-        try {
-            Long rowid = Long.parseLong (item);
-            int type = Integer.parseInt (typestr);
-            
-            Uri contenturi = __MEDIA_URIS[type];
-            Uri content = Uri.withAppendedPath(contenturi, item);
-            
-            response.setContentType(resolver.getType(content));
-            response.setStatus(HttpServletResponse.SC_OK);
-            InputStream stream = resolver.openInputStream(content);
-            OutputStream os = response.getOutputStream();
-            IO.copy(stream, os);
-            
-        } catch (Exception e) {
-            Log.w("Jetty", "Failed to fetch media", e);
+            Log.w("Jetty", "pathInfo was null, returning 404");
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         
-    }
-
-    protected void doBody(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
-    {
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
-        PrintWriter writer = response.getWriter();
-        HTMLHelper.doHeader(writer, request, response);
-        HTMLHelper.doMenuBar(writer, request, response);
+        String what = null; // 'json' or 'fetch'
+        String typestr = null; // media type id (0, 1) if what='fetch', media type string (audio, images, etc) if what='json'
+        String item = null; // item id
+        String thumb = null; // 'thumb' if only if thumbnail requested
         
-        writer.println("<h1 class='pageheader'>Media</h1><div id='content'>");
+        StringTokenizer strtok = new StringTokenizer(pathInfo, "/");
+        if (strtok.hasMoreElements())
+            what = strtok.nextToken();
         
-        Integer type = 0;
-        int count = 0;
-        boolean new_list = true;
+        if (strtok.hasMoreElements())
+            typestr = strtok.nextToken();
         
-        for (Uri contenturi : __MEDIA_URIS)
-        {
-            if (type % 2 == 0)
-            {
-                writer.println("<h2>" + __MEDIA_LABELS[type / 2] + "</h2>");
-                writer.println("<ul>");
-            }
-            
-            Cursor cur = resolver.query (contenturi, null, null, null, null);
-            while (cur.moveToNext())
-            {
-                Long rowid = cur.getLong (cur.getColumnIndexOrThrow(BaseColumns._ID));
-                String name = cur.getString (cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
+        if (strtok.hasMoreElements())
+            item = strtok.nextToken();
+        
+        if (strtok.hasMoreElements())
+            thumb = strtok.nextToken();
+        
+        if ("fetch".equals(what.trim())) {
+            try {
+                Long rowid = Long.parseLong (item);
+                int type = Integer.parseInt (typestr);
                 
-                writer.println("<li><a href='/console/media/" + type.toString() + "/" + rowid.toString() + "'>" + name + "</a></li>");
-                count++;
-            }
-            
-            type++;
-            
-            if (type % 2 == 0)
-            {
-                if (count == 0)
-                    writer.println("<li>No media items found on this phone.</li>");
-                count = 0;
-            
-                writer.println("</ul>");
+                Uri contenturi = __MEDIA_URIS[type];
+                Uri content = Uri.withAppendedPath(contenturi, item);
+                
+                if (thumb != null && "thumb".equals(thumb.trim()))
+                {
+                    Bitmap bitmap_orig = MediaStore.Images.Media.getBitmap(resolver, content);
+                    if (bitmap_orig != null)
+                    {
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+                        int width = bitmap_orig.getWidth();
+                        int height = bitmap_orig.getHeight();
+                        int newWidth = __THUMB_WIDTH;
+
+                        float scaleWidth = ((float) newWidth) / width;
+                        //float scaleHeight = ((float) newHeight) / height;
+                        float scaleHeight = scaleWidth;
+
+                        Matrix matrix = new Matrix();
+                        matrix.postScale(scaleWidth, scaleHeight);
+
+                        // recreate the new Bitmap
+                        Bitmap bitmap = Bitmap.createBitmap(bitmap_orig, 0, 0, width, height, matrix, true);
+
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+                        ByteArrayInputStream stream = new ByteArrayInputStream(bytes.toByteArray());
+                        
+                        response.setContentType("image/png");
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        OutputStream os = response.getOutputStream();
+                        IO.copy(stream,os);
+                    }
+                }
+                else
+                {
+                    Log.i("Jetty", "thumb = " + thumb);
+                    response.setContentType(resolver.getType(content));
+                    InputStream stream = resolver.openInputStream(content);
+                    OutputStream os = response.getOutputStream();
+                    
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    IO.copy(stream, os);
+                }
+            } catch (Exception e) {
+                Log.w("Jetty", "Failed to fetch media", e);
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             }
         }
-        
-        writer.println("</div>");
-        
-        HTMLHelper.doFooter (writer, request, response);
+        else if ("json".equals(what.trim()))
+        {
+            response.setContentType("text/json; charset=utf-8");
+            PrintWriter writer = response.getWriter();
+            
+            Integer type = -1;
+            
+            if ("images".equals(typestr.trim())) {
+                type = 0;
+            } else if ("audio".equals(typestr.trim())) {
+                type = 2;
+            } else if ("video".equals(typestr.trim())) {
+                type = 4;
+            }
+            
+            if (type == -1) {
+                Log.w("Jetty", "Invalid media type " + typestr);
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+            
+            writer.print("[ ");
+            
+            Integer limit = type + 1;
+            while (type <= limit)
+            {
+                Uri contenturi = __MEDIA_URIS[type];
+                Cursor cur = resolver.query (contenturi, null, null, null, null);
+                
+                while (cur.moveToNext())
+                {
+                    Long rowid = cur.getLong (cur.getColumnIndexOrThrow(BaseColumns._ID));
+                    String name = cur.getString (cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
+                    writer.print (" { 'type' : " + type.toString() + ", 'id' : " + rowid.toString() + ", 'title' : '" + name.replace("'", "\\'") + "' }");
+                    if (cur.isBeforeLast())
+                        writer.print (",");
+                }
+                
+                type++;
+            }
+            
+            writer.print(" ]");
+        }
+        else
+        {
+            Log.w("Jetty", "invalid action - '" + what + "', returning 404");
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 }

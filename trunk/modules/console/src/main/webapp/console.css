@@ -38,6 +38,10 @@ body {
     margin: 0;
 }
 
+#content ul {
+    margin-left: 1.5em;
+}
+
 h1, h2 {font: 2em Georgia, "Times New Roman", serif; letter-spacing: 1px;}
 h2 {font-size: 1.5em; }
 h3 {font: bold 1em Verdana, Arial, sans-serif; letter-spacing: 2px;
