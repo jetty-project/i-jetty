@@ -67,9 +67,9 @@ var Media =
                 var item = media[itemidx];
                 
                 if (type == "images") {
-                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/></a><br /><p>" + item.title + "</p></div>";
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><div class='thumb'><img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/></div></a><p>" + item.title + "</p></div>";
                 } else if (type == "audio") {
-                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><img src='/console/audio.png' alt='" + item.title + "'/></a><br /><p>" + item.title;
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><div class='thumb'><img src='/console/audio.png' alt='" + item.title + "'/></div></a><p>" + item.title;
                     
                     if (item.artist != null || item.album != null) {
                         html += "<span class='trackinfo'>";

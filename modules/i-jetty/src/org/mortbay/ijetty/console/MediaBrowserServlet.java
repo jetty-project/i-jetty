@@ -57,7 +57,9 @@ public class MediaBrowserServlet extends HttpServlet
     };
     
     private String[] __MEDIA_LABELS = { "Images", "Audio", "Video" };
+    
     private int __THUMB_WIDTH = 120;
+    private int __THUMB_HEIGHT = 120;
     
     private ContentResolver resolver;
 
@@ -120,18 +122,35 @@ public class MediaBrowserServlet extends HttpServlet
                     if (bitmap_orig != null)
                     {
                         response.setStatus(HttpServletResponse.SC_OK);
+                        InputStream stream = null;
+                        OutputStream os = response.getOutputStream();
                         Bitmap bitmap = null;
 
                         int width = bitmap_orig.getWidth();
+                        int height = bitmap_orig.getHeight();
                         
-                        if (width > __THUMB_WIDTH || )
+                        // If the image is too big (AND the width/height isn't 0), scale it
+                        if ((width > __THUMB_WIDTH || height > __THUMB_HEIGHT) && height != 0 && width != 0)
                         {
-                            int height = bitmap_orig.getHeight();
-                            int newWidth = __THUMB_WIDTH;
-
-                            float scaleWidth = ((float) newWidth) / width;
-                            //float scaleHeight = ((float) newHeight) / height;
-                            float scaleHeight = scaleWidth;
+                            float scaleWidth = 0;
+                            float scaleHeight = 0;
+                            
+                            if (width > __THUMB_WIDTH)
+                                scaleWidth = ((float) __THUMB_WIDTH) / width;
+                            
+                            if (height > __THUMB_HEIGHT)
+                                scaleHeight = ((float) __THUMB_HEIGHT) / height;
+                            
+                            if (scaleHeight < scaleWidth) 
+                                scaleWidth = scaleHeight;
+                            else if (scaleWidth < scaleHeight)
+                                scaleHeight = scaleWidth;
+                            
+                            if (scaleWidth == 0)
+                                scaleWidth = 0.5;
+                            
+                            if (scaleHeight == 0)
+                                scaleHeight = 0.5;
 
                             Matrix matrix = new Matrix();
                             matrix.postScale(scaleWidth, scaleHeight);
@@ -139,17 +158,17 @@ public class MediaBrowserServlet extends HttpServlet
                             // recreate the new Bitmap
                             bitmap = Bitmap.createBitmap(bitmap_orig, 0, 0, width, height, matrix, true);
                             response.setContentType("image/png");
+                            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+                            stream = new ByteArrayInputStream(bytes.toByteArray());
                         }
                         else
                         {
+                            // just return the original data from the DB
                             response.setContentType(resolver.getType(content));
-                            bitmap = bitmap_orig;
+                            stream = resolver.openInputStream(content);
                         }
 
-                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes);
-                        ByteArrayInputStream stream = new ByteArrayInputStream(bytes.toByteArray());
-                        OutputStream os = response.getOutputStream();
                         IO.copy(stream,os);
                     }
                 }
