@@ -33,7 +33,7 @@ public class HTMLHelper
     
     public static void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        doHeader(writer, request, response, null);
+        doHeader(writer, request, response, new String[] { "/console/jquery.js", "/console/jquery.tablesorter.min.js" });
     }
     
     public static void doHeader (PrintWriter writer,HttpServletRequest request, HttpServletResponse response, String[] scripts) throws ServletException, IOException
@@ -54,7 +54,7 @@ public class HTMLHelper
             
             // Make any tables we have sortable
             // (we assume that two of the scripts we add are jQuery and tablesorter)
-            //writer.println ("    <script>$(document).ready(function() { $('table').tablesorter(); });</script>");
+            writer.println ("    <script>$(document).ready(function() { $('table').tablesorter(); });</script>");
         }
         
         writer.println("</head>");
