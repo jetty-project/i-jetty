@@ -33,6 +33,7 @@
      <jetty-version>6.1.16</jetty-version>
      <android-version>1.1_r1</android-version>
      <servlet-version>2.5-20081211</servlet-version>
+     <android.platform></android.platform>
 
    </properties>
    <dependencyManagement>
