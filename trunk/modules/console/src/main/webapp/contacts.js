@@ -381,6 +381,9 @@ var User =
             $("#ulist").append(rows);
             $("#contacts").append("<br /><button id='add' onclick='User.addUser();'>Add</button>");
             $('.userlink').click(User.getUserDetails);
+            
+            // make it sortable
+            $("#user").tablesorter({sortList: [[2,0]]});
         }
   
 };
