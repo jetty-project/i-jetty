@@ -1,0 +1,119 @@
+Dependencies
+===========
+
+* Subversion
+* Java 1.5 
+* Maven 2.0.8 or higher
+* Google Android SDK r1.1_r1
+* Python (optional)
+
+
+Build with Python script
+========================
+   
+0) Check out the project from code.google.com:
+    $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
+
+1) Run build.py --configure
+   Default are fine, except for port forwarding, which you will probably
+   want to enable, so you can access Jetty from your desktop webbrowser as
+   well as on the phone.
+
+2) Run build.py with no arguments to setup your SD card, build i-jetty, run
+   the emulator and upload the Android package.
+
+
+
+Build without Python script
+===========================
+
+0) Check out the project from code.google.com:
+    $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
+
+1) Run:
+   mvn clean install -Dandroid.home=[path to your android SDK]
+
+   For example, if android is installed in /usr/local/java/android-sdk-linux_x86-1.1_r1
+   mvn clean install -Dandroid.home=/usr/local/java/android-sdk-linux_x86-1.1_r1
+
+2) Install modules/i-jetty/target/i-jetty-debug-2.0.apk onto your device.
+   For the emulator:
+       adb -e install modules/i-jetty/target/i-jetty-debug-2.0.apk
+   For a handset:
+       adb -d install modules/i-jetty/target/i-jetty-debug-2.0.apk
+
+3) Follow the instructions on http://developer.android.com/guide/developing/tools/othertools.html#mksdcard
+   to create an sdcard if you are using the emulator.
+
+
+
+Using i-jetty
+=============
+
+Starting i-jetty
+----------------
+Navigate to the "Manage Jetty" application and click on it to activate. Click
+on the "Start Jetty" button.
+
+Stopping i-jetty
+----------------
+If you already have i-jetty running, you can click and drag down the i-jetty
+icon in the navigation bar at the top of the screen to see the "Manage Jetty"
+task. Click on the task.
+
+Now click on the "Stop Jetty" button.
+
+
+Configuring i-jetty
+-------------------
+
+Click on the "Configure" button to change the settings for i-jetty.
+
+Currently supported settings are:
+
+ + Use NIO [true|false]
+ + Port [8080]
+ + Password for console [admin]
+
+Downloading new webapps
+-----------------------
+
+Click on the "Download" button and then enter the http url of a 
+android-enabled webapp. The webapp will be downloaded and installed
+to i-jetty.
+
+You may need to restart i-jetty in order to start the newly installed
+webapp. 
+
+
+
+Troubleshooting
+===============
+
+If the webapps are not able to inflate their WEB-INF/lib/classes.dex files
+to /data/dalvik-cache, you'll see log messages like:
+  "Can't open dex cache '/data/dalvik-cache/sdcard@jetty@webapps@chat@WEB-INF@lib@classes.zip@classes.dex'" 
+
+For the handset, currently there is no solution to this problem.
+For the emulator:
+   1. stop i-jetty application
+   2. in a desktop window do:
+      $ adb shell
+      > chmod 777 /data/dalvik-cache
+   3. restart i-jetty application
+
+
+
+Development Tips
+================
+Adding photos to contacts with the emulator
+-------------------------------------------
+
+* On the emulator, start the Contacts activity and add a few people you know.
+
+* To upload photos to associate with your contacts, the easiest way is to
+  use the adb program to push your images onto the emulator into the directory
+  where the images from the Camera are stored. You can then use the Contacts
+  application to pick the image to suit the Contact. Here's an example:
+  
+  $ adb push /my/local/pic.jpg /sdcard/Camera/dcim

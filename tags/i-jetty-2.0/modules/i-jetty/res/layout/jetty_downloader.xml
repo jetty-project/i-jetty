@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+ * Copyright (C) 2007 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ -->
+
+<!-- Demonstrates starting and stopping a local service.
+     See corresponding Java code com.google.android.sdk.app.LocalSerice.java. -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:padding="4dip"
+    android:gravity="center_horizontal"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+    <TextView
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:paddingBottom="4dip"
+        android:textStyle="bold"
+        android:text="@string/jetty_downloader"/>
+
+    <EditText
+        android:id="@+id/download_url"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0">        
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:paddingBottom="4dip"
+        android:textStyle="bold"
+        android:text="@string/context_path"/>
+
+    <EditText
+        android:id="@+id/context_path"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0">        
+    </EditText>
+
+    <Button android:id="@+id/start_download"
+        android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        android:text="@string/start_download">
+    </Button>
+
+
+    <ProgressBar android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:visibility="invisible"/>
+
+    <TextView android:id="@+id/loading"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:gravity="center_horizontal"
+        android:textStyle="bold"
+        android:text="@string/loading"
+        android:visibility="invisible"/>
+
+</LinearLayout>
+

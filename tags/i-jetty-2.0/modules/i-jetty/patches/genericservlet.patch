@@ -1,0 +1,35 @@
+--- javax/servlet/GenericServlet.java	2008-09-24 10:46:28.000000000 +1000
++++ ../original-sources/javax/servlet/GenericServlet.java	2008-09-24 10:45:33.000000000 +1000
+@@ -29,6 +29,7 @@
+ 
+ import java.io.IOException;
+ import java.util.Enumeration;
++import java.util.PropertyResourceBundle;
+ import java.util.ResourceBundle;
+ 
+ /**
+@@ -60,9 +61,21 @@
+ public abstract class GenericServlet 
+     implements Servlet, ServletConfig, java.io.Serializable
+ {
+-    private static final String LSTRING_FILE = "javax.servlet.LocalStrings";
+-    private static ResourceBundle lStrings =
+-        ResourceBundle.getBundle(LSTRING_FILE);
++    private static final String LSTRING_FILE = "/javax/servlet/LocalStrings.properties";
++    private static ResourceBundle lStrings;
++    
++    static {
++        try
++        {
++            lStrings = new PropertyResourceBundle(GenericServlet.class.getResourceAsStream(LSTRING_FILE));
++        }
++        catch (Exception e)
++        {
++            e.printStackTrace();
++        }
++    }
++   
++
+ 
+     private transient ServletConfig config;
+     
