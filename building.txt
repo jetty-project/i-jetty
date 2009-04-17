@@ -1,14 +1,15 @@
-Depedencies
+Dependencies
 ===========
 
 * Subversion
-* Java 1.5 (or 1.6, but only report bugs if they occur with 1.5)
-* Maven
-* Python
-* Google Android SDK
+* Java 1.5 
+* Maven 2.0.8 or higher
+* Google Android SDK r1.1_r1
+* Python (optional)
 
-How to build
-============
+
+Build with Python script
+========================
    
 0) Check out the project from code.google.com:
     $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
@@ -21,14 +22,29 @@ How to build
 2) Run build.py with no arguments to setup your SD card, build i-jetty, run
    the emulator and upload the Android package.
 
-3)  To start i-jetty, simply open the "Manage Jetty" activity in the emulator
-    and click "Start Jetty". You should be able to point your favorite browser
-    at http://localhost:8888/ (or http://localhost:8080 on the phone) and check
-    out Jetty from Android!
 
-4) There is a console webapp accessible at http://localhost:8888/console (or 
-   http://localhost:8080/console on the phone). You can use it to manage
-   your on-phone data such as Contacts, Call Logs etc.
+
+Build without Python script
+===========================
+
+0) Check out the project from code.google.com:
+    $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
+
+1) Run:
+   mvn clean install -Dandroid.home=[path to your android SDK]
+
+   For example, if android is installed in /usr/local/java/android-sdk-linux_x86-1.1_r1
+   mvn clean install -Dandroid.home=/usr/local/java/android-sdk-linux_x86-1.1_r1
+
+2) Install modules/i-jetty/target/i-jetty-debug-2.0.apk onto your device.
+   For the emulator:
+       adb -e install modules/i-jetty/target/i-jetty-debug-2.0.apk
+   For a handset:
+       adb -d install modules/i-jetty/target/i-jetty-debug-2.0.apk
+
+3) Follow the instructions on http://developer.android.com/guide/developing/tools/othertools.html#mksdcard
+   to create an sdcard if you are using the emulator.
+
 
 
 Using i-jetty
@@ -77,7 +93,9 @@ Troubleshooting
 If the webapps are not able to inflate their WEB-INF/lib/classes.dex files
 to /data/dalvik-cache, you'll see log messages like:
   "Can't open dex cache '/data/dalvik-cache/sdcard@jetty@webapps@chat@WEB-INF@lib@classes.zip@classes.dex'" 
-To fix that, you'll need to follow these steps:
+
+For the handset, currently there is no solution to this problem.
+For the emulator:
    1. stop i-jetty application
    2. in a desktop window do:
       $ adb shell
@@ -85,8 +103,11 @@ To fix that, you'll need to follow these steps:
    3. restart i-jetty application
 
 
-Adding photos to contacts
-=========================
+
+Development Tips
+================
+Adding photos to contacts with the emulator
+-------------------------------------------
 
 * On the emulator, start the Contacts activity and add a few people you know.
 
