@@ -24,11 +24,12 @@ import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
-import android.util.Log;
+
 
 /**
  * Web Application Deployer.
@@ -112,13 +113,13 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                 if (unpacked != null && unpacked.exists()
                         && unpacked.isDirectory())
                 {
-                    Log.d ("Jetty", "already exists.");
+                    if (Log.isDebugEnabled()) Log.debug(context +" already exists.");
                     continue;
                 }
             }
             else if (!app.isDirectory())
             {
-                Log.d ("Jetty", "Not directory");
+                if (Log.isDebugEnabled()) Log.debug (app+" Not directory");
                 continue;
             }
 
@@ -141,7 +142,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
                     ContextHandler c = (ContextHandler) installed[i];
 
                     if (context.equals(c.getContextPath())){
-                        Log.d ("Jetty", "Context were equal; duplicate!");
+                        if (Log.isDebugEnabled()) Log.debug (context + " Context were equal; duplicate!");
                         continue files;
                     }
 
@@ -154,7 +155,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
 
                     if (path.equals(app.getFile().getAbsolutePath()))
                     {
-                        Log.d ("Jetty", "Paths were equal; duplicate!");
+                        if (Log.isDebugEnabled()) Log.debug (path+" Paths were equal; duplicate!");
                         continue files;
                     }
 
@@ -201,7 +202,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             if (_resolver != null)
                 wah.setAttribute("contentResolver", _resolver);
             // add it
-            Log.d ("Jetty", "AndroidWebAppDeployer: prepared " + app.toString());
+            if (Log.isDebugEnabled()) Log.debug ("AndroidWebAppDeployer: prepared " + app.toString());
             contexts.addHandler(wah);
             _deployed.add(wah);
         }

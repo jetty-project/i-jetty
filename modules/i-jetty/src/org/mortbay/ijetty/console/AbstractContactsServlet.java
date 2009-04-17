@@ -92,8 +92,7 @@ public abstract class AbstractContactsServlet extends HttpServlet
         String pathInfo = request.getPathInfo();
         String servletPath=request.getServletPath();
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
-        Log.i("Jetty", "pathinfo="+pathInfo);
-        
+         
         if (pathInfo==null)
         {
             //redirect any requests for /console/contacts to be /console/contacts/
@@ -119,7 +118,7 @@ public abstract class AbstractContactsServlet extends HttpServlet
             str = request.getParameter("json");
             json = (str==null ? false : Integer.parseInt(str.trim()) == 1);
             
-            Log.i("Jetty", "who="+who+" what="+what+" action="+action+" json="+json);
+            Log.d("Jetty", "who="+who+" what="+what+" action="+action+" json="+json);
             
             switch (action)
             {
@@ -233,13 +232,13 @@ public abstract class AbstractContactsServlet extends HttpServlet
         id = (id == null? id : id.trim());
         id = (id == null? id : ("".equals(id) ? null : id));
 
-        Log.i("Jetty", "Saving: name="+request.getParameter("name")+" notes="+request.getParameter("notes")+" id="+id+" starred="+request.getParameter("starred"));
+        Log.d("Jetty", "Saving: name="+request.getParameter("name")+" notes="+request.getParameter("notes")+" id="+id+" starred="+request.getParameter("starred"));
         boolean created = false;
 
         if (id == null) {
             // Create it first if necessary (so we can save phone data)
             id = User.create(getContentResolver(), person);
-            Log.i("Jetty", "Inserted new user id "+id);
+            Log.d("Jetty", "Inserted new user id "+id);
             created = true;
         }
 
@@ -368,6 +367,6 @@ public abstract class AbstractContactsServlet extends HttpServlet
 
         User.save(getContentResolver(), person, id);
         __VERSION++;
-        Log.i("Jetty", "Updating user id "+id);
+        Log.d("Jetty", "Updating user id "+id);
     }
 }

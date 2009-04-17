@@ -35,6 +35,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -43,6 +44,8 @@ import android.widget.Toast;
 
 public class IJettyService extends Service
 {
+    private static Resources __resources;
+    
     private static final String[] __configurationClasses = 
         new String[] {
         "org.mortbay.ijetty.AndroidWebInfConfiguration",
@@ -50,32 +53,41 @@ public class IJettyService extends Service
         "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
         "org.mortbay.jetty.webapp.TagLibConfiguration" };
     private NotificationManager mNM;
-
     private Server server;
     private boolean _useNIO;
     private int _port;
     private String _consolePassword;
-
-    private static Resources __resources;
-
     private SharedPreferences preferences;
+    private PackageInfo pi;
+    private boolean isDebugEnabled = false;
+    
+    
+
    
 
     public void onCreate()
     {
-            Log.i("Jetty", "onCreate called");
-            __resources = getResources();
+        __resources = getResources();
+
+        try
+        {
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
+            if (pi.versionName == null || pi.versionName.toLowerCase().endsWith("snapshot"))
+                isDebugEnabled = true;
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Unable to determine running jetty version");
+        }
     }
 
 
     public void onStart(Intent intent, int startId)
     {
-        Log.i("Jetty", "onStart called");
         if (server != null)
         {
             Toast.makeText(IJettyService.this, R.string.jetty_already_started,
                     Toast.LENGTH_SHORT).show();
-            Log.i("Jetty", "already running");
             return;
         }
         
@@ -95,9 +107,8 @@ public class IJettyService extends Service
             _port = Integer.parseInt(preferences.getString(portKey, portDefault));
             _consolePassword = preferences.getString(pwdKey, pwdDefault);
 
-            Log.i("Jetty", "pref port = "+preferences.getString(portKey, portDefault));
-            Log.i("Jetty", "pref nio = "+preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault)));
-            //Log.i("Jetty", "pref pwd = "+preferences.getString(pwdKey, pwdDefault));
+            Log.d("Jetty", "pref port = "+preferences.getString(portKey, portDefault));
+            Log.d("Jetty", "pref nio = "+preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault)));
 
             startJetty();
 
@@ -188,7 +199,6 @@ public class IJettyService extends Service
     @Override
     public IBinder onBind(Intent intent)
     {
-        Log.d("Jetty", "onBind called");
         return null;
     }
 
@@ -212,10 +222,9 @@ public class IJettyService extends Service
         server.setConnectors(new Connector[] { connector });
 
         // Bridge Jetty logging to Android logging
-        System.setProperty("org.mortbay.log.class",
-                           "org.mortbay.log.AndroidLog");
+        AndroidLog.__isDebugEnabled = isDebugEnabled;
+        System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
         org.mortbay.log.Log.setLog(new AndroidLog());
-
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
