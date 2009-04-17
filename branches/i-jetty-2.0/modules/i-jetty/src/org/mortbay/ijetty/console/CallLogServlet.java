@@ -177,7 +177,7 @@ public class CallLogServlet extends HttpServlet
                     {
                         String name = cursor.getString(i);
                         if (name != null)
-                                writer.println(name==null?"&nbsp;":"<a href='/console/contacts/"+row+"'>"+name+"</a>");     
+                                writer.println(name==null?"&nbsp;":"<a href='/console/contacts/'>"+name+"</a>");     
                         else
                                 writer.println("&nbsp;");
                     }
