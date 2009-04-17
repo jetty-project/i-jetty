@@ -230,7 +230,7 @@ public class IJettyDownloader extends Activity
         {
             if (!warFile.createNewFile())
             {
-                Log.i("Jetty", "File exists");
+                Log.i("Jetty", war+": File exists");
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setCancelable(true);
                 builder.setMessage(R.string.overwrite);
