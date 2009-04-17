@@ -31,7 +31,7 @@ import java.util.Date;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 
-import android.util.Log;
+import org.mortbay.log.Log;
 
 public class AndroidFileResource extends AndroidResource
 {
@@ -43,11 +43,11 @@ public class AndroidFileResource extends AndroidResource
     	try
     	{    		
     		_file = new File (new URI(url.toString()));
-    		Log.d("Jetty", "Made AndroidFileResource for "+ _file.getCanonicalPath());
+    		if (Log.isDebugEnabled()) Log.debug("Made AndroidFileResource for "+ _file.getCanonicalPath());
     	}
     	catch (Exception e)
     	{
-    		Log.e("Jetty","Problem getting AndroidFileResource", e);
+    		Log.warn("Problem getting AndroidFileResource", e);
     	}
     }
     
@@ -181,7 +181,7 @@ public class AndroidFileResource extends AndroidResource
         }
         catch (Exception e)
         {
-            Log.e("Jetty", "Problem getting name of file ",e);
+            Log.warn("Problem getting name of file ",e);
             return "AndroidFileResource:unknown";
         }
     }

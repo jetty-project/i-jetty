@@ -18,8 +18,7 @@ package org.mortbay.ijetty;
 import java.net.URL;
 
 import org.mortbay.jetty.webapp.WebAppContext;
-
-import android.util.Log;
+import org.mortbay.log.Log;
 import dalvik.system.PathClassLoader;
 
 /**
@@ -73,7 +72,7 @@ public class AndroidClassLoader extends ClassLoader
 
             if (url == null && name.startsWith("/"))
             {
-                Log.d("Jetty", "HACK leading / off " + name);
+                if (Log.isDebugEnabled()) Log.debug("HACK leading / off " + name);
                 url= this.findResource(name.substring(1));
             }
         }
@@ -84,8 +83,7 @@ public class AndroidClassLoader extends ClassLoader
                 url= _parent.getResource(name);
         }
 
-        if (url != null)
-            Log.d("Jetty", "getResource("+name+")=" + url);
+        if (Log.isDebugEnabled())Log.debug("getResource("+name+")=" + url);
 
         return url;
     }
@@ -165,16 +163,16 @@ public class AndroidClassLoader extends ClassLoader
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
-        Log.i("Jetty", _context.getContextPath()+" parent priority = "+_context.isParentLoaderPriority());
+        if (Log.isDebugEnabled()) Log.debug(_context.getContextPath()+" parent priority = "+_context.isParentLoaderPriority());
         
         if (c == null && _parent!=null && (_context.isParentLoaderPriority() || isSystemPath(name)) )
         {
             tried_parent= true;
             try
             {
-                Log.i("Jetty", "loading class "+name+" trying parent loader first" + _parent);
+                if (Log.isDebugEnabled()) Log.debug("loading class "+name+" trying parent loader first" + _parent);
                 c= _parent.loadClass(name);
-                Log.i("Jetty", "parent loaded " + c);
+                if (Log.isDebugEnabled()) Log.debug("parent loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -186,9 +184,9 @@ public class AndroidClassLoader extends ClassLoader
         {
             try
             {
-                Log.i("Jetty", "loading class "+name+" trying delegate loader" +_delegate);
+                if (Log.isDebugEnabled()) Log.debug("loading class "+name+" trying delegate loader" +_delegate);
                 c= _delegate.loadClass(name);
-                Log.i("Jetty", "delegate loaded " + c);
+                if (Log.isDebugEnabled()) Log.debug("delegate loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -205,7 +203,7 @@ public class AndroidClassLoader extends ClassLoader
         if (resolve)
             resolveClass(c);
 
-        Log.d("Jetty", "loaded " + c+ " from "+c.getClassLoader());
+        if (Log.isDebugEnabled()) Log.debug("loaded " + c+ " from "+c.getClassLoader());
         
         return c;
     }

@@ -38,7 +38,7 @@ import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.util.URIUtil;
 
 import android.content.res.Resources;
-import android.util.Log;
+
 
 
 public class DefaultServlet extends HttpServlet
@@ -102,8 +102,6 @@ public class DefaultServlet extends HttpServlet
         
         String pathInContext=URIUtil.addPaths(servletPath,pathInfo);
         boolean endsWithSlash=pathInContext.endsWith(URIUtil.SLASH);
-        
-        Log.d("Jetty", "DefaultServlet, pathInContext="+pathInContext);
         
         URL url = getServletContext().getResource(pathInContext);
         AndroidFileResource androidFileResource = getResource (url);
