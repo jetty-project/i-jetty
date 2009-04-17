@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.mortbay.ijetty"
-    android:versionCode="2"
-    android:versionName="1.2">
+    android:versionCode="300"
+    android:versionName="2.1-SNAPSHOT">
     <application android:label="@string/manage_jetty" android:icon="@drawable/jetty">
         <activity android:name=".IJetty"
                   android:label="@string/manage_jetty"
