@@ -106,6 +106,11 @@ public class MediaBrowserServlet extends HttpServlet
         if (strtok.hasMoreElements())
             thumb = strtok.nextToken();
         
+        if (what == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
         if ("fetch".equals(what.trim())) {
             try {
                 Long rowid = Long.parseLong (item);
