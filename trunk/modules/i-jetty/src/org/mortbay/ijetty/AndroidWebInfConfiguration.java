@@ -16,9 +16,10 @@
 package org.mortbay.ijetty;
 
 import org.mortbay.jetty.webapp.WebInfConfiguration;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 
-import android.util.Log;
+
 
 public class AndroidWebInfConfiguration extends WebInfConfiguration
 {
@@ -27,17 +28,16 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
     {
         if (getWebAppContext().isStarted())
         {
-            Log.d("Jetty", "Cannot configure webapp after it is started");
+            if (Log.isDebugEnabled()) Log.debug(getWebAppContext()+": Cannot configure webapp after it is started");
             return;
         }
-        
+
         Resource web_inf = _context.getWebInf();
-      
-       
+
         ClassLoader parentLoader = this.getClass().getClassLoader();
 
-         AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context); 
-       
+        AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context); 
+
         // Add WEB-INF lib classpath 
         if (web_inf != null && web_inf.isDirectory())
         {
@@ -49,23 +49,23 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
                 {
                     if (dex.endsWith("zip") || dex.endsWith("apk"))
                     {
-                      String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
-                      if (!"".equals(paths))
-                          paths +=":";
+                        String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
+                        if (!"".equals(paths))
+                            paths +=":";
 
-                      paths += fullpath;
+                        paths += fullpath;
                     }
                 }
                 loader = new AndroidClassLoader (paths, parentLoader, _context);
             }
             else
-                Log.d("Jetty", "No WEB-INF/lib for "+_context.getContextPath());
+                if (Log.isDebugEnabled()) Log.debug("No WEB-INF/lib for "+_context.getContextPath());
         }
         else
-            Log.d("Jetty", "No WEB-INF for "+_context.getContextPath());
+            if (Log.isDebugEnabled()) Log.debug("No WEB-INF for "+_context.getContextPath());
 
         if (_context.getClassLoader() != null)
-            Log.w ("Jetty", "Ignoring classloader "+_context.getClassLoader());
+            Log.warn ("Ignoring classloader "+_context.getClassLoader());
 
         _context.setClassLoader (loader);
     }

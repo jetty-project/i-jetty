@@ -24,7 +24,7 @@ import java.net.URL;
 
 import org.mortbay.util.IO;
 
-import android.util.Log;
+import org.mortbay.log.Log;
 
 public abstract class AndroidResource
 {
@@ -44,7 +44,7 @@ public abstract class AndroidResource
         public static AndroidResource getResource (String path)
         throws MalformedURLException
         {
-            Log.i("Jetty", "Getting resource for path="+path);
+            if (Log.isDebugEnabled()) Log.debug("Getting resource for path="+path);
             return new AndroidFileResource(new URL(path));
         }
 }

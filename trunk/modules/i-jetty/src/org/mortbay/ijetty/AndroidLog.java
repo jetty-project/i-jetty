@@ -22,7 +22,7 @@ import android.util.Log;
 public class AndroidLog implements Logger
 {
     public static final String __JETTY_TAG = "Jetty";
-    
+    public static boolean __isDebugEnabled = false;
     
     public AndroidLog()
     {
@@ -55,12 +55,12 @@ public class AndroidLog implements Logger
 
     public boolean isDebugEnabled()
     {
-        return Log.isLoggable(__JETTY_TAG, Log.DEBUG);
+        return __isDebugEnabled;
     }
 
     public void setDebugEnabled(boolean enabled)
     {
-        //not supported by android logger
+        __isDebugEnabled = enabled;
     }
 
     public void warn(String msg, Object arg0, Object arg1)
