@@ -59,7 +59,7 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>MediaBrowserServlet</servlet-name>
-		<url-pattern>/media/db/*</url-pattern>
+		<url-pattern>/media/*</url-pattern>
 	</servlet-mapping>
 	<filter-mapping>
 	    <filter-name>MultiPart</filter-name>
