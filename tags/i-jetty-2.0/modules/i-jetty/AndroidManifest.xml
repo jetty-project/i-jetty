@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.mortbay.ijetty"
     android:versionCode="2"
-    android:versionName="2.0-SNAPSHOT">
+    android:versionName="2.0">
     <application android:label="@string/manage_jetty" android:icon="@drawable/jetty">
         <activity android:name=".IJetty"
                   android:label="@string/manage_jetty"
