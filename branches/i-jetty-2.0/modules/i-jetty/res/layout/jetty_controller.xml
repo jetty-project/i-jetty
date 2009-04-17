@@ -22,7 +22,7 @@
     android:gravity="center_horizontal"
     android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-    <TextView
+    <TextView android:id="@+id/heading"
         android:layout_width="fill_parent" android:layout_height="wrap_content"
         android:layout_weight="0"
         android:paddingBottom="4dip"
