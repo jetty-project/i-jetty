@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>i-jetty Console</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="/console/console.css" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0"/>
+    <script src="/console/jquery.js"></script>
+    <script src="/console/media.js"></script>
+    
+    <style>
+        div.float {
+            float: left;
+            text-align: center;
+            margin: 6px;
+            width: 126px;
+        }
+        
+        div.thumb {
+            border: 1px solid #eeeeec;
+            padding: 3px;
+            height: 120px;
+            width: 125px;
+            
+            line-height: 120px;
+            font-size: 1em;
+        }
+        
+        div.thumb a,
+        div.thumb a img {
+            vertical-align: middle;
+        }
+        
+        div.thumb img {
+            vertical-align: middle;
+            margin-top: expression(( 120 - this.height ) / 2); 
+        }
+        
+        div.thumb:hover {
+            background-color: #eeeeec;
+        }
+        
+        div.float p {
+            text-align: center;
+        }
+        
+        div.spacer {
+            clear: both;
+        }
+        
+        .trackinfo {
+            color: #555753;
+            font-size: 90%;
+        }
+        
+        #images, #audio {
+            width: 75%;
+        }
+        
+        .reload-span {
+            float: right;
+            font-size: 70%;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation">
+        <ul>
+            <li><a href="/console/contacts/index.html">Contacts</a></li>
+            <li><a href="/console/settings/">System Settings</a></li>
+            <li><a href="/console/calls/">Call Logs</a></li>
+            <li><a href="/console/network/">Network</a></li>
+            <li><a href="/console/media/"><strong>Media</strong></a></li>
+        </ul>
+    </div>
+    
+    <div id="page">
+        <h1 class="pageheader">Media</h1>
+        <div id="content">
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('images');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Images</h2>
+            <div id="images">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('audio');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Audio</h2>
+            <div id="audio">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('video');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Video</h2>
+            <div id="video">Loading...</div>
+        </div>
+    </div>
+    
+    <div id="footer">
+        Served up by Jetty.<br />Chuck Norris approves.
+    </div>
+    <iframe id="hidden-target" name="hidden-target" style="width: 340px; height: 48px; border: 0px none; float: right; position: fixed; bottom: 2px; right: 12px; visibility:hidden;"></iframe>
+</body>
+</html>
