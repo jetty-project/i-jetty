@@ -1,5 +1,5 @@
 i-jetty VERSION:  2.0
-RELEASE DATE:      
+RELEASE DATE:     17 April 2009
 SVN:              https://i-jetty.googlecode.com/svn/tags/i-jetty-2.0
 ANDROID VERSION:  1.1_r1
 
