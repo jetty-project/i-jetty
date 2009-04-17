@@ -210,6 +210,32 @@
             <artifactId>exec-maven-plugin</artifactId>
             <version>1.1</version>
             <executions>
+              <!-- Generate R.java and put the project's resources into the output package file. -->
+              <execution>
+                <id>aapt-initial-package</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${android.home}/${android.platform}/tools/aapt</executable>
+                  <arguments>
+                    <argument>package</argument>
+                    <argument>-J</argument>
+                    <argument>src/org/mortbay/ijetty</argument>
+                    <argument>-f</argument>
+                    <argument>-M</argument>
+                    <argument>${basedir}/AndroidManifest.xml</argument>
+                    <argument>-S</argument>
+                    <argument>${basedir}/res</argument>
+                    <argument>-I</argument>
+                    <argument>${android.home}/${android.platform}/android.jar</argument>
+                    <argument>-F</argument>
+                    <argument>${project.build.directory}/${artifactId}-resources.apk</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+              <!-- Make a debug version ie signed with the default certificate --> 
               <!-- Convert the compiled classes into a clases.dex. -->
               <execution>
                 <id>generate-dex</id>
@@ -231,30 +257,6 @@
                 </configuration>
               </execution>
               
-              <!-- Put the project's resources into the output package file. -->
-              <execution>
-                <id>aapt-initial-package</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>${android.home}/${android.platform}/tools/aapt</executable>
-                  <arguments>
-                    <argument>package</argument>
-                    <argument>-f</argument>
-                    <argument>-M</argument>
-                    <argument>${basedir}/AndroidManifest.xml</argument>
-                    <argument>-S</argument>
-                    <argument>${basedir}/res</argument>
-                    <argument>-I</argument>
-                    <argument>${android.home}/${android.platform}/android.jar</argument>
-                    <argument>-F</argument>
-                    <argument>${project.build.directory}/${artifactId}-resources.apk</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-              <!-- Make a debug version ie signed with the default certificate --> 
               <execution>
                 <id>finish-package</id>
                 <phase>package</phase>
