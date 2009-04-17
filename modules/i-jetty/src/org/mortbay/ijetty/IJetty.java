@@ -74,7 +74,7 @@ public class IJetty extends Activity
     public static final String __TMP_DIR = "tmp";
     
     private IPList _ipList;
-
+    PackageInfo pi = null;
 
     private class IPList 
     {
@@ -177,9 +177,21 @@ public class IJetty extends Activity
     /** Called when the activity is first created. */
     public void onCreate(Bundle icicle) 
     {
+        try
+        {
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
+        }
+        catch (Exception e)
+        {
+            Log.e("Jetty", "Unable to determine running jetty version");
+        }
         setupJetty();
         super.onCreate(icicle);
         setContentView(R.layout.jetty_controller);
+        
+        //Set the page heading to include the jetty version
+        TextView heading = (TextView)findViewById(R.id.heading);
+        heading.setText("i-jetty "+pi.versionName);
 
         // Watch for button clicks.
         final Button startButton = (Button)findViewById(R.id.start);
@@ -248,20 +260,12 @@ public class IJetty extends Activity
     {
        
         boolean update = false;
-        PackageInfo pi = null;
-        try
-        {
-            pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
-            Log.i("Jetty", "Running jetty version="+pi.versionCode);
-            int storedVersion = getStoredJettyVersion();
-            Log.i("Jetty", "On disk jetty version="+storedVersion);
-            if (pi.versionCode > storedVersion)
-                update = true;
-        }
-        catch (Exception e)
-        {
-            Log.e("Jetty", "Problem determining jetty version", e);
-        }
+
+        int storedVersion = getStoredJettyVersion();
+
+        if (pi != null && pi.versionCode > storedVersion)
+            update = true;
+
         //create the jetty dir structure
         File jettyDir = new File(__JETTY_DIR);
         if (!jettyDir.exists())

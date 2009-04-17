@@ -16,21 +16,21 @@ public final class R {
         public static final int jicon=0x7f020002;
     }
     public static final class id {
-        public static final int config=0x7f070002;
-        public static final int context_path=0x7f070006;
-        public static final int download=0x7f070003;
-        public static final int download_url=0x7f070005;
-        public static final int list=0x7f070004;
-        public static final int loading=0x7f070009;
-        public static final int progress=0x7f070008;
-        public static final int start=0x7f070000;
-        public static final int start_download=0x7f070007;
-        public static final int stop=0x7f070001;
+        public static final int config=0x7f070003;
+        public static final int context_path=0x7f070007;
+        public static final int download=0x7f070004;
+        public static final int download_url=0x7f070006;
+        public static final int heading=0x7f070000;
+        public static final int list=0x7f070005;
+        public static final int loading=0x7f07000a;
+        public static final int progress=0x7f070009;
+        public static final int start=0x7f070001;
+        public static final int start_download=0x7f070008;
+        public static final int stop=0x7f070002;
     }
     public static final class layout {
         public static final int jetty_controller=0x7f030000;
         public static final int jetty_downloader=0x7f030001;
-        public static final int main=0x7f030002;
     }
     public static final class raw {
         public static final int realm_properties=0x7f050000;
