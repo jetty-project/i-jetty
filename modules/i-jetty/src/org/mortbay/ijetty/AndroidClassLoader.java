@@ -15,10 +15,13 @@
 
 package org.mortbay.ijetty;
 
+import java.io.IOException;
 import java.net.URL;
 
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
+
+import dalvik.system.DexClassLoader;
 import dalvik.system.PathClassLoader;
 
 /**
@@ -35,20 +38,21 @@ public class AndroidClassLoader extends ClassLoader
     private WebAppContext _context;
 
 
-    public AndroidClassLoader(String path, ClassLoader parent, WebAppContext context)
+    public AndroidClassLoader(String path, ClassLoader parent, WebAppContext context) throws IOException
     {
         // _parent = parent;
         _parent = this.getClass().getClassLoader();
+        _context = context;
         
          if (_parent == null)
              _parent = ClassLoader.getSystemClassLoader();
    
         if (path==null || "".equals(path.trim()))
-            _delegate = new PathClassLoader("", _parent);
+            _delegate = new DexClassLoader("", context.getTempDirectory().getCanonicalPath(),null,_parent);
         else
-            _delegate = new PathClassLoader(path, _parent);
+            _delegate = new DexClassLoader(path, context.getTempDirectory().getCanonicalPath(), null, _parent);
 
-        _context = context;
+       
     }
 
 
