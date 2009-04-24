@@ -1,6 +1,6 @@
 [Product]
 Name = i-jetty
-Version = 2.0-SNAPSHOT
+Version = 2.1-SNAPSHOT
 SDK = 1.1_r1
 
 [Upload]
