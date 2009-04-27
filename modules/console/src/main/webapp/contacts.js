@@ -270,7 +270,7 @@ var User =
             html += "<tr><td>Starred: </td><td ><input name='starred' type='checkbox' " + (User.summary.starred ? "checked='checked'" : "") + " /></td></tr>";
             html += "<tr><td>Send to Voicemail: </td><td><input name='voicemail' type='checkbox' "+(User.summary.voicemail? "checked='checked'" : "") + " /></td></tr>";
             html += "<tr><td>Notes: </td><td ><textarea name='notes'>" + (User.summary.notes != null ? User.summary.notes : "") + "</textarea></td></tr>";
-            html += "<tr><td><a href='/console/contacts/json/"+User.summary.id+"/photo'><img src='/console/contacts/json/"+User.summary.id+"/photo' /></a></td><td>Update photo:<br /><input type='file' name='new-pic' /></td></tr>";
+            html += "<tr><td><a href='/console/contacts/json/"+User.summary.id+"/photo'><img src='/console/contacts/json/"+User.summary.id+"/photo' width='64' height='64'/></a></td><td>Update photo:<br /><input type='file' name='new-pic' /></td></tr>";
             html += "<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>";
             for (var p in User.phones)
             {
@@ -374,7 +374,7 @@ var User =
                     rows += "<td><span class='big'>*</span></td>";
                 else
                     rows += "<td>&nbsp;</td>";
-                rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'><img src='/console/contacts/json/"+data[d].id+"/photo'/></a></td>";
+                rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'><img width='64' height='64' src='/console/contacts/json/"+data[d].id+"/photo'/></a></td>";
                 rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'>"+data[d].name+"</a></td>";
                 rows +="</tr>";
             }
@@ -404,5 +404,6 @@ if (console && document.console) {
 $(document).ready (function () {
     User.detectEnvironment();
     User.getUsers();
+    $("#loading").attr ("style", "display:none");
     console.log("document ready");
 }); 

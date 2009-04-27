@@ -15,9 +15,14 @@
 
 package org.mortbay.ijetty.console;
 
+import org.mortbay.ijetty.IJetty;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
@@ -44,6 +49,8 @@ import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.util.Log;
+import android.media.MediaScannerConnection;
+import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 public class MediaBrowserServlet extends HttpServlet
 {
@@ -62,6 +69,7 @@ public class MediaBrowserServlet extends HttpServlet
     private int __THUMB_HEIGHT = 120;
     
     private ContentResolver resolver;
+    private MediaScannerConnection scanner;
 
     public void init(ServletConfig config) throws ServletException
     {
@@ -74,7 +82,72 @@ public class MediaBrowserServlet extends HttpServlet
         return resolver;
     }
     
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        response.setContentType("text/html");
+        response.setStatus(HttpServletResponse.SC_OK);
+        PrintWriter writer = response.getWriter();
+        
+        // Should we use just the servlet directory instead?
+        File sdcarddir = new File("/sdcard/jetty/media");
+        
+        // Create file upload directory if it doesn't exist
+        if (!sdcarddir.exists())
+            sdcarddir.mkdir();
+        
+        File output = null;
+        
+        try
+        {
+            // Save file to /sdcard
+            File file = (File)request.getAttribute("fileupload");
+            String origName = request.getParameter("fileupload");
+            
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IO.copy(new FileInputStream(file), out);
+            
+            output = new File (sdcarddir, origName);
+            Log.i ("Jetty", "Writing to: " + output);
+            FileOutputStream stream = new FileOutputStream (output);
+            
+            out.writeTo (stream);
+            stream.close();
+        }
+        catch (Exception e)
+        {
+            Log.w ("Jetty", "Failed to save uploaded file", e);
+            printResponse(writer, 1, "Could not save uploaded file to sdcard.", -1);
+            return;
+        }
+        
+        // Re-run media scanner, to re-detect media
+        /*scanner = new MediaScannerConnection(null,
+			new MediaScannerConnectionClient() {
+				public void onMediaScannerConnected() {
+					scanner.scanFile(output.getAbsolutePath(), null);
+				}
+
+				public void onScanCompleted(String path, Uri uri) {
+					    Log.i ("Jetty", "Finished scanning!");
+						scanner.disconnect();
+				}
+			
+		});
+		
+		scanner.connect();*/
+        
+        int filetype = -1;
+        printResponse(writer, 0, "No error", filetype);
+        
+    }
     
+    private void printResponse (PrintWriter writer, int resp, String msg, int filetype)
+    {
+        writer.println ("<script>");
+        writer.println ("var json = { error: " + resp + ", msg: '" + msg + "', filetype: " + filetype + " };");
+        writer.println ("if (top.Media) { top.Media.uploadComplete(json); }");
+        writer.println ("</script>");
+    }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
