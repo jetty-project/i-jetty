@@ -59,11 +59,13 @@ var User =
                 dataType: 'json',
                 beforeSend: function(xhr)
                 {
+                    $("#loading").css ("display", "block");
                     xhr.setRequestHeader('Connection', 'Keep-Alive');
                     return true;
                 },
                 success: function(response) 
                 { 
+                    $("#loading").css ("display", "none");
                     if (!successfn)
                     {
                         console.log("Got user list");
@@ -404,6 +406,5 @@ if (console && document.console) {
 $(document).ready (function () {
     User.detectEnvironment();
     User.getUsers();
-    $("#loading").attr ("style", "display:none");
     console.log("document ready");
 }); 
