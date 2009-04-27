@@ -34,6 +34,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -247,6 +248,7 @@ public class IJettyService extends Service
                 staticDeployer.setWebAppDir(IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR);
                 staticDeployer.setDefaultsDescriptor(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/webdefault.xml");
                 staticDeployer.setContexts(contexts);
+                staticDeployer.setContext((Context) IJettyService.this);
                 staticDeployer.setContentResolver (getContentResolver());
                 staticDeployer.setConfigurationClasses(__configurationClasses);
             }

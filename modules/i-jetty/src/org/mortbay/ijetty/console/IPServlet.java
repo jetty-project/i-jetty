@@ -39,7 +39,7 @@ public class IPServlet extends HttpServlet
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
-        resolver = (ContentResolver)getServletContext().getAttribute("contentResolver");
+        resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
     }
 
     public ContentResolver getContentResolver()
