@@ -46,6 +46,7 @@ import android.provider.MediaStore;
 import android.net.Uri;
 import android.database.Cursor;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.util.Log;
@@ -54,6 +55,31 @@ import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 public class MediaBrowserServlet extends HttpServlet
 {
+    public class MyMediaConnectorClient extends MediaScannerConnectionClient
+    {
+        private MediaScannerConnection _scanner = null;
+        private final File _file;
+        
+        public MyMediaConnectorClient (File file)
+        {
+            _file = file;
+        }
+        
+        public void setScanner (MediaScannerConnection scanner)
+        {
+            _scanner = scanner;
+        }
+        
+        public void onMediaScannerConnected() {
+		    _scanner.scanFile(_file.getAbsolutePath(), null);
+		}
+
+		public void onScanCompleted(String path, Uri uri) {
+		    Log.i ("Jetty", "Finished scanning!");
+			_scanner.disconnect();
+		}
+    }
+    
     private Uri[] __MEDIA_URIS = {
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         MediaStore.Images.Media.INTERNAL_CONTENT_URI,
@@ -69,12 +95,13 @@ public class MediaBrowserServlet extends HttpServlet
     private int __THUMB_HEIGHT = 120;
     
     private ContentResolver resolver;
-    private MediaScannerConnection scanner;
+    private Context context;
 
     public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
-        resolver = (ContentResolver)getServletContext().getAttribute("contentResolver");
+        resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
+        context = (Context)getServletContext().getAttribute("org.mortbay.ijetty.context");
     }
 
     public ContentResolver getContentResolver()
@@ -120,21 +147,12 @@ public class MediaBrowserServlet extends HttpServlet
             return;
         }
         
-        // Re-run media scanner, to re-detect media
-        /*scanner = new MediaScannerConnection(null,
-			new MediaScannerConnectionClient() {
-				public void onMediaScannerConnected() {
-					scanner.scanFile(output.getAbsolutePath(), null);
-				}
-
-				public void onScanCompleted(String path, Uri uri) {
-					    Log.i ("Jetty", "Finished scanning!");
-						scanner.disconnect();
-				}
-			
-		});
+        // Re-run media scanner, to re-detect media        
+        MyMediaConnectorClient client = new MyMediaConnectorClient(output);
+		MediaScannerConnection scanner = new MediaScannerConnection(context, client);
+		client.setScanner (scanner);
 		
-		scanner.connect();*/
+		scanner.connect();
         
         int filetype = -1;
         printResponse(writer, 0, "No error", filetype);

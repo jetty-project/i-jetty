@@ -29,6 +29,7 @@ import org.mortbay.resource.Resource;
 import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
+import android.content.Context;
 
 
 /**
@@ -51,10 +52,16 @@ public class AndroidWebAppDeployer extends WebAppDeployer
 {
     private ArrayList _deployed;
     private ContentResolver _resolver = null;
+    private Context _context = null;
 
     public void setContentResolver(ContentResolver resolver)
     {
         _resolver = resolver;
+    }
+    
+    public void setContext(Context context)
+    {
+        _context = context;
     }
     
     public ContentResolver getContentResolver()
@@ -200,7 +207,8 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(isParentLoaderPriority());
             if (_resolver != null)
-                wah.setAttribute("contentResolver", _resolver);
+                wah.setAttribute("org.mortbay.ijetty.contentResolver", _resolver);
+                wah.setAttribute("org.mortbay.ijetty.context", _context);
             // add it
             if (Log.isDebugEnabled()) Log.debug ("AndroidWebAppDeployer: prepared " + app.toString());
             contexts.addHandler(wah);
