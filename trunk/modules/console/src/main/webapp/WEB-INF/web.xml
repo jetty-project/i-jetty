@@ -65,6 +65,7 @@
 	    <filter-name>MultiPart</filter-name>
 	    <url-pattern>/contacts/json/*</url-pattern>
 	    <url-pattern>/contacts/html/*</url-pattern>
+	    <url-pattern>/media/db/upload</url-pattern>
 	</filter-mapping>
 	
     <security-constraint>

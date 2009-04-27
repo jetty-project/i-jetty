@@ -84,13 +84,14 @@
             <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('video');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Video</h2>
             <div id="video">Loading...</div>
             <hr />
+            <div style="text-align:center;">
             <h2>Upload</h2>
             <div id="upload">
-                <form method="post" id="uploadform" enctype="multipart/form-data" target="/console/media/db/upload">
-                    <input type="file" name="fileupload" id="fileupload" /><br />
+                <form method="post" id="uploadform" enctype="multipart/form-data" action="/console/media/db/upload" target="upload_target">
+                    <input type="file" name="fileupload" id="fileupload" /><br /><br />
                     <input type="submit" value="Upload" />
-                    <iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px none;display:none;"></iframe>
                 </form>
+            </div>
             </div>
         </div>
     </div>
@@ -99,5 +100,6 @@
         Served up by Jetty.<br />Chuck Norris approves.
     </div>
     <iframe id="hidden-target" name="hidden-target" style="width: 340px; height: 48px; border: 0px none; float: right; position: fixed; bottom: 2px; right: 12px; visibility:hidden;"></iframe>
+    <iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px none;display:none;"></iframe>
 </body>
 </html>

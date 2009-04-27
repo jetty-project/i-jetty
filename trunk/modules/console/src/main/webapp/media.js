@@ -113,12 +113,31 @@ var Media =
             }
             
             parent.append (html);
+        },
+        
+        uploadComplete: function(json) {
+            console.log ("Upload complete!");
+            console.log ("caller = ", this.caller);
+            
+            if (json.error != 0) {
+                alert ("Failed to upload file to phone: " + json.msg);
+                return;
+            }
+            
+            // OK, we assume that the upload completed fine, so let's refresh the media types.
+            if (json.filetype == -1) {
+                this.getAllMedia();
+            } else {
+                this.getMedia (json.filetype);
+            }
+            
+            $("#fileupload").attr("value", "")
         }
 };
 
 
 // For browsers without logging.
-if (console == null && document.console == null) {
+if (console && document.console) {
     document.console = {
         log: function() {
             return;
