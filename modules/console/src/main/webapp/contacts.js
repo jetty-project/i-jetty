@@ -390,12 +390,14 @@ var User =
 
 
 // For browsers without logging.
-if (console == null && document.console == null) {
+if (console && document.console) {
     document.console = {
         log: function() {
             return;
         }
     };
+    
+    var console = document.console;
 }
 
 
