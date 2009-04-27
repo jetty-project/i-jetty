@@ -20,6 +20,7 @@ import java.io.InputStream;
 
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.deployer.ContextDeployer;
@@ -225,6 +226,7 @@ public class IJettyService extends Service
         AndroidLog.__isDebugEnabled = isDebugEnabled;
         System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
         org.mortbay.log.Log.setLog(new AndroidLog());
+        
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
@@ -279,6 +281,13 @@ public class IJettyService extends Service
         }
         
         server.start();
+        
+        //TODO
+        // Less than ideal solution to the problem that dalvik doesn't know about manifests of jars.
+        // A as the version field is private to Server, its difficult
+        //if not impossible to set it any other way. Note this means that ContextHandler.SContext.getServerInfo()
+        //will still return 0.0.
+        HttpGenerator.setServerVersion("i-jetty "+pi.versionName);
     }
 
     private void stopJetty() throws Exception
