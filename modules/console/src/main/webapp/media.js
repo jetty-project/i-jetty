@@ -124,12 +124,18 @@ var Media =
                 return;
             }
             
+            setTimeout(this.finishUpload, 1000);
+        },
+        
+        finishUpload: function() {
             // OK, we assume that the upload completed fine, so let's refresh the media types.
-            if (json.filetype == -1) {
+            /*if (json.filetype == -1) {
                 this.getAllMedia();
             } else {
                 this.getMedia (json.filetype);
-            }
+            }*/
+            
+            this.getAllMedia();
             
             $("#fileupload").attr("value", "")
         }
