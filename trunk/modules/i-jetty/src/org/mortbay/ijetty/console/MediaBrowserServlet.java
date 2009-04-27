@@ -55,7 +55,7 @@ import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 
 public class MediaBrowserServlet extends HttpServlet
 {
-    public class MyMediaConnectorClient extends MediaScannerConnectionClient
+    public class MyMediaConnectorClient implements MediaScannerConnectionClient
     {
         private MediaScannerConnection _scanner = null;
         private final File _file;
