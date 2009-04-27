@@ -4,6 +4,7 @@
     <title>i-jetty Console</title>
     <link rel="stylesheet" type="text/css" media="screen" href="/console/console.css" />
     <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <script src="/console/jquery.js"></script>
     <script src="/console/media.js"></script>
     
@@ -82,6 +83,15 @@
             <div id="audio">Loading...</div>
             <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('video');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Video</h2>
             <div id="video">Loading...</div>
+            <hr />
+            <h2>Upload</h2>
+            <div id="upload">
+                <form method="post" id="uploadform" enctype="multipart/form-data" target="/console/media/db/upload">
+                    <input type="file" name="fileupload" id="fileupload" /><br />
+                    <input type="submit" value="Upload" />
+                    <iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px none;display:none;"></iframe>
+                </form>
+            </div>
         </div>
     </div>
     
