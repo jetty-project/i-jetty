@@ -20,7 +20,9 @@ public class HelloWorld extends HttpServlet
     public void init(ServletConfig config) throws ServletException
     {
     	super.init(config);
-        
+    	//to demonstrate it is possible
+        Object o = config.getServletContext().getAttribute("contentResolver");
+        android.content.ContentResolver resolver = (android.content.ContentResolver)o;
     }
 
     /* ------------------------------------------------------------ */
