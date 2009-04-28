@@ -48,12 +48,15 @@ public class IJettyService extends Service
 {
     private static Resources __resources;
     
-    private static final String[] __configurationClasses = 
-        new String[] {
-        "org.mortbay.ijetty.AndroidWebInfConfiguration",
-        "org.mortbay.jetty.webapp.WebXmlConfiguration",
-        "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
-        "org.mortbay.jetty.webapp.TagLibConfiguration" };
+    public static final String[] __configurationClasses = 
+        new String[]
+        {
+            "org.mortbay.ijetty.AndroidWebInfConfiguration",
+            "org.mortbay.jetty.webapp.WebXmlConfiguration",
+            "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
+            "org.mortbay.jetty.webapp.TagLibConfiguration" 
+        };
+ 
     private NotificationManager mNM;
     private Server server;
     private boolean _useNIO;
@@ -252,6 +255,7 @@ public class IJettyService extends Service
                 staticDeployer.setContentResolver (getContentResolver());
                 staticDeployer.setConfigurationClasses(__configurationClasses);
             }
+           
             ContextDeployer contextDeployer = null;
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
             if (new File(jettyDir, IJetty.__CONTEXTS_DIR).exists())

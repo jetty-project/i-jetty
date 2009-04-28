@@ -32,7 +32,10 @@ import org.mortbay.util.IO;
 import android.util.Log;
 
 public class Installer
-{
+{ 
+    
+
+                                        
     
     public static void install (File warFile, String contextPath, File webappsDir, String webappName, boolean createContextXml) 
     throws MalformedURLException, IOException
@@ -114,6 +117,14 @@ public class Installer
         contextPath = contextPath.equals("/") ? "root" : contextPath;
         contextPath = contextPath.startsWith("/") ? contextPath : "/"+contextPath;
         
+        
+        String configurationClassesXml =  "<Array type=\"java.lang.String\">";
+        for (int i=0; i < IJettyService.__configurationClasses.length;i++)
+        {
+            configurationClassesXml +="<Item>"+IJettyService.__configurationClasses[i]+"</Item>";
+        }
+        configurationClassesXml += "</Array>";
+        
         File tmpDir = new File (IJetty.__JETTY_DIR+"/"+IJetty.__TMP_DIR);       
         File tmpContextFile = new File (tmpDir, webappName+".xml");
        
@@ -122,9 +133,11 @@ public class Installer
         writer.println("<!DOCTYPE Configure PUBLIC \"-//Mort Bay Consulting//DTD Configure//EN\" \"http://jetty.mortbay.org/configure.dtd\">"
 );
         writer.println("<Configure class=\"org.mortbay.jetty.webapp.WebAppContext\">");
+        writer.println("<Set name=\"configurationClasses\">"+configurationClassesXml+"</Set>");   
         writer.println("<Set name=\"contextPath\">"+contextPath+"</Set>");
         writer.println("<Set name=\"war\"><SystemProperty name=\"jetty.home\" default=\".\"/>/webapps/"+webappName+"</Set>");
         writer.println("<Set name=\"defaultsDescriptor\">/sdcard/jetty/etc/webdefault.xml</Set>");
+       
         writer.println("</Configure>");
         writer.flush();
         writer.close();
