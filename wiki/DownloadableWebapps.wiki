@@ -1,31 +1,43 @@
 #summary How to create downloadable webapps
 
-= Creating Downloadable WebApps =
+=Creating Downloadable WebApps=
 
 Making a webapp that is dynamically downloadable by i-jetty is very much like making a normal webapp. The only tricky step is that you need to run the `dx` tool over the classes that would normally be in `WEB-INF/classes` and the jars that would normally be in `WEB-INF/lib`.
 
 == Downloading a WebApp ==
 *NOTE: Android SDK 1.5 and above is needed to support dynamic webapps.
 
+After you've prepared your web app - you might like to read the section below on Sample Webapps for some hints - you need to download it to the phone.
 
-== Sample WebApps ==
+First, you'll need to arrange for the webapp to be served from a http:// url. The easiest way to do this is to serve it from a [http://jetty.mortbay.org Jetty] installation on your desktop machine. The Jetty site has full instructions on how to download and install it.
+
+Once you've got Jetty installed - and lets assume you installed it to $JETTY_HOME - make a directory called $JETTY_HOME/webapps/downloads.  Now copy your android-ready war file to that directory. Start Jetty. Your webapp will now be available as a downloadable file from the url `http://[your host ip]/downloads/[your webapp name]`. So for example, if your host ip address is `10.10.1.10` and you build a webapp called `myfirstwebapp.war`, then it is downloadable from `http://10.10.1.10/downloads/myfirstwebapp.war`.
+
+Now, go to your phone or emulator and start i-jetty if its not already running. Select the *Download* button and type in the url of your webapp. Then enter the context path at which you want that webapp available. For example, you might want to access it as "/howcoolami".
+
+i-jetty will now download your webapp and install it to the phone. 
+
+At the time of writing, you will need to restart i-jetty to get it to deploy your new webapp, although we are working on providing a hot deploy capability.
+
+
+==Sample WebApps==
 
 The i-jetty project comes with a couple of example webapps that you can build, and then dynamically download with i-jetty to get you going with the concept of dynamic webapps in the android environment.
 
 
-=== Hello World Example ===
+===Hello World Example===
 
 The "HelloWorld" web application in `$I_JETTY_HOME/modules/hello` prints out the famous "Hello World" message. The web app contains one very simple Servlet as an example of how to prepare a web app that has classes in addition to static content.
 
-The pom.xml for HelloWorld does a couple of things to make the webapp android-ifiable (if I can invent that word):
+The [http://code.google.com/p/i-jetty/source/browse/trunk/modules/hello/pom.xml pom.xml] for HelloWorld does a couple of things to make the webapp android-ifiable (if I can invent that word):
 
  * runs the `dx` tool over all the java classes in the webapp to produce a `classes.dex` file
  * zips up the `classes.dex` output file from `dx`
 
 That's all you need to do for a simple webapp that uses no libraries. For more complex webapps that use 3rd party libs, refer to the "Chat" webapp.
 
-=== Chat Example ===
+===Chat Example===
 
 The "Chat" web application is a much more sophisticated beast than "HelloWorld". It uses 3rd party java libraries, such as the [http://jetty.mortbay.org Jetty] implementation of the [http://docs.codehaus.org/display/JETTY/Cometd+(aka+Bayeux) cometd Bayeux protocol], along with the [http://cometdproject.dojotoolkit.org/documentation/cometd-dojox dojox.cometd] javascript library to implement the now-classic Ajax chat room. 
 
-Again, this is essentially a straight-forward webapp, with the only added complication that the 3rd party jars need to be dex-ified. Looking at the pom.xml for the Chat application, you'll see that prior to the 2 steps outlined above in the HelloWorld app, the build first unpacks the classes from the dependency jars. Thus, during the `dx` step, all classes - both those of the webapp and those from the libraries it uses - are all compiled into the `classes.dex` and then `classes.zip` file.
+Again, this is essentially a straight-forward webapp, with the only added complication that the 3rd party jars need to be dex-ified. Looking at the [http://code.google.com/p/i-jetty/source/browse/trunk/modules/chat/pom.xml pom.xml] for the Chat application, you'll see that prior to the 2 steps outlined above in the HelloWorld app, the build first unpacks the classes from the dependency jars. Thus, during the `dx` step, all classes - both those of the webapp and those from the libraries it uses - are all compiled into the `classes.dex` and then `classes.zip` file.
