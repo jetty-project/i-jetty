@@ -1,4 +1,5 @@
 #summary How to create downloadable webapps
+#labels Featured
 
 =Creating Downloadable WebApps=
 
