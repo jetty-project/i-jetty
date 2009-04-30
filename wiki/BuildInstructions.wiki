@@ -1,6 +1,8 @@
-= Building i-jetty =
+#summary How to build i-jetty
 
-== From the Command Line ==
+=Building i-jetty=
+
+==From the Command Line==
 Building i-jetty at the command line is very straightforward.
 
 You'll need these tools:
@@ -22,7 +24,7 @@ To build:
 
 Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/modules/i-jetty/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
 
-== Using the Eclipse Plugin ==
+==Using the Eclipse Plugin==
 
 You can import the i-jetty project into Eclipse. We use the wonderful [http://m2eclipse.codehaus.org/ m2 Eclipse plugin] to make it easy. 
 
