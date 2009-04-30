@@ -1,4 +1,5 @@
 #summary How to build i-jetty
+#labels Featured
 
 =Building i-jetty=
 
