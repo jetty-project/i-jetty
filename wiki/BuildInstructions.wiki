@@ -1,0 +1,29 @@
+= Building i-jetty =
+
+== From the Command Line ==
+Building i-jetty at the command line is very straightforward.
+
+You'll need these tools:
+
+ * svn
+ * java 1.5 or above
+ * maven 2.0.8 or above
+ * android sdk installation
+
+To build:
+
+ # Checkout the code from svn: `http://i-jetty.googlecode.com/svn/trunk/`
+ # Assuming you checked out the code to $I_JETTY_HOME, and you have the android sdk installed at $ANDROID_HOME, you do:
+
+{{{
+ cd $I_JETTY_HOME
+ mvn clean install -Dandroid.home=$ANDROID_HOME
+}}}
+
+Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/modules/i-jetty/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
+
+== Using the Eclipse Plugin ==
+
+You can import the i-jetty project into Eclipse. We use the wonderful [http://m2eclipse.codehaus.org/ m2 Eclipse plugin] to make it easy. 
+
+A word of warning though, we haven't been using the android Eclipse plugin since the early days of i-jetty. We prefer to develop by keeping the emulator running from the command line and then using the `adb uninstall/install` commands to upload new build bundles. If you've had success getting the Eclipse plugin to work with i-jetty then please post *dev@jetty.codehaus.org* with the instructions and we'll update this page.
