@@ -44,6 +44,8 @@ public class HTMLHelper
         writer.println("    <title>i-jetty Console</title>");
         writer.println("    <link rel='stylesheet' type='text/css' media='screen' href='/console/console.css' />");
         writer.println("    <meta name='viewport' content='width=device-width,minimum-scale=1.0,maximum-scale=1.0'/>");
+        writer.println("    <META http-equiv='Pragma' content='no-cache'/>");
+        writer.println("    <META http-equiv='Cache-Control' content='no-cache,no-store'/>");
         
         if (scripts != null)
         {

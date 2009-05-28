@@ -9,7 +9,6 @@ var Media =
         getMedia: function (type)
         {
             var uri =  "/console/media/db/json/" + type + "/";
-            console.log("uri = "+uri);
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -23,14 +22,13 @@ var Media =
                 },
                 success: function(response) 
                 {
-                    console.log("Got list of media (of type '" + type + "')");
                     Media.media[type] = response;
                     Media.renderMedia(type);
                 },
                 error: function(xhr, reason, exception) 
                 { 
                     errormsg = "GET media list for " + type + " failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception;
-                    console.log(errormsg);
+                    alert(errormsg);
                     $("#" + type).empty();
                     $("#" + type).append ("<strong>Failed to get " + type + "!</strong><br />Error:<br /><pre>" + errormsg + "</pre>");
                 }
@@ -42,7 +40,6 @@ var Media =
         {
             for (var type in Media.media)
             {
-                console.log ("fetching all " + type);
                 Media.getMedia (type);
             }
         },
@@ -116,9 +113,6 @@ var Media =
         },
         
         uploadComplete: function(json) {
-            console.log ("Upload complete!");
-            console.log ("caller = ", this.caller);
-            
             if (json.error != 0) {
                 alert ("Failed to upload file to phone: " + json.msg);
                 return;
@@ -142,18 +136,9 @@ var Media =
 };
 
 
-// For browsers without logging.
-if (console && document.console) {
-    document.console = {
-        log: function() {
-            return;
-        }
-    };
-}
 
 $(document).ready (function () {
     Media.getAllMedia();
-    console.log("document ready");
 }); 
 
 function reloadMedia (type) {
@@ -178,7 +163,6 @@ function playMedia (elem) {
         stopMedia(document.currentPlaying);
     }
     
-    console.log ('elem = ', elem);
     var href = elem.href;
     href = href.replace ("fetch", "embed"); // go to embed url location for iframe
     $("#hidden-target")[0].src = href;

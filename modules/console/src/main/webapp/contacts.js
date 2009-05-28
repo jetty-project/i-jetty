@@ -52,7 +52,6 @@ var User =
         getUsers: function (successfn, errfn)
         {
             var uri =  "/console/contacts/json/";
-            console.log("uri = "+uri);
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -68,7 +67,6 @@ var User =
                     $("#loading").css ("display", "none");
                     if (!successfn)
                     {
-                        console.log("Got user list");
                         User.users = response.users;
                         User.version = response.version;
                         User.renderUsers();
@@ -80,7 +78,7 @@ var User =
                 { 
                     if (!errfn)
                     {
-                        console.log("Get Users Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                        alert("Get Users Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                     }
                     else
                     {
@@ -94,7 +92,6 @@ var User =
         getUserDetails: function ()
         {
             var uri = $(this).attr('href');
-            console.log("uri = "+uri);
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -125,7 +122,7 @@ var User =
                 },
                 error: function(xhr, reason, exception) 
                 { 
-                    console.log("Get User Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                    alert("Get User Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                 }
             });
             return false;
@@ -133,7 +130,6 @@ var User =
         
         refreshUsers: function ()
         {
-            console.log("In refreshUsers");
             //Set a timeout as the async xhr request often completes before the form submission
             setTimeout("User.getUsers(User.checkResponseVersion, User.errResponseVersion)",
                        1000);
@@ -141,7 +137,6 @@ var User =
         
         checkResponseVersion: function (response)
         {
-            console.log("In checkResponseVersion with User.version="+User.version+", response.version="+response.version);
             if (User.version == response.version)
             {
                 User.refreshUsers();
@@ -175,7 +170,7 @@ var User =
         
         errResponseVersion: function ()
         {
-            console.log("Error getting updated user list");
+            alert("Error getting updated user list");
         },
         
         addUser: function ()
@@ -225,11 +220,11 @@ var User =
                                }
                             }
                             else
-                               console.log(data);
+                               alert(data);
                         },
                         error: function(xhr, reason, exception) 
                         { 
-                            console.log("Delete request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                            alert("Delete request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                         }
                     });
         },
@@ -237,7 +232,6 @@ var User =
         
         saveUser: function ()
         {     
-            console.log("in SaveUser");
            User.refreshUsers();
         },
         
@@ -254,7 +248,6 @@ var User =
             }
             else
             {  
-                console.log("Not a mobile browser, removing the userinfo div");
                 //get rid of the userinfo div
                 $("#userinfo").remove();
             }
@@ -325,7 +318,18 @@ var User =
             return html;
         },
         
-
+        toggleLabel: function (addrId)
+        {
+            //addrId is which address has been changed
+            //If option 0 is selected, this is type[0], which is Custom then
+            //make the hidden text box visible
+   
+            if ($("#contact-type-"+addrId).selectedIndex == 0)
+                $("#contact-type-label-"+addrId).css("visibility", "visible");
+            else
+                $("#contact-type-label-"+addrId).css("visibility", "hidden");
+        },
+      
         renderAddress: function (address)
         {
             var html = "<tr><td>";
@@ -337,14 +341,16 @@ var User =
             }
             kindSelect += "</select>";
             
-            var typeSelect = "<select name='contact-type-"+address.id+"'>";
+            var typeSelect = "<select id='contact-type-"+address.id+"' name='contact-type-"+address.id+"' onChange='User.toggleLabel('"+address.id+"')>";
             for (t in User.types)
             {
                 typeSelect += "<option value='"+t+"'"+(address.type == t? " selected='selected'": "")+">"+User.types[t]+"</option>";
             }
             typeSelect += "</select>";
+            
+            var typeLabel = "<input type='txt' id='contact-type-label-"+address.id+"' name='contact-type-label-"+address.id+"' value='"+address.label+"' style='visibility: "+(address.type==0?"visible":"hidden")+";' length='12'/>";
         
-            html +=kindSelect+typeSelect+"</td><td><input type='text' name='contact-val-"+address.id+"' style='width: 120px;' length='12' value='"+address.data+"'/>";
+            html +=kindSelect+typeSelect+typeLabel+"</td><td><input type='text' name='contact-val-"+address.id+"' style='width: 120px;' length='12' value='"+address.data+"'/>";
             if ("x" != address.id)
                 html += "&nbsp;<input type='checkbox' name='contact-del-"+address.id+"' value='del'>Delete</input>";
             
@@ -391,20 +397,9 @@ var User =
 };
 
 
-// For browsers without logging.
-if (console && document.console) {
-    document.console = {
-        log: function() {
-            return;
-        }
-    };
-    
-    var console = document.console;
-}
 
 
 $(document).ready (function () {
     User.detectEnvironment();
     User.getUsers();
-    console.log("document ready");
 }); 
