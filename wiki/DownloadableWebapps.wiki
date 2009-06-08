@@ -6,7 +6,7 @@
 Making a webapp that is dynamically downloadable by i-jetty is very much like making a normal webapp. The only tricky step is that you need to run the `dx` tool over the classes that would normally be in `WEB-INF/classes` and the jars that would normally be in `WEB-INF/lib`.
 
 == Downloading a WebApp ==
-*NOTE: Android SDK 1.5 and above is needed to support dynamic webapps.
+<font color="red">*NOTE: Android SDK 1.5 and above is needed to support dynamic webapps.</font>
 
 After you've prepared your web app - you might like to read the section below on Sample Webapps for some hints - you need to download it to the phone.
 
