@@ -16,6 +16,7 @@
 package org.mortbay.ijetty;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
@@ -26,10 +27,9 @@ import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.AttributesMap;
 import org.mortbay.util.URIUtil;
 
-import android.content.ContentResolver;
-import android.content.Context;
 
 
 /**
@@ -51,23 +51,21 @@ import android.content.Context;
 public class AndroidWebAppDeployer extends WebAppDeployer
 {
     private ArrayList _deployed;
-    private ContentResolver _resolver = null;
-    private Context _context = null;
+    private AttributesMap _attributes = new AttributesMap();
+    
+    
+    
+    public void setAttribute (String name, Object value)
+    {
+        _attributes.setAttribute(name, value);
+    }
 
-    public void setContentResolver(ContentResolver resolver)
+    public Object getAttribute (String name)
     {
-        _resolver = resolver;
+        return _attributes.getAttribute(name);
     }
     
-    public void setContext(Context context)
-    {
-        _context = context;
-    }
     
-    public ContentResolver getContentResolver()
-    {
-        return _resolver;
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -206,9 +204,14 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             wah.setExtractWAR(isExtract()); 
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(isParentLoaderPriority());
-            if (_resolver != null)
-                wah.setAttribute("org.mortbay.ijetty.contentResolver", _resolver);
-                wah.setAttribute("org.mortbay.ijetty.context", _context);
+            
+            Enumeration names = _attributes.getAttributeNames();
+            while (names.hasMoreElements())
+            {
+                String name = (String)names.nextElement();
+                wah.setAttribute(name, _attributes.getAttribute(name));
+            }
+           
             // add it
             if (Log.isDebugEnabled()) Log.debug ("AndroidWebAppDeployer: prepared " + app.toString());
             contexts.addHandler(wah);
