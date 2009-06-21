@@ -251,18 +251,20 @@ public class IJettyService extends Service
                 staticDeployer.setWebAppDir(IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR);
                 staticDeployer.setDefaultsDescriptor(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/webdefault.xml");
                 staticDeployer.setContexts(contexts);
-                staticDeployer.setContext((Context) IJettyService.this);
-                staticDeployer.setContentResolver (getContentResolver());
+                staticDeployer.setAttribute("org.mortbay.ijetty.contentResolver", getContentResolver());
+                staticDeployer.setAttribute("org.mortbay.ijetty.context", (Context) IJettyService.this);
                 staticDeployer.setConfigurationClasses(__configurationClasses);
             }
            
-            ContextDeployer contextDeployer = null;
+            AndroidContextDeployer contextDeployer = null;
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
             if (new File(jettyDir, IJetty.__CONTEXTS_DIR).exists())
             {
-                contextDeployer = new ContextDeployer();
-                contextDeployer.setScanInterval(0); // Don't eat the battery (scan only at server-start)
-                contextDeployer.setConfigurationDir(IJetty.__JETTY_DIR+"/"+IJetty.__CONTEXTS_DIR);
+                contextDeployer = new AndroidContextDeployer();
+                contextDeployer.setScanInterval(10); // Don't eat the battery (scan only at server-start)
+                contextDeployer.setConfigurationDir(IJetty.__JETTY_DIR+"/"+IJetty.__CONTEXTS_DIR);                
+                contextDeployer.setAttribute("org.mortbay.ijetty.contentResolver", getContentResolver());
+                contextDeployer.setAttribute("org.mortbay.ijetty.context", (Context) IJettyService.this);             
                 contextDeployer.setContexts(contexts);
             }
             File realmProps = new File(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
