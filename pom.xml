@@ -29,13 +29,14 @@
        <module>modules/chat</module>
        <module>modules/i-jetty</module>
    </modules>
+
    <properties>
      <jetty-version>6.1.16</jetty-version>
-     <android-version>1.5_r2</android-version>
+     <android-version>1.5_r3</android-version>
      <servlet-version>2.5-20081211</servlet-version>
      <android.platform>platforms/android-1.5</android.platform>
-
    </properties>
+
    <dependencyManagement>
      <dependencies>
         <dependency>
