@@ -34,7 +34,7 @@
      <jetty-version>6.1.16</jetty-version>
      <android-version>1.5_r3</android-version>
      <servlet-version>2.5-20081211</servlet-version>
-     <android.platform>platforms/android-1.5</android.platform>
+     <android-platform>platforms/android-1.5</android-platform>
    </properties>
 
    <dependencyManagement>
@@ -73,6 +73,13 @@
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>servlet-api</artifactId>
           <version>${servlet-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>android</groupId>
+          <artifactId>android</artifactId>
+          <version>${android-version}</version>
+          <scope>system</scope>
+          <systemPath>${android.home}/${android.platform}/android.jar</systemPath>
         </dependency>
       </dependencies>
    </dependencyManagement>
