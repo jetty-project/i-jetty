@@ -321,9 +321,9 @@ def do_build (config, buildconfig, verbose=False, args=None):
             
             if verbose: print "Building with Maven."
             if config.getboolean ("Build", "alwaysclean"):
-                cmd = "mvn clean install -Dandroid.home=%s -Dandroid.platform=%s -Dandroid-version=%s > build.log" % (androidpath, platform_maven_str, config.get ("Paths", "sdkver"))
+                cmd = "mvn clean install -Dandroid.home=%s -Dandroid-platform=%s -Dandroid-version=%s > build.log" % (androidpath, platform_maven_str, config.get ("Paths", "sdkver"))
             else:
-                cmd = "mvn install -Dandroid.home=%s -Dandroid.platform=%s -Dandroid-version > build.log" % (androidpath, platform_maven_str, config.get ("Paths", "sdkver"))
+                cmd = "mvn install -Dandroid.home=%s -Dandroid-platform=%s -Dandroid-version > build.log" % (androidpath, platform_maven_str, config.get ("Paths", "sdkver"))
             
             if verbose: print "Executing: %s" % cmd
             ret = os.system (cmd)

@@ -79,7 +79,7 @@
           <artifactId>android</artifactId>
           <version>${android-version}</version>
           <scope>system</scope>
-          <systemPath>${android.home}/${android.platform}/android.jar</systemPath>
+          <systemPath>${android.home}/${android-platform}/android.jar</systemPath>
         </dependency>
       </dependencies>
    </dependencyManagement>
