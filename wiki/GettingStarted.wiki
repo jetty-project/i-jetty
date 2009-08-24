@@ -1,4 +1,5 @@
 #summary Getting started instructions
+#labels Featured
 
 = Getting Started =
 
