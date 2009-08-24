@@ -1,0 +1,53 @@
+#summary Getting started instructions
+
+= Getting Started =
+
+After installing the i-jetty apk onto the phone, select the i-jetty application icon and click on it to activate.
+
+There are a number of options:
+
+== Start Jetty ==
+Clicking the Start button will start an i-jetty service. i-jetty will be available on the phone at the port that you selected with the Configure button. The default port is 8080.
+
+== Stop Jetty Button ==
+The Stop Jetty button kills the i-jetty service. You will need to stop and then restart i-jetty for newly downloaded webapps to be deployed.
+
+== Configure ==
+
+Currently supported settings are:
+
+ * *Use NIO [true|false]*
+   The default is false. Select true if you want
+   i-jetty to use NIO style connectors. Note that
+   there may be issues on the dalvik jvm with some
+   of the NIO libraries.
+
+ * *Port [8080]*
+   The port on which i-jetty will listen for requests.
+
+ * *Password for console [admin]*
+   The password which allows access to the console
+   web application.
+
+== Download ==
+
+Click on the Download button and then enter the http url of an android-enabled webapp, and enter the context path at which you want the web application to be deployed. The webapp will be downloaded and installed to i-jetty. If i-jetty is already running, you will need to stop and restart.
+
+= The i-jetty Console =
+
+Once you have started i-jetty on the phone, the console webapp will be available from either the on-phone web browser or a desktop web browser.
+
+The webapp makes available the on-phone content such as Contacts, Call Logs, Music, Images, System Settings. 
+
+*Using the on-phone browser*, the webapp is available at the URL http://localhost:8080/console. If you selected a different port number, then replace 8080 with that number.
+
+*Using a desktop browser*, the webapp will be available at the IP address of the phone on your local wireless network. For example, if your phone is at IP address 10.10.1.14, then access the console webapp at URL http://10.10.1.14:8080/console. Again, if you configured a different port number, then replace 8080 with that number in the URL.
+
+You can find out the IP addresses for your phone by looking at the i-jetty application. Underneath the buttons for Start, Stop, Configure and Download you'll see a list of IP addresses for the phone interfaces. One of them should correspond to an address on your local network. If not, then check the configuration of the phone allows you to connect to your local wifi setup.
+
+You will need to supply the following authentication information:
+{{{
+     login:    admin
+     password: admin
+}}}
+Note that you can use i-jetty's Configure button to change the password.
