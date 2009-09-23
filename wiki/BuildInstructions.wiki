@@ -16,11 +16,13 @@ You'll need these tools:
 To build:
 
  # Checkout the code from svn: `http://i-jetty.googlecode.com/svn/trunk/`
- # Assuming you checked out the code to $I_JETTY_HOME, and you have the android sdk installed at $ANDROID_HOME, you do:
+ # Define 2 system properties: `android.home` and `android.platform`
+
+Assuming you checked out the code to $I_JETTY_HOME, and you have the android sdk installed at $ANDROID_HOME, you do:
 
 {{{
  cd $I_JETTY_HOME
- mvn clean install -Dandroid.home=$ANDROID_HOME
+ mvn clean install -Dandroid.home=$ANDROID_HOME -Dandroid.platform=$ANDROID_HOME/platforms/android-1.5
 }}}
 
 Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/modules/i-jetty/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
