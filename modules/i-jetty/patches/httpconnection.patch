@@ -1,0 +1,18 @@
+--- org/mortbay/jetty/HttpConnection.java	2009-09-24 00:59:42.000000000 +0200
++++ ../original-sources/org/mortbay/jetty/HttpConnection.java	2009-09-24 01:10:04.000000000 +0200
+@@ -471,7 +471,14 @@
+                         more_in_buffer = false;
+                     }
+
+-                    reset(!more_in_buffer);
++                    if (more_in_buffer)
++                    {
++                        reset(false);
++                        more_in_buffer = _parser.isMoreInBuffer() || _endp.isBufferingInput();
++                    }
++                    else
++                        reset(true);
++
+                     no_progress = 0;
+                 }
+
