@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,8 +45,8 @@ import android.widget.Toast;
 public class IJettyService extends Service
 {
     private static Resources __resources;
-    
-    private static final String[] __configurationClasses = 
+
+    private static final String[] __configurationClasses =
         new String[] {
         "org.mortbay.ijetty.AndroidWebInfConfiguration",
         "org.mortbay.jetty.webapp.WebXmlConfiguration",
@@ -60,10 +60,10 @@ public class IJettyService extends Service
     private SharedPreferences preferences;
     private PackageInfo pi;
     private boolean isDebugEnabled = false;
-    
-    
 
-   
+
+
+
 
     public void onCreate()
     {
@@ -71,7 +71,7 @@ public class IJettyService extends Service
 
         try
         {
-            pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0);
             if (pi.versionName == null || pi.versionName.toLowerCase().endsWith("snapshot"))
                 isDebugEnabled = true;
         }
@@ -90,7 +90,7 @@ public class IJettyService extends Service
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         try
         {
             preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -102,7 +102,7 @@ public class IJettyService extends Service
             String portKey = getText(R.string.pref_port_key).toString();
             String pwdKey = getText(R.string.pref_console_pwd_key).toString();
             String nioKey = getText(R.string.pref_nio_key).toString();
-            
+
             _useNIO = preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault));
             _port = Integer.parseInt(preferences.getString(portKey, portDefault));
             _consolePassword = preferences.getString(pwdKey, pwdDefault);
@@ -123,8 +123,8 @@ public class IJettyService extends Service
 
             CharSequence text = getText(R.string.manage_jetty);
 
-            Notification notification = new Notification(R.drawable.jicon, 
-                    text, 
+            Notification notification = new Notification(R.drawable.jicon,
+                    text,
                     System.currentTimeMillis());
 
             notification.setLatestEventInfo(this, getText(R.string.app_name),
@@ -172,8 +172,8 @@ public class IJettyService extends Service
                     Toast.LENGTH_SHORT).show();
         }
     }
-    
-    
+
+
 
     public void onLowMemory()
     {
@@ -184,7 +184,7 @@ public class IJettyService extends Service
 
     /**
      * Hack to get around bug in ResourceBundles
-     * 
+     *
      * @param id
      * @return
      */
@@ -222,22 +222,23 @@ public class IJettyService extends Service
         server.setConnectors(new Connector[] { connector });
 
         // Bridge Jetty logging to Android logging
-        AndroidLog.__isDebugEnabled = isDebugEnabled;
         System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
-        org.mortbay.log.Log.setLog(new AndroidLog());
+        org.mortbay.log.Logger logger = new AndroidLog("org.mortbay.log");
+        logger.setDebugEnabled(isDebugEnabled);
+        org.mortbay.log.Log.setLog(logger);
         HandlerCollection handlers = new HandlerCollection();
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
         server.setHandler(handlers);
 
         File jettyDir = new File(IJetty.__JETTY_DIR);
-        
+
         // Load any webapps we find on the card.
         if (jettyDir.exists())
         {
             System.setProperty ("jetty.home", IJetty.__JETTY_DIR);
             AndroidWebAppDeployer staticDeployer = null;
-            
+
             // Deploy any static webapps we have.
             if (new File(jettyDir, IJetty.__WEBAPP_DIR).exists())
             {
@@ -277,7 +278,7 @@ public class IJettyService extends Service
         {
             Log.w("Jetty", "Not loading any webapps - none on SD card.");
         }
-        
+
         server.start();
     }
 
