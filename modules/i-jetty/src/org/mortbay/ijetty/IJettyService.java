@@ -18,17 +18,6 @@ package org.mortbay.ijetty;
 import java.io.File;
 import java.io.InputStream;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.deployer.ContextDeployer;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -41,6 +30,16 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.deployer.ContextDeployer;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.handler.DefaultHandler;
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.HashUserRealm;
 
 public class IJettyService extends Service
 {
@@ -205,21 +204,7 @@ public class IJettyService extends Service
     private void startJetty() throws Exception
     {
         server = new Server();
-        Connector connector;
-        if (_useNIO)
-        {
-          SelectChannelConnector nioConnector = new SelectChannelConnector();
-          nioConnector.setUseDirectBuffers(false);
-          nioConnector.setPort(_port);
-          connector = nioConnector;
-        }
-        else
-        {
-            SocketConnector bioConnector = new SocketConnector();
-            bioConnector.setPort(_port);
-            connector = bioConnector;
-        }
-        server.setConnectors(new Connector[] { connector });
+        server.setConnectors(setupConnectors(server));
 
         // Bridge Jetty logging to Android logging
         System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
@@ -280,6 +265,25 @@ public class IJettyService extends Service
         }
 
         server.start();
+    }
+
+    protected Connector[] setupConnectors(Server server)
+    {
+        Connector connector;
+        if (_useNIO)
+        {
+          SelectChannelConnector nioConnector = new SelectChannelConnector();
+          nioConnector.setUseDirectBuffers(false);
+          nioConnector.setPort(_port);
+          connector = nioConnector;
+        }
+        else
+        {
+            SocketConnector bioConnector = new SocketConnector();
+            bioConnector.setPort(_port);
+            connector = bioConnector;
+        }
+        return new Connector[]{connector};
     }
 
     private void stopJetty() throws Exception

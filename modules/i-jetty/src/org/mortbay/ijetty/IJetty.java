@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,6 @@
 
 
 package org.mortbay.ijetty;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,21 +29,21 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.mortbay.util.IO;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import org.mortbay.util.IO;
 
 /**
  * IJetty
@@ -53,30 +52,30 @@ import android.widget.TextView;
  * Can start other activities:
  *   + configure
  *   + download
- *   
+ *
  *  Can start/stop services:
  *   + IJettyService
  */
-public class IJetty extends Activity 
+public class IJetty extends Activity
 {
     public static final String __PORT = "org.mortbay.ijetty.port";
     public static final String __NIO = "org.mortbay.ijetty.nio";
     public static final String __CONSOLE_PWD = "org.mortbay.ijetty.console";
-    
+
     public static final String __PORT_DEFAULT = "8080";
     public static final boolean __NIO_DEFAULT = true;
     public static final String __CONSOLE_PWD_DEFAULT = "admin";
-    
+
     public static final String __JETTY_DIR = "/sdcard/jetty";
     public static final String __WEBAPP_DIR = "webapps";
     public static final String __ETC_DIR = "etc";
     public static final String __CONTEXTS_DIR = "contexts";
     public static final String __TMP_DIR = "tmp";
-    
+
     private IPList _ipList;
     PackageInfo pi = null;
 
-    private class IPList 
+    private class IPList
     {
         private List _list = new ArrayList();
 
@@ -118,51 +117,51 @@ public class IJetty extends Activity
         }
     }
 
-    private class NetworkListAdapter extends BaseAdapter 
+    private class NetworkListAdapter extends BaseAdapter
     {
         private Context _context;
         private IPList _ipList;
 
-        public NetworkListAdapter(Context context, IPList ipList) 
+        public NetworkListAdapter(Context context, IPList ipList)
         {
             _context = context;
             _ipList = ipList;
             _ipList.refresh();
         }
 
-        public int getCount() 
+        public int getCount()
         {
             return _ipList.getCount();
         }
 
-        public boolean areAllItemsSelectable() 
+        public boolean areAllItemsSelectable()
         {
             return false;
         }
 
-        public boolean isSelectable(int position) 
+        public boolean isSelectable(int position)
         {
             return false;
         }
 
-        public Object getItem(int position) 
+        public Object getItem(int position)
         {
             return position;
         }
 
-        public long getItemId(int position) 
+        public long getItemId(int position)
         {
             return position;
         }
 
-        public View getView(int position, View convertView, ViewGroup parent) 
+        public View getView(int position, View convertView, ViewGroup parent)
         {
             TextView tv;
-            if (convertView == null) 
+            if (convertView == null)
             {
                 tv = new TextView(_context);
-            } 
-            else 
+            }
+            else
             {
                 tv = (TextView) convertView;
             }
@@ -175,11 +174,11 @@ public class IJetty extends Activity
 
 
     /** Called when the activity is first created. */
-    public void onCreate(Bundle icicle) 
+    public void onCreate(Bundle icicle)
     {
         try
         {
-            pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
+            pi = getPackageManager().getPackageInfo(getPackageName(), 0);
         }
         catch (Exception e)
         {
@@ -188,7 +187,7 @@ public class IJetty extends Activity
         setupJetty();
         super.onCreate(icicle);
         setContentView(R.layout.jetty_controller);
-        
+
         //Set the page heading to include the jetty version
         TextView heading = (TextView)findViewById(R.id.heading);
         heading.setText("i-jetty "+pi.versionName);
@@ -199,9 +198,9 @@ public class IJetty extends Activity
                 new OnClickListener()
                 {
                     public void onClick(View v)
-                    {  
+                    {
                         //TODO get these values from editable UI elements
-                        Intent intent = new Intent(IJetty.this, IJettyService.class);
+                        Intent intent = createServiceIntent();
                         intent.putExtra(__PORT, __PORT_DEFAULT);
                         intent.putExtra(__NIO, __NIO_DEFAULT);
                         intent.putExtra(__CONSOLE_PWD, __CONSOLE_PWD_DEFAULT);
@@ -216,7 +215,7 @@ public class IJetty extends Activity
                 {
                     public void onClick(View v)
                     {
-                        stopService(new Intent(IJetty.this, IJettyService.class));
+                        stopService(createServiceIntent());
                     }
                 }
         );
@@ -231,7 +230,7 @@ public class IJetty extends Activity
               }
             }
         );
-        
+
         Button downloadButton = (Button)findViewById(R.id.download);
         downloadButton.setOnClickListener(
                 new OnClickListener()
@@ -249,16 +248,21 @@ public class IJetty extends Activity
 
     }
 
+    protected Intent createServiceIntent()
+    {
+        return new Intent(this, IJettyService.class);
+    }
+
     protected void onResume()
     {
         _ipList.refresh();
         super.onResume();
     }
-    
-    
+
+
     public void setupJetty ()
     {
-       
+
         boolean update = false;
 
         int storedVersion = getStoredJettyVersion();
@@ -270,16 +274,16 @@ public class IJetty extends Activity
         File jettyDir = new File(__JETTY_DIR);
         if (!jettyDir.exists())
             jettyDir.mkdirs();
-        
+
         //make jetty/tmp
         File tmpDir = new File(jettyDir, __TMP_DIR);
         if (!tmpDir.exists())
             tmpDir.mkdirs();
-        
+
         //make jetty/webapps
         File webappsDir = new File (jettyDir, __WEBAPP_DIR);
         if (!webappsDir.exists())
-            webappsDir.mkdirs();           
+            webappsDir.mkdirs();
 
         //make jetty/etc
         File etcDir = new File (jettyDir, __ETC_DIR);
@@ -302,7 +306,7 @@ public class IJetty extends Activity
                 Log.e("Jetty", "Error loading webdefault.xml", e);
             }
         }
-        File realm = new File (etcDir, "realm.properties"); 
+        File realm = new File (etcDir, "realm.properties");
         if (!realm.exists() || update)
         {
             try
@@ -333,7 +337,7 @@ public class IJetty extends Activity
             Installer.deleteWebapp(consoleWar);
             Log.i("Jetty", "Cleaned console webapp for update");
         }
-        
+
         boolean exists = consoleWar.exists();
         String[] files = consoleWar.list();
         if (!exists || files==null || files.length==0)
@@ -342,10 +346,10 @@ public class IJetty extends Activity
             Installer.install(is, "/console", webappsDir, "console", false);
             Log.i("Jetty", "Loaded console webapp");
         }
-        
+
         setStoredJettyVersion(pi.versionCode);
     }
-    
+
     protected int getStoredJettyVersion ()
     {
         File jettyDir = new File(__JETTY_DIR);
@@ -375,7 +379,7 @@ public class IJetty extends Activity
             }
         }
     }
-    
+
     protected void setStoredJettyVersion (int version)
     {
         File jettyDir = new File(__JETTY_DIR);
