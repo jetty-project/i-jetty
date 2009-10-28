@@ -52,7 +52,6 @@ var User =
         getUsers: function (successfn, errfn)
         {
             var uri =  "/console/contacts/json/";
-            console.log("uri = "+uri);
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -66,7 +65,6 @@ var User =
                 { 
                     if (!successfn)
                     {
-                        console.log("Got user list");
                         User.users = response.users;
                         User.version = response.version;
                         User.renderUsers();
@@ -78,7 +76,6 @@ var User =
                 { 
                     if (!errfn)
                     {
-                        console.log("Get Users Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                     }
                     else
                     {
@@ -92,7 +89,6 @@ var User =
         getUserDetails: function ()
         {
             var uri = $(this).attr('href');
-            console.log("uri = "+uri);
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -123,7 +119,6 @@ var User =
                 },
                 error: function(xhr, reason, exception) 
                 { 
-                    console.log("Get User Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                 }
             });
             return false;
@@ -131,7 +126,6 @@ var User =
         
         refreshUsers: function ()
         {
-            console.log("In refreshUsers");
             //Set a timeout as the async xhr request often completes before the form submission
             setTimeout("User.getUsers(User.checkResponseVersion, User.errResponseVersion)",
                        1000);
@@ -139,7 +133,6 @@ var User =
         
         checkResponseVersion: function (response)
         {
-            console.log("In checkResponseVersion with User.version="+User.version+", response.version="+response.version);
             if (User.version == response.version)
             {
                 User.refreshUsers();
@@ -173,7 +166,6 @@ var User =
         
         errResponseVersion: function ()
         {
-            console.log("Error getting updated user list");
         },
         
         addUser: function ()
@@ -222,12 +214,9 @@ var User =
                                    User.renderUsers();
                                }
                             }
-                            else
-                               console.log(data);
                         },
                         error: function(xhr, reason, exception) 
                         { 
-                            console.log("Delete request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                         }
                     });
         },
@@ -235,7 +224,6 @@ var User =
         
         saveUser: function ()
         {     
-            console.log("in SaveUser");
            User.refreshUsers();
         },
         
@@ -252,7 +240,6 @@ var User =
             }
             else
             {  
-                console.log("Not a mobile browser, removing the userinfo div");
                 //get rid of the userinfo div
                 $("#userinfo").remove();
             }
@@ -402,5 +389,4 @@ if (console == null && document.console == null) {
 $(document).ready (function () {
     User.detectEnvironment();
     User.getUsers();
-    console.log("document ready");
 }); 
