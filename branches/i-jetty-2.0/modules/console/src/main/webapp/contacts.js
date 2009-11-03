@@ -376,16 +376,6 @@ var User =
 };
 
 
-// For browsers without logging.
-if (console == null && document.console == null) {
-    document.console = {
-        log: function() {
-            return;
-        }
-    };
-}
-
-
 $(document).ready (function () {
     User.detectEnvironment();
     User.getUsers();
