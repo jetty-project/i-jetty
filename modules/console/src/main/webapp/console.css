@@ -162,6 +162,8 @@ td, tr {
 
 #contacts {
   float: left;
+  height: 45em;
+  overflow-y: scroll;
 }
 	
 /* Pane that contains all user info. Only used on desktop browsers with JS. */
