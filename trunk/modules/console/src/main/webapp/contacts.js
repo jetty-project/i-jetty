@@ -341,7 +341,7 @@ var User =
             }
             kindSelect += "</select>";
             
-            var typeSelect = "<select id='contact-type-"+address.id+"' name='contact-type-"+address.id+"' onChange='User.toggleLabel('"+address.id+"')>";
+            var typeSelect = "<select id='contact-type-"+address.id+"' onChange='User.toggleLabel(\""+address.id+"\")'  name='contact-type-"+address.id+"'>";
             for (t in User.types)
             {
                 typeSelect += "<option value='"+t+"'"+(address.type == t? " selected='selected'": "")+">"+User.types[t]+"</option>";
