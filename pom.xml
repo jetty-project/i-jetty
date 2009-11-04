@@ -9,7 +9,7 @@
    <name>I-Jetty :: Parent</name>
    <description>Jetty on Android</description>
   <repositories>
-    <repository>
+    <!-- repository>
       <id>codehaus.org</id>
       <name>Jetty Releases</name>
       <layout>default</layout>
@@ -20,7 +20,7 @@
       <releases>
         <enabled>true</enabled>
       </releases>
-    </repository>
+    </repository -->
   </repositories>
 
    <modules>
@@ -31,10 +31,10 @@
    </modules>
 
    <properties>
-     <jetty-version>6.1.16</jetty-version>
-     <android-version>1.5_r3</android-version>
+     <jetty-version>6.1.21</jetty-version>
+     <android-version>1.6_r1</android-version>
      <servlet-version>2.5-20081211</servlet-version>
-     <android-platform>platforms/android-1.5</android-platform>
+     <android-platform>platforms/android-1.6</android-platform>
    </properties>
 
    <dependencyManagement>
@@ -79,7 +79,7 @@
           <artifactId>android</artifactId>
           <version>${android-version}</version>
           <scope>system</scope>
-          <systemPath>${android.home}/${android-platform}/android.jar</systemPath>
+          <systemPath>${android.home}${file.separator}${android-platform}${file.separator}android.jar</systemPath>
         </dependency>
       </dependencies>
    </dependencyManagement>
