@@ -16,7 +16,6 @@
       <dependency>
          <groupId>android</groupId>
          <artifactId>android</artifactId>
-         <version>${android-version}</version>
       </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
