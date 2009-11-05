@@ -36,9 +36,10 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
 
         ClassLoader parentLoader = this.getClass().getClassLoader();
 
+        //Make a loader to use in case there is no WEB-INF
         AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context); 
 
-        // Add WEB-INF lib classpath 
+        //Make a loader containing all .zip files in WEB-INF/lib
         if (web_inf != null && web_inf.isDirectory())
         {
             Resource lib = web_inf.addPath("lib/");

@@ -22,7 +22,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 
 import dalvik.system.DexClassLoader;
-import dalvik.system.PathClassLoader;
+
 
 /**
  * AndroidClassLoader
@@ -40,8 +40,7 @@ public class AndroidClassLoader extends ClassLoader
 
     public AndroidClassLoader(String path, ClassLoader parent, WebAppContext context) throws IOException
     {
-        // _parent = parent;
-        _parent = this.getClass().getClassLoader();
+         _parent = parent;
         _context = context;
         
          if (_parent == null)
