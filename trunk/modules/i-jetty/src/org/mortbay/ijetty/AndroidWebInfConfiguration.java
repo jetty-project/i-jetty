@@ -69,5 +69,6 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
             Log.warn ("Ignoring classloader "+_context.getClassLoader());
 
         _context.setClassLoader (loader);
+       if (Log.isDebugEnabled()) Log.debug("Setting webapp classloader="+loader+" for "+_context.getContextPath());
     }
 }

@@ -16,6 +16,7 @@
 package org.mortbay.ijetty;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.mortbay.jetty.Connector;
@@ -23,7 +24,6 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
@@ -40,13 +40,22 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+/**
+ * IJettyService
+ *
+ * Android Service which runs the Jetty server, maintaining it in the active Notifications so that
+ * the user can return to the IJetty Activity to control it at any time.
+ */
 public class IJettyService extends Service
 {
     private static Resources __resources;
+    private static final String CONTENT_RESOLVER_ATTRIBUTE = "org.mortbay.ijetty.contentResolver";
+    private static final String ANDROID_CONTEXT_ATTRIBUTE = "org.mortbay.ijetty.context"; 
     
     public static final String[] __configurationClasses = 
         new String[]
@@ -59,17 +68,20 @@ public class IJettyService extends Service
  
     private NotificationManager mNM;
     private Server server;
+    private ContextHandlerCollection contexts;
     private boolean _useNIO;
     private int _port;
     private String _consolePassword;
     private SharedPreferences preferences;
     private PackageInfo pi;
     private boolean isDebugEnabled = false;
-    
+    PowerManager.WakeLock wakeLock;
     
 
-   
-
+    /** 
+     * Android Service create
+     * @see android.app.Service#onCreate()
+     */
     public void onCreate()
     {
         __resources = getResources();
@@ -87,6 +99,10 @@ public class IJettyService extends Service
     }
 
 
+    /** 
+     * Android Service Start
+     * @see android.app.Service#onStart(android.content.Intent, int)
+     */
     public void onStart(Intent intent, int startId)
     {
         if (server != null)
@@ -95,7 +111,7 @@ public class IJettyService extends Service
                     Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         try
         {
             preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -114,6 +130,11 @@ public class IJettyService extends Service
 
             Log.d("Jetty", "pref port = "+preferences.getString(portKey, portDefault));
             Log.d("Jetty", "pref nio = "+preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault)));
+
+            //Get a wake lock to stop the cpu going to sleep
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "IJetty");
+            wakeLock.acquire();
 
             startJetty();
 
@@ -148,10 +169,20 @@ public class IJettyService extends Service
     }
 
 
+    /** 
+     * Android Service destroy
+     * @see android.app.Service#onDestroy()
+     */
     public void onDestroy()
     {
         try
         {
+            if (wakeLock != null)
+            {
+                wakeLock.release();
+                wakeLock = null;
+            }
+            
             if (server != null)
             {
                 stopJetty();
@@ -201,95 +232,142 @@ public class IJettyService extends Service
             return null;
     }
 
-    @Override
     public IBinder onBind(Intent intent)
     {
         return null;
     }
 
-    private void startJetty() throws Exception
+    
+    /**
+     * Get a reference to the Jetty Server instance
+     * @return
+     */
+    public Server getServer()
     {
-        server = new Server();
-        Connector connector;
-        if (_useNIO)
+        return server;
+    }
+    
+    
+    protected Server newServer()
+    {
+        return new Server();
+    }
+    
+    protected ContextHandlerCollection newContexts()
+    {
+        return new ContextHandlerCollection();
+    }
+  
+    
+    protected void configureConnectors()
+    {
+        if (server != null)
         {
-          SelectChannelConnector nioConnector = new SelectChannelConnector();
-          nioConnector.setUseDirectBuffers(false);
-          nioConnector.setPort(_port);
-          connector = nioConnector;
+            Connector connector;
+            if (_useNIO)
+            {
+                SelectChannelConnector nioConnector = new SelectChannelConnector();
+                nioConnector.setUseDirectBuffers(false);
+                nioConnector.setPort(_port);
+                connector = nioConnector;
+            }
+            else
+            {
+                SocketConnector bioConnector = new SocketConnector();
+                bioConnector.setPort(_port);
+                connector = bioConnector;
+            }
+            server.addConnector(connector);
         }
-        else
+    }
+    
+    protected void configureHandlers()
+    {
+        if (server != null)
         {
-            SocketConnector bioConnector = new SocketConnector();
-            bioConnector.setPort(_port);
-            connector = bioConnector;
+            HandlerCollection handlers = new HandlerCollection();
+            contexts = new ContextHandlerCollection();
+            handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
+            server.setHandler(handlers);
         }
-        server.setConnectors(new Connector[] { connector });
-
-        // Bridge Jetty logging to Android logging
-        AndroidLog.__isDebugEnabled = isDebugEnabled;
-        System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
-        org.mortbay.log.Log.setLog(new AndroidLog());
-        
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[] {contexts, new DefaultHandler()});
-        server.setHandler(handlers);
-
+    }
+    
+    protected void configureDeployers () throws Exception
+    {
+        AndroidWebAppDeployer staticDeployer =  new AndroidWebAppDeployer();
+        AndroidContextDeployer contextDeployer = new AndroidContextDeployer();
+     
         File jettyDir = new File(IJetty.__JETTY_DIR);
         
         // Load any webapps we find on the card.
         if (jettyDir.exists())
         {
-            System.setProperty ("jetty.home", IJetty.__JETTY_DIR);
-            AndroidWebAppDeployer staticDeployer = null;
-            
             // Deploy any static webapps we have.
             if (new File(jettyDir, IJetty.__WEBAPP_DIR).exists())
             {
-                staticDeployer = new AndroidWebAppDeployer();
                 staticDeployer.setWebAppDir(IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR);
                 staticDeployer.setDefaultsDescriptor(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/webdefault.xml");
                 staticDeployer.setContexts(contexts);
-                staticDeployer.setAttribute("org.mortbay.ijetty.contentResolver", getContentResolver());
-                staticDeployer.setAttribute("org.mortbay.ijetty.context", (Context) IJettyService.this);
+                staticDeployer.setAttribute(CONTENT_RESOLVER_ATTRIBUTE, getContentResolver());
+                staticDeployer.setAttribute(ANDROID_CONTEXT_ATTRIBUTE, (Context) IJettyService.this);
                 staticDeployer.setConfigurationClasses(__configurationClasses);
-            }
+            }          
            
-            AndroidContextDeployer contextDeployer = null;
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
             if (new File(jettyDir, IJetty.__CONTEXTS_DIR).exists())
             {
-                contextDeployer = new AndroidContextDeployer();
-                contextDeployer.setScanInterval(10); // Don't eat the battery (scan only at server-start)
+                contextDeployer.setScanInterval(10); // Don't eat the battery
                 contextDeployer.setConfigurationDir(IJetty.__JETTY_DIR+"/"+IJetty.__CONTEXTS_DIR);                
-                contextDeployer.setAttribute("org.mortbay.ijetty.contentResolver", getContentResolver());
-                contextDeployer.setAttribute("org.mortbay.ijetty.context", (Context) IJettyService.this);             
+                contextDeployer.setAttribute(CONTENT_RESOLVER_ATTRIBUTE, getContentResolver());
+                contextDeployer.setAttribute(ANDROID_CONTEXT_ATTRIBUTE, (Context) IJettyService.this);             
                 contextDeployer.setContexts(contexts);
             }
-            File realmProps = new File(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
-            if (realmProps.exists())
-            {
-                HashUserRealm realm = new HashUserRealm("Console", IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
-                realm.setRefreshInterval(0);
-                if (_consolePassword != null)
-                    realm.put("admin", _consolePassword); //set the admin password for console webapp
-                server.addUserRealm(realm);
-            }
-
-            if (contextDeployer != null)
-                server.addLifeCycle(contextDeployer);
-
-            if (staticDeployer != null)
-                server.addLifeCycle(staticDeployer);
         }
         else
         {
             Log.w("Jetty", "Not loading any webapps - none on SD card.");
         }
+
+        if (server != null)
+        {
+            server.addLifeCycle(contextDeployer);
+            server.addLifeCycle(staticDeployer); 
+        }
+    }
+    
+    public void configureRealm () throws IOException
+    {
+        File realmProps = new File(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
+        if (realmProps.exists())
+        {
+            HashUserRealm realm = new HashUserRealm("Console", IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
+            realm.setRefreshInterval(0);
+            if (_consolePassword != null)
+                realm.put("admin", _consolePassword); //set the admin password for console webapp
+            server.addUserRealm(realm);
+        }
+    }
+    
+    
+    protected void startJetty() throws Exception
+    {
+        // Bridge Jetty logging to Android logging
+        AndroidLog.__isDebugEnabled = isDebugEnabled;
+        System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
+        org.mortbay.log.Log.setLog(new AndroidLog());
+
+        //Set jetty.home
+        System.setProperty ("jetty.home", IJetty.__JETTY_DIR);
+
+        server = newServer();
         
+        configureConnectors();
+        configureHandlers();
+        configureDeployers();
+        configureRealm ();
+
         server.start();
-        
+
         //TODO
         // Less than ideal solution to the problem that dalvik doesn't know about manifests of jars.
         // A as the version field is private to Server, its difficult
@@ -298,7 +376,7 @@ public class IJettyService extends Service
         HttpGenerator.setServerVersion("i-jetty "+pi.versionName);
     }
 
-    private void stopJetty() throws Exception
+    protected void stopJetty() throws Exception
     {
         Log.i("Jetty", "Jetty stopping");
         server.stop();
