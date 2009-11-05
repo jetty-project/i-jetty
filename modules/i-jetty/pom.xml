@@ -81,7 +81,7 @@
               <configuration>
                <!-- <classifier>sources</classifier> -->
                 <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
-                <excludeArtifactIds>android</excludeArtifactIds>
+                <excludeArtifactIds>android,console</excludeArtifactIds>
                 <excludes>org/mortbay/log/Slf4jLog.class,org/mortbay/xml/XmlParser*</excludes>
                <!-- <outputDirectory>${project.build.directory}/generated-sources</outputDirectory> -->
                <outputDirectory>${project.build.directory}/generated-classes</outputDirectory>

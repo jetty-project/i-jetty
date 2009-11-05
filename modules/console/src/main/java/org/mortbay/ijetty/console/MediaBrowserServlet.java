@@ -15,7 +15,6 @@
 
 package org.mortbay.ijetty.console;
 
-import org.mortbay.ijetty.IJetty;
 
 import java.io.IOException;
 import java.io.PrintWriter;
