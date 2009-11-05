@@ -16,13 +16,17 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HelloWorld extends HttpServlet 
 {
+    String proofOfLife = null;
+    
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config) throws ServletException
     {
     	super.init(config);
     	//to demonstrate it is possible
-        Object o = config.getServletContext().getAttribute("contentResolver");
+        Object o = config.getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
         android.content.ContentResolver resolver = (android.content.ContentResolver)o;
+        android.content.Context androidContext = (android.content.Context)config.getServletContext().getAttribute("org.mortbay.ijetty.context");
+        proofOfLife = androidContext.getApplicationInfo().packageName;
     }
 
     /* ------------------------------------------------------------ */
@@ -38,6 +42,7 @@ public class HelloWorld extends HttpServlet
         ServletOutputStream out = response.getOutputStream();
         out.println("<html>");
         out.println("<h1>Hello From Servlet Land!</h1>");
+        out.println("Brought to you by: "+proofOfLife);
         out.println("</html>");
         out.flush();
     }
