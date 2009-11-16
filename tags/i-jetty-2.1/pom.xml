@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>org.mortbay.ijetty</groupId>
+   <artifactId>ijetty-parent</artifactId>
+   <version>2.1-SNAPSHOT</version>
+   <packaging>pom</packaging>
+   <name>I-Jetty :: Parent</name>
+   <description>Jetty on Android</description>
+  <repositories>
+    <!-- repository>
+      <id>codehaus.org</id>
+      <name>Jetty Releases</name>
+      <layout>default</layout>
+      <url>http://repository.codehaus.org</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository -->
+  </repositories>
+
+   <modules>
+       <module>modules/console</module>
+       <module>modules/hello</module>
+       <module>modules/chat</module>
+       <module>modules/i-jetty</module>
+   </modules>
+
+   <properties>
+     <jetty-version>6.1.21</jetty-version>
+     <android-version>1.6_r1</android-version>
+     <servlet-version>2.5-20081211</servlet-version>
+     <android-platform>platforms/android-1.6</android-platform>
+   </properties>
+
+   <dependencyManagement>
+     <dependencies>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+          <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-util5</artifactId>
+          <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-util</artifactId>
+          <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-client</artifactId>
+          <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>cometd-jetty</artifactId>
+          <version>${jetty-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.cometd.java</groupId>
+          <artifactId>cometd-api</artifactId>
+          <version>1.0.beta4</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>servlet-api</artifactId>
+          <version>${servlet-version}</version>
+        </dependency>
+        <dependency>
+          <groupId>android</groupId>
+          <artifactId>android</artifactId>
+          <version>${android-version}</version>
+          <scope>system</scope>
+          <systemPath>${android.home}${file.separator}${android-platform}${file.separator}android.jar</systemPath>
+        </dependency>
+      </dependencies>
+   </dependencyManagement>
+
+</project>
