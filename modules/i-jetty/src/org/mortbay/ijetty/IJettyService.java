@@ -29,6 +29,7 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.SslSocketConnector;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -70,8 +71,15 @@ public class IJettyService extends Service
     private Server server;
     private ContextHandlerCollection contexts;
     private boolean _useNIO;
+    private boolean _useSSL;
     private int _port;
+    private int _sslPort;
     private String _consolePassword;
+    private String _keymgrPassword;
+    private String _keystorePassword;
+    private String _truststorePassword;
+    private String _keystoreFile;
+    private String _truststoreFile;
     private SharedPreferences preferences;
     private PackageInfo pi;
     private boolean isDebugEnabled = false;
@@ -117,20 +125,52 @@ public class IJettyService extends Service
             preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
             String portDefault = getText(R.string.pref_port_value).toString();
+            String sslPortDefault = getText(R.string.pref_ssl_port_value).toString();
             String pwdDefault = getText(R.string.pref_console_pwd_value).toString();
-            String nioDefault = getText(R.string.pref_nio_value).toString();
+            
+            String nioEnabledDefault = getText(R.string.pref_nio_value).toString();
+            String sslEnabledDefault = getText(R.string.pref_ssl_value).toString();
 
             String portKey = getText(R.string.pref_port_key).toString();
+            String sslPortKey = getText(R.string.pref_ssl_port_key).toString();
             String pwdKey = getText(R.string.pref_console_pwd_key).toString();
             String nioKey = getText(R.string.pref_nio_key).toString();
+            String sslKey = getText(R.string.pref_ssl_key).toString();
             
-            _useNIO = preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault));
+            _useSSL = preferences.getBoolean(sslKey, Boolean.valueOf(sslEnabledDefault));
+            _useNIO = preferences.getBoolean(nioKey, Boolean.valueOf(nioEnabledDefault));
             _port = Integer.parseInt(preferences.getString(portKey, portDefault));
+            if (_useSSL)
+            {
+              _sslPort = Integer.parseInt(preferences.getString(sslPortKey, sslPortDefault));
+              String defaultValue = getText(R.string.pref_keystore_pwd_value).toString();
+              String key = getText(R.string.pref_keystore_pwd_key).toString();
+              _keystorePassword = preferences.getString(key, defaultValue);
+              
+              defaultValue = getText(R.string.pref_keymgr_pwd_value).toString();
+              key = getText(R.string.pref_keymgr_pwd_key).toString();
+              _keymgrPassword = preferences.getString(key, defaultValue);
+              
+              defaultValue = getText(R.string.pref_truststore_pwd_value).toString();
+              key = getText(R.string.pref_truststore_pwd_key).toString();
+              _truststorePassword = preferences.getString(key, defaultValue);
+              
+              defaultValue = getText(R.string.pref_keystore_file).toString();
+              key = getText(R.string.pref_keystore_file_key).toString();
+              _keystoreFile = preferences.getString(key, defaultValue);
+              
+              defaultValue = getText(R.string.pref_truststore_file).toString();
+              key = getText(R.string.pref_truststore_file_key).toString();
+              _truststoreFile = preferences.getString(key, defaultValue);
+            }
+
             _consolePassword = preferences.getString(pwdKey, pwdDefault);
 
-            Log.d("Jetty", "pref port = "+preferences.getString(portKey, portDefault));
-            Log.d("Jetty", "pref nio = "+preferences.getBoolean(nioKey, Boolean.valueOf(nioDefault)));
-
+            Log.d("Jetty", "pref port = "+_port);
+            Log.d("Jetty", "pref use nio = "+_useNIO);
+            Log.d("Jetty", "pref use ssl = "+_useSSL);
+            Log.d("Jetty", "pref ssl port = "+_sslPort);
+           
             //Get a wake lock to stop the cpu going to sleep
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "IJetty");
@@ -263,21 +303,38 @@ public class IJettyService extends Service
     {
         if (server != null)
         {
-            Connector connector;
             if (_useNIO)
             {
                 SelectChannelConnector nioConnector = new SelectChannelConnector();
                 nioConnector.setUseDirectBuffers(false);
                 nioConnector.setPort(_port);
-                connector = nioConnector;
+                server.addConnector(nioConnector);
             }
             else
             {
                 SocketConnector bioConnector = new SocketConnector();
                 bioConnector.setPort(_port);
-                connector = bioConnector;
+                server.addConnector(bioConnector);
             }
-            server.addConnector(connector);
+
+            if (_useSSL)
+            {
+              SslSocketConnector sslConnector = new SslSocketConnector();
+              sslConnector.setPort(_sslPort);
+              //sslConnector.setKeystore("/sdcard/jetty/etc/keystore");
+              sslConnector.setKeystore(_keystoreFile);
+              sslConnector.setKeystoreType("bks");
+              //sslConnector.setTruststore("/sdcard/jetty/etc/keystore");
+              sslConnector.setTruststore(_truststoreFile);
+              //sslConnector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+              sslConnector.setPassword(_keystorePassword);
+              //sslConnector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
+              sslConnector.setKeyPassword(_keymgrPassword);
+              //sslConnector.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
+              sslConnector.setTrustPassword(_truststorePassword);
+              sslConnector.setTruststoreType("bks");
+              server.addConnector(sslConnector);
+            }
         }
     }
     

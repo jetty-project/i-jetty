@@ -15,9 +15,12 @@
 package org.mortbay.ijetty;
 
 import org.mortbay.ijetty.R;
-
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.CheckBox;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.preference.CheckBoxPreference;
 
 public class IJettyEditor extends PreferenceActivity
 {
