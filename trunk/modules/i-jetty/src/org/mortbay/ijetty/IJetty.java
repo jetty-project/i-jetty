@@ -61,10 +61,12 @@ public class IJetty extends Activity
 {
     public static final String __PORT = "org.mortbay.ijetty.port";
     public static final String __NIO = "org.mortbay.ijetty.nio";
+    public static final String __SSL = "org.mortbay.ijetty.ssl";
     public static final String __CONSOLE_PWD = "org.mortbay.ijetty.console";
     
     public static final String __PORT_DEFAULT = "8080";
     public static final boolean __NIO_DEFAULT = true;
+    public static final boolean __SSL_DEFAULT = false;
     public static final String __CONSOLE_PWD_DEFAULT = "admin";
     
     public static final String __JETTY_DIR = "/sdcard/jetty";
@@ -204,6 +206,7 @@ public class IJetty extends Activity
                         Intent intent = new Intent(IJetty.this, IJettyService.class);
                         intent.putExtra(__PORT, __PORT_DEFAULT);
                         intent.putExtra(__NIO, __NIO_DEFAULT);
+                        intent.putExtra(__SSL, __SSL_DEFAULT);
                         intent.putExtra(__CONSOLE_PWD, __CONSOLE_PWD_DEFAULT);
                         startService(intent);
                     }
@@ -316,6 +319,23 @@ public class IJetty extends Activity
             catch (Exception e)
             {
                 Log.e("Jetty", "Error loading realm.propeties", e);
+            }
+        }
+
+        File keystore = new File(etcDir, "keystore");
+        if (!keystore.exists() || update)
+        {
+            try
+            {
+                //get the keystore out of resources
+                InputStream is = getResources().openRawResource(R.raw.keystore);
+                OutputStream os = new FileOutputStream(keystore);
+                IO.copy(is,os);
+                Log.i("Jetty", "Loaded keystore");
+            }
+            catch (Exception e)
+            {
+                Log.e("Jetty", "Error loading keystore", e);
             }
         }
 
