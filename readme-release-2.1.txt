@@ -4,6 +4,15 @@ SVN:              https://i-jetty.googlecode.com/svn/tags/i-jetty-2.1
 ANDROID VERSION:  1.6_r1
 
 
+Changes
+=======
++ Support for sdk 1.6
++ Console webapp classes refactored back into console webapp 
++ Console webapp provides media upload and download
++ Console webapp uses JSON and XHR
++ Addition of SSL connector and configuration
++ Upgrade to jetty-6.1.21
+
 
 Using i-jetty
 ================
