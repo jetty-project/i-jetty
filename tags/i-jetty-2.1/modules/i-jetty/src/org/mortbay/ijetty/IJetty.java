@@ -69,7 +69,7 @@ public class IJetty extends Activity
     public static final boolean __SSL_DEFAULT = false;
     public static final String __CONSOLE_PWD_DEFAULT = "admin";
     
-    public static final String __JETTY_DIR = "/sdcard/jetty";
+    public static final String __JETTY_DIR = "/sdcard/jetty/";
     public static final String __WEBAPP_DIR = "webapps";
     public static final String __ETC_DIR = "etc";
     public static final String __CONTEXTS_DIR = "contexts";
@@ -182,6 +182,7 @@ public class IJetty extends Activity
         try
         {
             pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
+            Log.i("Jetty", "IJetty version ("+pi.versionName+","+pi.versionCode+")");
         }
         catch (Exception e)
         {
@@ -260,8 +261,7 @@ public class IJetty extends Activity
     
     
     public void setupJetty ()
-    {
-       
+    {      
         boolean update = false;
 
         int storedVersion = getStoredJettyVersion();
@@ -272,22 +272,42 @@ public class IJetty extends Activity
         //create the jetty dir structure
         File jettyDir = new File(__JETTY_DIR);
         if (!jettyDir.exists())
-            jettyDir.mkdirs();
-        
+        {
+            boolean made = jettyDir.mkdirs();
+            Log.i("Jetty", "Made "+__JETTY_DIR+": "+made);
+        }
+        else
+            Log.i("Jetty", __JETTY_DIR+" exists");
+             
         //make jetty/tmp
         File tmpDir = new File(jettyDir, __TMP_DIR);
         if (!tmpDir.exists())
-            tmpDir.mkdirs();
+        {
+            boolean made = tmpDir.mkdirs(); 
+            Log.i("Jetty", "Made "+tmpDir+": "+made);
+        }
+        else
+            Log.i("Jetty",tmpDir+" exists");
         
         //make jetty/webapps
         File webappsDir = new File (jettyDir, __WEBAPP_DIR);
         if (!webappsDir.exists())
-            webappsDir.mkdirs();           
+        {
+            boolean made= webappsDir.mkdirs();    
+            Log.i("Jetty", "Made "+webappsDir+": "+made);
+        }
+        else
+            Log.i("Jetty", webappsDir+" exists");
 
         //make jetty/etc
         File etcDir = new File (jettyDir, __ETC_DIR);
         if (!etcDir.exists())
-            etcDir.mkdirs();
+        {
+            boolean made = etcDir.mkdirs(); 
+            Log.i("Jetty", "Made "+etcDir+": "+made);
+        }
+        else
+            Log.i("Jetty", etcDir+" exists");
 
         File webdefaults = new File (etcDir, "webdefault.xml");
         if (!webdefaults.exists() || update)
@@ -342,7 +362,12 @@ public class IJetty extends Activity
         //make jetty/contexts
         File contextsDir = new File (jettyDir, __CONTEXTS_DIR);
         if (!contextsDir.exists())
-            contextsDir.mkdirs();
+        {
+            boolean made = contextsDir.mkdirs();
+            Log.i("Jetty", "Made "+contextsDir+": "+made);
+        }
+        else
+            Log.i("Jetty", contextsDir+" exists");
 
         //unpack the console war, but don't make a context.xml for it
         //Must be deployed by webapp deployer to get the Android ContentResolver

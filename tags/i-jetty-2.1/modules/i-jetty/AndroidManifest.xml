@@ -3,7 +3,7 @@
     package="org.mortbay.ijetty"
     android:versionCode="3"
     android:versionName="2.1">
-    <uses-sdk android:minSdkVersion="4"/>
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="4"/>
     <application android:label="@string/app_name" android:icon="@drawable/jetty">
         <activity android:name=".IJetty"
                   android:label="@string/app_name"
@@ -36,4 +36,5 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
     <uses-permission android:name="android.permission.INTERNET" /> 
     <uses-permission android:name="android.permission.WAKE_LOCK" /> 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> 
 </manifest> 

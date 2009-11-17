@@ -72,17 +72,18 @@
             android:defaultValue="@string/pref_truststore_pwd_value"
             android:password="true"
             android:key="@string/pref_truststore_pwd_key"/>
-
-
     </PreferenceCategory>
 
 
-    <EditTextPreference 
+    <PreferenceCategory
+            android:title="@string/console_category">
+      <EditTextPreference 
             android:dialogTitle="@string/pref_console_pwd"
             android:title="@string/pref_console_pwd_title"
             android:defaultValue="@string/pref_console_pwd_value"
             android:password="true"
             android:key="@string/pref_console_pwd_key"/>
+    </PreferenceCategory>
 
 </PreferenceScreen>
 
