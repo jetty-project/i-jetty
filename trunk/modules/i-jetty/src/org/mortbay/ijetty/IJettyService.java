@@ -368,6 +368,7 @@ public class IJettyService extends Service
                 staticDeployer.setAttribute(CONTENT_RESOLVER_ATTRIBUTE, getContentResolver());
                 staticDeployer.setAttribute(ANDROID_CONTEXT_ATTRIBUTE, (Context) IJettyService.this);
                 staticDeployer.setConfigurationClasses(__configurationClasses);
+                staticDeployer.setAllowDuplicates(false);
             }          
            
             // Use a ContextDeploy so we can hot-deploy webapps and config at startup.
