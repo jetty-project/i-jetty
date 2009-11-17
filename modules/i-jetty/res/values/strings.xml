@@ -19,6 +19,7 @@
     <string name="interfaces">Known IP Addresses</string>
     <string name="non_ssl_category">Non SSL Port</string>
     <string name="ssl_category">SSL Port</string>
+    <string name="console_category">Console</string>
     <string name="pref_nio_value">false</string>
     <string name="pref_nio_title">Use NIO</string>
     <string name="pref_nio_key">org.mortbay.ijetty.pref_nio</string>
