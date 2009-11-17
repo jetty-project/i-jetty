@@ -153,12 +153,11 @@ public class AndroidWebAppDeployer extends WebAppDeployer
 
                     String path;
                     if (c instanceof WebAppContext)
-                        path = ((WebAppContext) c).getWar();
+                        path = Resource.newResource(((WebAppContext)c).getWar()).getFile().getAbsolutePath();
                     else
-                        path = (c.getBaseResource() == null ? "" : c
-                                .getBaseResource().getFile().getAbsolutePath());
-
-                    if (path.equals(app.getFile().getAbsolutePath()))
+                        path = c.getBaseResource().getFile().getAbsolutePath();
+                    
+                    if (path!=null && path.equals(app.getFile().getAbsolutePath()))
                     {
                         if (Log.isDebugEnabled()) Log.debug (path+" Paths were equal; duplicate!");
                         continue files;
