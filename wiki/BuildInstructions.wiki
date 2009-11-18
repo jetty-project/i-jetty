@@ -2,6 +2,7 @@
 #labels Featured
 
 =Building i-jetty=
+_Updated for i-jetty-2.1_
 
 ==From the Command Line==
 Building i-jetty at the command line is very straightforward.
