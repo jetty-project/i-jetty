@@ -16,7 +16,7 @@ You'll need these tools:
 
 To build:
 
- # Checkout the code from svn: `http://i-jetty.googlecode.com/svn/trunk/`
+ # Checkout the code from svn:  `svn co http://i-jetty.googlecode.com/svn/trunk/`
  # Edit your maven [http://maven.apache.org/settings.html settings.xml] file
 
 You should add the following lines to your [http://maven.apache.org/settings.html settings.xml] file, replacing the value of *android.home* with the location of your android sdk:
