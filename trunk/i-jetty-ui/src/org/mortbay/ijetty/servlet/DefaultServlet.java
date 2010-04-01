@@ -37,17 +37,14 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.util.URIUtil;
 
-import android.content.res.Resources;
-
-
-
 public class DefaultServlet extends HttpServlet
 {
+    private static final long serialVersionUID = 7465407271932262180L;
     private String[] _welcomes =  {"index.html", "index.htm"};   
     private boolean _redirectWelcome=false;
-    private boolean _dirAllowed=true;
+    // private boolean _dirAllowed=true;
     private ContextHandler.SContext _context;
-    private Resources _resources;
+    // private Resources _resources;
     
     
     public DefaultServlet ()
@@ -60,8 +57,8 @@ public class DefaultServlet extends HttpServlet
        if (tmp!=null)
            _redirectWelcome=Boolean.valueOf(tmp.trim());
        tmp = getInitParameter("dirAllowed");
-       if (tmp!=null)
-           _dirAllowed=Boolean.valueOf(tmp.trim());
+       // if (tmp!=null)
+          //  _dirAllowed=Boolean.valueOf(tmp.trim());
        ServletContext config=getServletContext();
        _context = (ContextHandler.SContext)config;
     }
@@ -338,9 +335,9 @@ public class DefaultServlet extends HttpServlet
         return null;
     }
     
-    public void setResources (Resources resources)
-    {
-    	_resources = resources;
-    }
+    //public void setResources (Resources resources)
+    //{
+    //	_resources = resources;
+    //}
 
 }

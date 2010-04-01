@@ -17,6 +17,7 @@ package org.mortbay.ijetty;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HandlerContainer;
@@ -24,13 +25,12 @@ import org.mortbay.jetty.deployer.ContextDeployer;
 import org.mortbay.jetty.deployer.WebAppDeployer;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.URIUtil;
-
-
 
 /**
  * Web Application Deployer.
@@ -48,34 +48,31 @@ import org.mortbay.util.URIUtil;
  * 
  * @see {@link ContextDeployer}
  */
-public class AndroidWebAppDeployer extends WebAppDeployer
-{
-    private ArrayList _deployed;
+public class AndroidWebAppDeployer extends WebAppDeployer {
+    private List<? super Context>     _deployed;
     private AttributesMap _attributes = new AttributesMap();
-    
-    
-    
-    public void setAttribute (String name, Object value)
-    {
-        _attributes.setAttribute(name, value);
-    }
 
-    public Object getAttribute (String name)
-    {
-        return _attributes.getAttribute(name);
-    }
-    
-    
-    
     /* ------------------------------------------------------------ */
     /**
      * @throws Exception
      */
-    public void doStart() throws Exception
-    {
-        _deployed = new ArrayList();
+    @Override
+    public void doStart() throws Exception {
+        _deployed = new ArrayList<Context>();
         scan();
 
+    }
+
+    @Override
+    public void doStop() throws Exception {
+        for (int i = _deployed.size(); i-- > 0;) {
+            ContextHandler wac = (ContextHandler) _deployed.get(i);
+            wac.stop();// TODO Multi exception
+        }
+    }
+
+    public Object getAttribute(String name) {
+        return _attributes.getAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -84,82 +81,79 @@ public class AndroidWebAppDeployer extends WebAppDeployer
      * 
      * @throws Exception
      */
-    public void scan() throws Exception
-    {
-        if (getContexts() == null)
+    @Override
+    public void scan() throws Exception {
+        if (getContexts() == null) {
             throw new IllegalArgumentException("No HandlerContainer");
+        }
 
         Resource r = Resource.newResource(getWebAppDir());
-        if (!r.exists())
+        if (!r.exists()) {
             throw new IllegalArgumentException("No such webapps resource " + r);
+        }
 
-        if (!r.isDirectory())
-            throw new IllegalArgumentException(
-                    "Not directory webapps resource " + r);
+        if (!r.isDirectory()) {
+            throw new IllegalArgumentException("Not directory webapps resource " + r);
+        }
 
         String[] files = r.list();
 
-        files: for (int f = 0; files != null && f < files.length; f++)
-        {
+        files: for (int f = 0; (files != null) && (f < files.length); f++) {
             String context = files[f];
 
-            if (context.equalsIgnoreCase("CVS/")
-                    || context.equalsIgnoreCase("CVS")
-                    || context.startsWith(".")) continue;
-
-            Resource app = r.addPath(r.encode(context));
-
-            if (context.toLowerCase().endsWith(".war")
-                    || context.toLowerCase().endsWith(".jar"))
-            {
-                context = context.substring(0, context.length() - 4);
-                Resource unpacked = r.addPath(context);
-
-                if (unpacked != null && unpacked.exists()
-                        && unpacked.isDirectory())
-                {
-                    if (Log.isDebugEnabled()) Log.debug(context +" already exists.");
-                    continue;
-                }
-            }
-            else if (!app.isDirectory())
-            {
-                if (Log.isDebugEnabled()) Log.debug (app+" Not directory");
+            if (context.equalsIgnoreCase("CVS/") || context.equalsIgnoreCase("CVS") || context.startsWith(".")) {
                 continue;
             }
 
-            if (context.equalsIgnoreCase("root")
-                    || context.equalsIgnoreCase("root/"))
+            Resource app = r.addPath(r.encode(context));
+
+            if (context.toLowerCase().endsWith(".war") || context.toLowerCase().endsWith(".jar")) {
+                context = context.substring(0, context.length() - 4);
+                Resource unpacked = r.addPath(context);
+
+                if ((unpacked != null) && unpacked.exists() && unpacked.isDirectory()) {
+                    Log.debug(context + " already exists.");
+                    continue;
+                }
+            } else if (!app.isDirectory()) {
+                Log.debug(app + " Not directory");
+                continue;
+            }
+
+            if (context.equalsIgnoreCase("root") || context.equalsIgnoreCase("root/")) {
                 context = URIUtil.SLASH;
-            else
+            } else {
                 context = "/" + context;
-            if (context.endsWith("/") && context.length() > 0)
+            }
+            if (context.endsWith("/") && (context.length() > 0)) {
                 context = context.substring(0, context.length() - 1);
+            }
 
             // Check the context path has not already been added or the webapp
             // itself is not already deployed
-            if (!getAllowDuplicates())
-            {
-                Handler[] installed = getContexts().getChildHandlersByClass(
-                        ContextHandler.class);
-                for (int i = 0; i < installed.length; i++)
-                {
+            if (!getAllowDuplicates()) {
+                Handler[] installed = getContexts().getChildHandlersByClass(ContextHandler.class);
+                for (int i = 0; i < installed.length; i++) {
                     ContextHandler c = (ContextHandler) installed[i];
 
-                    if (context.equals(c.getContextPath())){
-                        if (Log.isDebugEnabled()) Log.debug (context + " Context were equal; duplicate!");
+                    if (context.equals(c.getContextPath())) {
+                        if (Log.isDebugEnabled()) {
+                            Log.debug(context + " Context were equal; duplicate!");
+                        }
                         continue files;
                     }
 
                     String path;
-                    if (c instanceof WebAppContext)
-                        path = Resource.newResource(((WebAppContext)c).getWar()).getFile().getAbsolutePath();
-                    else
+                    if (c instanceof WebAppContext) {
+                        path = Resource.newResource(((WebAppContext) c).getWar()).getFile().getAbsolutePath();
+                    } else {
                         path = c.getBaseResource().getFile().getAbsolutePath();
-                    
-                    if (path!=null && path.equals(app.getFile().getAbsolutePath()))
-                    {
-                        if (Log.isDebugEnabled()) Log.debug (path+" Paths were equal; duplicate!");
+                    }
+
+                    if ((path != null) && path.equals(app.getFile().getAbsolutePath())) {
+                        if (Log.isDebugEnabled()) {
+                            Log.debug(path + " Paths were equal; duplicate!");
+                        }
                         continue files;
                     }
 
@@ -169,61 +163,45 @@ public class AndroidWebAppDeployer extends WebAppDeployer
             // create a webapp
             WebAppContext wah = null;
             HandlerContainer contexts = getContexts();
-            if (contexts instanceof ContextHandlerCollection
-                    && 
-               WebAppContext.class.isAssignableFrom(((ContextHandlerCollection) contexts).getContextClass()))
-            {
-                try
-                {
+            if ((contexts instanceof ContextHandlerCollection)
+                    && WebAppContext.class.isAssignableFrom(((ContextHandlerCollection) contexts).getContextClass())) {
+                try {
                     wah = (WebAppContext) ((ContextHandlerCollection) contexts).getContextClass().newInstance();
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     throw new Error(e);
                 }
-            }
-            else
-            {
+            } else {
                 wah = new WebAppContext();
             }
 
             // configure it
             wah.setContextPath(context);
 
-            if (getConfigurationClasses() != null)
-            {
+            if (getConfigurationClasses() != null) {
                 wah.setConfigurationClasses(getConfigurationClasses());
             }
 
-
-            if (getDefaultsDescriptor() != null) 
-            {
+            if (getDefaultsDescriptor() != null) {
                 wah.setDefaultsDescriptor(getDefaultsDescriptor());
             }
-            wah.setExtractWAR(isExtract()); 
+            wah.setExtractWAR(isExtract());
             wah.setWar(app.toString());
             wah.setParentLoaderPriority(isParentLoaderPriority());
-            
-            Enumeration names = _attributes.getAttributeNames();
-            while (names.hasMoreElements())
-            {
-                String name = (String)names.nextElement();
+
+            Enumeration<?> names = _attributes.getAttributeNames();
+            while (names.hasMoreElements()) {
+                String name = (String) names.nextElement();
                 wah.setAttribute(name, _attributes.getAttribute(name));
             }
-           
+
             // add it
-            if (Log.isDebugEnabled()) Log.debug ("AndroidWebAppDeployer: prepared " + app.toString());
+            Log.debug("AndroidWebAppDeployer: prepared " + app.toString());
             contexts.addHandler(wah);
             _deployed.add(wah);
         }
     }
 
-    public void doStop() throws Exception
-    {
-        for (int i = _deployed.size(); i-- > 0;)
-        {
-            ContextHandler wac = (ContextHandler) _deployed.get(i);
-            wac.stop();// TODO Multi exception
-        }
+    public void setAttribute(String name, Object value) {
+        _attributes.setAttribute(name, value);
     }
 }

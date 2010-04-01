@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.Server;
@@ -354,7 +353,7 @@ public class IJettyService extends Service
         AndroidWebAppDeployer staticDeployer =  new AndroidWebAppDeployer();
         AndroidContextDeployer contextDeployer = new AndroidContextDeployer();
      
-        File jettyDir = new File(IJetty.__JETTY_DIR);
+        File jettyDir = IJetty.__JETTY_DIR;
         
         // Load any webapps we find on the card.
         if (jettyDir.exists())
@@ -415,7 +414,7 @@ public class IJettyService extends Service
         org.mortbay.log.Log.setLog(new AndroidLog());
 
         //Set jetty.home
-        System.setProperty ("jetty.home", IJetty.__JETTY_DIR);
+        System.setProperty ("jetty.home", IJetty.__JETTY_DIR.getAbsolutePath());
 
         server = newServer();
         
