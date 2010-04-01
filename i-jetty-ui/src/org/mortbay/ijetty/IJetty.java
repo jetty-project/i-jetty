@@ -27,6 +27,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +71,7 @@ public class IJetty extends Activity
     public static final boolean __SSL_DEFAULT = false;
     public static final String __CONSOLE_PWD_DEFAULT = "admin";
     
-    public static final String __JETTY_DIR = "/sdcard/jetty/";
+    public static final File __JETTY_DIR;
     public static final String __WEBAPP_DIR = "webapps";
     public static final String __ETC_DIR = "etc";
     public static final String __CONTEXTS_DIR = "contexts";
@@ -77,10 +79,14 @@ public class IJetty extends Activity
     
     private IPList _ipList;
     PackageInfo pi = null;
+    
+    static {
+        __JETTY_DIR = new File(Environment.getExternalStorageDirectory(), "jetty");
+    }
 
     private class IPList 
     {
-        private List _list = new ArrayList();
+        private List<String> _list = new ArrayList<String>();
 
         public IPList()
         {
@@ -100,21 +106,17 @@ public class IJetty extends Activity
         {
             _list.clear();
 
-            try
-            {
-                Enumeration nis = NetworkInterface.getNetworkInterfaces();
-                while (nis.hasMoreElements())
+            try {
+                Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+                for (NetworkInterface ni : Collections.list(nis))
                 {
-                    NetworkInterface ni = (NetworkInterface)nis.nextElement();
-                    Enumeration iis = ni.getInetAddresses();
-                    while (iis.hasMoreElements())
+                    Enumeration<InetAddress> iis = ni.getInetAddresses();
+                    for (InetAddress ia : Collections.list(iis))
                     {
-                        _list.add(ni.getDisplayName()+": "+((InetAddress)iis.nextElement()).getHostAddress());
+                        _list.add(ni.getDisplayName() + ": " + ia.getHostAddress());
                     }
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.e("JETTY", "Problem retrieving ip addresses", e);
             }
         }
@@ -135,16 +137,6 @@ public class IJetty extends Activity
         public int getCount() 
         {
             return _ipList.getCount();
-        }
-
-        public boolean areAllItemsSelectable() 
-        {
-            return false;
-        }
-
-        public boolean isSelectable(int position) 
-        {
-            return false;
         }
 
         public Object getItem(int position) 
@@ -270,7 +262,7 @@ public class IJetty extends Activity
             update = true;
 
         //create the jetty dir structure
-        File jettyDir = new File(__JETTY_DIR);
+        File jettyDir = __JETTY_DIR;
         if (!jettyDir.exists())
         {
             boolean made = jettyDir.mkdirs();
@@ -393,7 +385,7 @@ public class IJetty extends Activity
     
     protected int getStoredJettyVersion ()
     {
-        File jettyDir = new File(__JETTY_DIR);
+        File jettyDir = __JETTY_DIR;
         if (!jettyDir.exists())
             return -1;
         File versionFile = new File (jettyDir, "version.code");
@@ -423,7 +415,7 @@ public class IJetty extends Activity
     
     protected void setStoredJettyVersion (int version)
     {
-        File jettyDir = new File(__JETTY_DIR);
+        File jettyDir = __JETTY_DIR;
         if (!jettyDir.exists())
             return;
         File versionFile = new File (jettyDir, "version.code");

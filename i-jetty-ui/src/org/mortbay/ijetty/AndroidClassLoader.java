@@ -28,9 +28,8 @@ import dalvik.system.DexClassLoader;
  * AndroidClassLoader
  * 
  * Loads classes dynamically from dex files wrapped inside a zip.
- * 
- * 
  */
+@SuppressWarnings("unchecked")
 public class AndroidClassLoader extends ClassLoader
 {
     private ClassLoader _parent;
@@ -75,7 +74,7 @@ public class AndroidClassLoader extends ClassLoader
 
             if (url == null && name.startsWith("/"))
             {
-                if (Log.isDebugEnabled()) Log.debug("HACK leading / off " + name);
+                Log.debug("HACK: leaving leading '/' off " + name);
                 url= this.findResource(name.substring(1));
             }
         }
@@ -86,7 +85,7 @@ public class AndroidClassLoader extends ClassLoader
                 url= _parent.getResource(name);
         }
 
-        if (Log.isDebugEnabled())Log.debug("getResource("+name+")=" + url);
+        Log.debug("getResource("+name+")=" + url);
 
         return url;
     }
@@ -166,16 +165,16 @@ public class AndroidClassLoader extends ClassLoader
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
-        if (Log.isDebugEnabled()) Log.debug(_context.getContextPath()+" parent priority = "+_context.isParentLoaderPriority());
+        Log.debug(_context.getContextPath()+" parent priority = "+_context.isParentLoaderPriority());
         
         if (c == null && _parent!=null && (_context.isParentLoaderPriority() || isSystemPath(name)) )
         {
             tried_parent= true;
             try
             {
-                if (Log.isDebugEnabled()) Log.debug("loading class "+name+" trying parent loader first" + _parent);
+                Log.debug("loading class "+name+" trying parent loader first" + _parent);
                 c= _parent.loadClass(name);
-                if (Log.isDebugEnabled()) Log.debug("parent loaded " + c);
+                Log.debug("parent loaded " + c);
             }
             catch (ClassNotFoundException e)
             {

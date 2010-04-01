@@ -17,6 +17,7 @@ package org.mortbay.ijetty;
 
 import org.mortbay.log.Logger;
 
+import android.util.Config;
 import android.util.Log;
 
 public class AndroidLog implements Logger
@@ -35,12 +36,16 @@ public class AndroidLog implements Logger
     
     public void debug(String msg, Throwable th)
     {
-        Log.d(__JETTY_TAG, msg, th);
+        if (__isDebugEnabled && Config.LOGD) {
+            Log.d(__JETTY_TAG, msg, th);
+        }
     }
 
     public void debug(String msg, Object arg0, Object arg1)
     {
-        Log.d(__JETTY_TAG, msg);
+        if (__isDebugEnabled && Config.LOGD) {
+            Log.d(__JETTY_TAG, msg);
+        }
     }
 
     public Logger getLogger(String name)
@@ -72,5 +77,4 @@ public class AndroidLog implements Logger
     {
         Log.e(__JETTY_TAG, msg, th);
     }
-
 }

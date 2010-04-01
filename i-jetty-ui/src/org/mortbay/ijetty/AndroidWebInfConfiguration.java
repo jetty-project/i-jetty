@@ -19,16 +19,17 @@ import org.mortbay.jetty.webapp.WebInfConfiguration;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 
+public class AndroidWebInfConfiguration extends WebInfConfiguration {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8235322314977241413L;
 
-public class AndroidWebInfConfiguration extends WebInfConfiguration
-{
-
-    public void configureClassLoader() throws Exception
-    {
-        if (getWebAppContext().isStarted())
-        {
-            if (Log.isDebugEnabled()) Log.debug(getWebAppContext()+": Cannot configure webapp after it is started");
+    @Override
+    public void configureClassLoader() throws Exception {
+        if (getWebAppContext().isStarted()) {
+            Log.debug(getWebAppContext() + ": Cannot configure webapp after it is started");
             return;
         }
 
@@ -37,38 +38,36 @@ public class AndroidWebInfConfiguration extends WebInfConfiguration
         ClassLoader parentLoader = this.getClass().getClassLoader();
 
         //Make a loader to use in case there is no WEB-INF
-        AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context); 
+        AndroidClassLoader loader = new AndroidClassLoader(null, parentLoader, _context);
 
         //Make a loader containing all .zip files in WEB-INF/lib
-        if (web_inf != null && web_inf.isDirectory())
-        {
+        if ((web_inf != null) && web_inf.isDirectory()) {
             Resource lib = web_inf.addPath("lib/");
-            String paths = "";   
-            if (lib.exists() || lib.isDirectory())
-            {                 
-                for (String dex : lib.list())
-                {
-                    if (dex.endsWith("zip") || dex.endsWith("apk"))
-                    {
+            String paths = "";
+            if (lib.exists() || lib.isDirectory()) {
+                for (String dex : lib.list()) {
+                    if (dex.endsWith("zip") || dex.endsWith("apk")) {
                         String fullpath = web_inf.addPath("lib/").addPath(dex).getFile().getAbsolutePath();
-                        if (!"".equals(paths))
-                            paths +=":";
+                        if (!"".equals(paths)) {
+                            paths += ":";
+                        }
 
                         paths += fullpath;
                     }
                 }
-                loader = new AndroidClassLoader (paths, parentLoader, _context);
+                loader = new AndroidClassLoader(paths, parentLoader, _context);
+            } else {
+                Log.debug("No WEB-INF/lib for " + _context.getContextPath());
             }
-            else
-                if (Log.isDebugEnabled()) Log.debug("No WEB-INF/lib for "+_context.getContextPath());
+        } else {
+            Log.debug("No WEB-INF for " + _context.getContextPath());
         }
-        else
-            if (Log.isDebugEnabled()) Log.debug("No WEB-INF for "+_context.getContextPath());
 
-        if (_context.getClassLoader() != null)
-            Log.warn ("Ignoring classloader "+_context.getClassLoader());
+        if (_context.getClassLoader() != null) {
+            Log.warn("Ignoring classloader " + _context.getClassLoader());
+        }
 
-        _context.setClassLoader (loader);
-       if (Log.isDebugEnabled()) Log.debug("Setting webapp classloader="+loader+" for "+_context.getContextPath());
+        _context.setClassLoader(loader);
+        Log.debug("Setting webapp classloader=" + loader + " for " + _context.getContextPath());
     }
 }

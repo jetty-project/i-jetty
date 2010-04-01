@@ -92,6 +92,25 @@
             </configuration>
          </plugin>
          <plugin>
+           <groupId>org.codehaus.mojo</groupId>
+           <artifactId>build-helper-maven-plugin</artifactId>
+           <version>1.5</version>
+           <executions>
+             <execution>
+               <id>add-gen-sources</id>
+               <phase>generate-sources</phase>
+               <goals>
+                 <goal>add-source</goal>
+               </goals>
+               <configuration>
+                 <sources>
+                   <source>${basedir}/gen</source>
+                 </sources>
+               </configuration>
+             </execution>
+           </executions>
+         </plugin>
+         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <version>1.1</version>
@@ -108,7 +127,7 @@
                   <arguments>
                     <argument>package</argument>
                     <argument>-J</argument>
-                    <argument>src/org/mortbay/ijetty</argument>
+                    <argument>gen/org/mortbay/ijetty</argument>
                     <argument>-f</argument>
                     <argument>-M</argument>
                     <argument>${basedir}/AndroidManifest.xml</argument>
