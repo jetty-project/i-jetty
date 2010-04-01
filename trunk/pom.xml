@@ -8,32 +8,18 @@
    <packaging>pom</packaging>
    <name>I-Jetty :: Parent</name>
    <description>Jetty on Android</description>
-  <repositories>
-    <!-- repository>
-      <id>codehaus.org</id>
-      <name>Jetty Releases</name>
-      <layout>default</layout>
-      <url>http://repository.codehaus.org</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository -->
-  </repositories>
 
    <modules>
-       <module>modules/console</module>
-       <module>modules/hello</module>
-       <module>modules/chat</module>
-       <module>modules/i-jetty</module>
+       <module>webapps/console</module>
+       <module>webapps/hello</module>
+       <module>webapps/chat</module>
+       <module>i-jetty-ui</module>
    </modules>
 
    <properties>
      <jetty-version>6.1.21</jetty-version>
-     <android-version>1.6_r1</android-version>
      <servlet-version>2.5-20081211</servlet-version>
+     <android-version>1.6</android-version>
      <android-platform>platforms/android-1.6</android-platform>
    </properties>
 
