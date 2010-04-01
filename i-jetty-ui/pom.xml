@@ -12,41 +12,19 @@
    <packaging>jar</packaging>
    <name>I-Jetty :: Android Application</name>
    <description>Jetty on Android</description>
+   <properties>
+     <dep.classes.dir>${project.build.directory}/dependency-classes</dep.classes.dir>
+     <war.classes.dir>${project.build.directory}/included-wars</war.classes.dir>
+   </properties>
    <dependencies>
       <dependency>
          <groupId>android</groupId>
          <artifactId>android</artifactId>
       </dependency>
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-util</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-util5</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <scope>provided</scope>
+      <groupId>org.mortbay.ijetty</groupId>
+      <artifactId>i-jetty-server</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mortbay.ijetty</groupId>
@@ -79,15 +57,14 @@
                 <goal>unpack-dependencies</goal>
               </goals>
               <configuration>
-               <!-- <classifier>sources</classifier> -->
                 <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                 <excludeArtifactIds>android,console</excludeArtifactIds>
-                <excludes>org/mortbay/log/Slf4jLog.class,org/mortbay/xml/XmlParser*</excludes>
-               <!-- <outputDirectory>${project.build.directory}/generated-sources</outputDirectory> -->
-               <outputDirectory>${project.build.directory}/generated-classes</outputDirectory>
+                <excludes>META-INF/**</excludes>
+                <outputDirectory>${dep.classes.dir}</outputDirectory>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>false</overWriteSnapshots>
               </configuration>
             </execution>
-
             <execution>
               <id>copy-war</id>
               <phase>generate-sources</phase>
@@ -95,7 +72,7 @@
                 <goal>copy-dependencies</goal>
               </goals>
               <configuration>
-                 <outputDirectory>${project.build.directory}/included-wars</outputDirectory>
+                 <outputDirectory>${war.classes.dir}</outputDirectory>
                  <overWriteReleases>false</overWriteReleases>
                  <overWriteSnapshots>false</overWriteSnapshots>
                  <overWriteIfNewer>true</overWriteIfNewer>
@@ -114,7 +91,6 @@
                <target>1.5</target>
             </configuration>
          </plugin>
-         
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
@@ -145,7 +121,7 @@
                   </arguments>
                 </configuration>
               </execution>
-              <!-- Make a debug version ie signed with the default certificate --> 
+              <!-- Make a debug version ie signed with the default certificate -->
               <!-- Convert the compiled classes into a clases.dex. -->
               <execution>
                 <id>generate-dex</id>
@@ -162,12 +138,12 @@
                     <argument>--core-library</argument>
                     <argument>--output=${project.build.directory}/classes.dex</argument>
                     <argument>--positions=lines</argument>
-                    <argument>${project.build.directory}/classes/</argument>
-                    <argument>${project.build.directory}/generated-classes/</argument>
+                    <argument>${project.build.outputDirectory}</argument>
+                    <argument>${dep.classes.dir}</argument>
                   </arguments>
                 </configuration>
               </execution>
-              
+
               <execution>
                 <id>finish-package</id>
                 <phase>package</phase>
@@ -184,11 +160,11 @@
                         <argument>-f</argument>
                         <argument>${project.build.directory}/classes.dex</argument>
                         <argument>-rf</argument>
-                        <argument>${project.build.directory}/generated-classes</argument>
+                        <argument>${dep.classes.dir}</argument>
                         <argument>-rf</argument>
                         <argument>${basedir}/src</argument>
                         <argument>-rf</argument>
-                        <argument>${project.build.directory}/included-wars</argument>
+                        <argument>${war.classes.dir}</argument>
                         <argument>-nf</argument>
                         <argument>${android.home}/${android-platform}</argument>
                     </arguments>
@@ -237,7 +213,7 @@
                         <argument>-rf</argument>
                         <argument>${basedir}/src</argument>
                         <argument>-rf</argument>
-                        <argument>${project.build.directory}/included-wars</argument>
+                        <argument>${war.classes.dir}</argument>
                         <argument>-nf</argument>
                         <argument>${android.home}/${android-platform}</argument>
                     </arguments>
