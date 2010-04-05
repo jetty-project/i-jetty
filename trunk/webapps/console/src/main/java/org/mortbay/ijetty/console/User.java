@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------
 //Licensed under the Apache License, Version 2.0 (the "License");
 //you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at 
+//You may obtain a copy of the License at
 //http://www.apache.org/licenses/LICENSE-2.0
 //Unless required by applicable law or agreed to in writing, software
 //distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,6 @@
 //See the License for the specific language governing permissions and
 //limitations under the License.
 //========================================================================
-
 
 package org.mortbay.ijetty.console;
 
@@ -32,7 +31,7 @@ import android.util.Log;
 
 public class User
 {
-  
+
     /**
      * UserCollection
      *
@@ -40,184 +39,187 @@ public class User
      */
     public static class UserCollection extends DatabaseCollection
     {
-        public UserCollection (Cursor cursor)
+        public UserCollection(Cursor cursor)
         {
             super(cursor);
         }
 
+        @Override
         public ContentValues cursorToValues(Cursor cursor)
         {
-           return cursorToUserValues(cursor);
+            return cursorToUserValues(cursor);
         }
-       
-    }
-    
-  
 
-    
-    static final String[] baseProjection = 
-        new String[] 
-                   {
-                       android.provider.BaseColumns._ID,
-                       android.provider.Contacts.PeopleColumns.DISPLAY_NAME,
-                       android.provider.Contacts.PeopleColumns.NOTES,
-                       android.provider.Contacts.PeopleColumns.STARRED,
-                       android.provider.Contacts.PeopleColumns.SEND_TO_VOICEMAIL,
-                       android.provider.Contacts.PeopleColumns.CUSTOM_RINGTONE
-                   };
-    
-   
-    
-    
+    }
+
+    private static final String TAG = "JettyConsole";
+
+    static final String[] baseProjection = new String[]
+    { android.provider.BaseColumns._ID, android.provider.Contacts.PeopleColumns.DISPLAY_NAME, android.provider.Contacts.PeopleColumns.NOTES,
+            android.provider.Contacts.PeopleColumns.STARRED, android.provider.Contacts.PeopleColumns.SEND_TO_VOICEMAIL,
+            android.provider.Contacts.PeopleColumns.CUSTOM_RINGTONE };
+
     /**
      * create
-     * 
+     *
      * Create a new Contact.
-     * 
+     *
      * @param resolver
      * @param values
      * @return
      */
-    public static String create (ContentResolver resolver, ContentValues values)
+    public static String create(ContentResolver resolver, ContentValues values)
     {
         if (resolver == null)
+        {
             return null;
+        }
         if (values == null)
+        {
             return null;
-        Uri uri = Contacts.People.createPersonInMyContactsGroup(resolver, values);
+        }
+        Uri uri = Contacts.People.createPersonInMyContactsGroup(resolver,values);
         //Uri uri = resolver.insert(Contacts.People.CONTENT_URI, values);
-        return  String.valueOf(ContentUris.parseId(uri));
+        return String.valueOf(ContentUris.parseId(uri));
     }
 
-
-    public static void savePhoto (ContentResolver resolver, String id, File photo)
+    public static ContentValues cursorToUserValues(Cursor cursor)
     {
-        if (resolver == null)
-            return;
-        if (photo == null)
-            return;
-        if (id == null)
-            return;
-        Uri uri = Uri.withAppendedPath(Contacts.People.CONTENT_URI, id);
-        try
+        if (cursor == null)
         {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            IO.copy(new FileInputStream(photo), out);
-            Contacts.People.setPhotoData(resolver, uri, out.toByteArray());
+            return null;
         }
-        catch (Exception e)
-        {
-            Log.e("Jetty", "Problem converting photo to bytes for "+photo.getAbsolutePath(), e);
-        }
+
+        ContentValues values = new ContentValues();
+        String val;
+        val = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));
+        values.put(android.provider.BaseColumns._ID,val);
+
+        val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.DISPLAY_NAME));
+        values.put(Contacts.PeopleColumns.DISPLAY_NAME,val);
+
+        Integer intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)));
+        values.put(Contacts.PeopleColumns.STARRED,intVal);
+
+        val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
+        values.put(Contacts.PeopleColumns.NOTES,val);
+
+        intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.SEND_TO_VOICEMAIL)));
+        values.put(Contacts.PeopleColumns.SEND_TO_VOICEMAIL,intVal);
+
+        val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.CUSTOM_RINGTONE));
+        values.put(Contacts.PeopleColumns.CUSTOM_RINGTONE,val);
+        return values;
     }
 
-    /**
-     * save
-     * 
-     * Update an existing Contact.
-     * 
-     * @param resolver
-     * @param values
-     * @param id
-     */
-    public static void save (ContentResolver resolver, ContentValues values, String id)
-    {
-        if (resolver == null)
-            return;
-        if (values == null)
-            return;
-        if (id == null)
-            return;
-        Uri uri = Uri.withAppendedPath(Contacts.People.CONTENT_URI, id);
-        resolver.update (uri, values, null, null);
-    }
-    
-    
-    
     /**
      * delete
-     * 
+     *
      * Delete a Contact.
-     * 
+     *
      * @param resolver
      * @param id
      */
-    public static void delete (ContentResolver resolver, String id)
+    public static void delete(ContentResolver resolver, String id)
     {
         if (id == null)
+        {
             return;
-        
-        resolver.delete(Uri.withAppendedPath(Contacts.People.CONTENT_URI, id), null, null);
+        }
+
+        resolver.delete(Uri.withAppendedPath(Contacts.People.CONTENT_URI,id),null,null);
     }
-    
-      
-    
-    /**
-     * getAll
-     * 
-     * Get all Contacts.
-     * 
-     * @param resolver
-     * @return
-     */
-    public static UserCollection getAll (ContentResolver resolver)
-    {
-        return new UserCollection(resolver.query(Contacts.People.CONTENT_URI, baseProjection, null, null, null)); 
-    }
-    
-    
-    
+
     /**
      * get
-     * 
+     *
      * Get a single Contact.
-     * 
+     *
      * @param resolver
      * @param id
      * @return
      */
-    public static ContentValues get (ContentResolver resolver, String id)
+    public static ContentValues get(ContentResolver resolver, String id)
     {
         if (id == null)
+        {
             return null;
-        
-        String[] whereArgs = new String[]{id};
-        Cursor cursor = resolver.query(Contacts.People.CONTENT_URI, baseProjection, 
-                "people."+android.provider.BaseColumns._ID+" = ?", 
-                whereArgs, Contacts.PeopleColumns.NAME+" ASC");
+        }
+
+        String[] whereArgs = new String[]
+        { id };
+        Cursor cursor = resolver.query(Contacts.People.CONTENT_URI,baseProjection,"people." + android.provider.BaseColumns._ID + " = ?",whereArgs,
+                Contacts.PeopleColumns.NAME + " ASC");
         cursor.moveToFirst();
-        ContentValues values =  cursorToUserValues(cursor);
+        ContentValues values = cursorToUserValues(cursor);
         cursor.close();
         return values;
     }
 
-    
-   
-    
-    public static ContentValues cursorToUserValues(Cursor cursor)
+    /**
+     * getAll
+     *
+     * Get all Contacts.
+     *
+     * @param resolver
+     * @return
+     */
+    public static UserCollection getAll(ContentResolver resolver)
     {
-        if (cursor == null)
-            return null;
-        
-        ContentValues values = new ContentValues();
-        String val;
-        val = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));  
-        values.put(android.provider.BaseColumns._ID, val);
-        
-        val =  cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.DISPLAY_NAME));
-        values.put(Contacts.PeopleColumns.DISPLAY_NAME, val);
-        
-        Integer intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.STARRED)));
-        values.put(Contacts.PeopleColumns.STARRED, intVal);
-        
-        val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.NOTES));
-        values.put(Contacts.PeopleColumns.NOTES, val);
-        
-        intVal = new Integer(cursor.getInt(cursor.getColumnIndex(Contacts.PeopleColumns.SEND_TO_VOICEMAIL)));
-        values.put(Contacts.PeopleColumns.SEND_TO_VOICEMAIL, intVal);
-        
-        val = cursor.getString(cursor.getColumnIndex(Contacts.PeopleColumns.CUSTOM_RINGTONE));
-        values.put(Contacts.PeopleColumns.CUSTOM_RINGTONE, val);
-        return values;
+        return new UserCollection(resolver.query(Contacts.People.CONTENT_URI,baseProjection,null,null,null));
+    }
+
+    /**
+     * save
+     *
+     * Update an existing Contact.
+     *
+     * @param resolver
+     * @param values
+     * @param id
+     */
+    public static void save(ContentResolver resolver, ContentValues values, String id)
+    {
+        if (resolver == null)
+        {
+            return;
+        }
+        if (values == null)
+        {
+            return;
+        }
+        if (id == null)
+        {
+            return;
+        }
+        Uri uri = Uri.withAppendedPath(Contacts.People.CONTENT_URI,id);
+        resolver.update(uri,values,null,null);
+    }
+
+    public static void savePhoto(ContentResolver resolver, String id, File photo)
+    {
+        if (resolver == null)
+        {
+            return;
+        }
+        if (photo == null)
+        {
+            return;
+        }
+        if (id == null)
+        {
+            return;
+        }
+        Uri uri = Uri.withAppendedPath(Contacts.People.CONTENT_URI,id);
+        try
+        {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            IO.copy(new FileInputStream(photo),out);
+            Contacts.People.setPhotoData(resolver,uri,out.toByteArray());
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG,"Problem converting photo to bytes for " + photo.getAbsolutePath(),e);
+        }
     }
 }

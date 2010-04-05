@@ -164,6 +164,11 @@ td, tr {
     display: none;
 }
 
+p.singline {
+	margin-top: 0px;
+	margin-bottom: 2px;	
+}
+
 #contacts {
   float: left;
 }
