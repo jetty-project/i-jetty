@@ -13,7 +13,6 @@
 //limitations under the License.
 //========================================================================
 
-
 package org.mortbay.ijetty.console;
 
 import android.content.ContentValues;
@@ -23,14 +22,24 @@ public abstract class DatabaseCollection
 {
     protected Cursor cursor;
 
-    public abstract ContentValues cursorToValues (Cursor cursor);
-
-    public DatabaseCollection (Cursor cursor)
+    public DatabaseCollection(Cursor cursor)
     {
-        this.cursor = cursor;    
+        this.cursor = cursor;
     }
 
-    public ContentValues next ()
+    public void close()
+    {
+        cursor.close();
+    }
+
+    public abstract ContentValues cursorToValues(Cursor cursor);
+
+    public boolean hasNext()
+    {
+        return !cursor.isLast();
+    }
+
+    public ContentValues next()
     {
         ContentValues values = null;
 
@@ -41,15 +50,4 @@ public abstract class DatabaseCollection
 
         return values;
     }
-    
-    public boolean hasNext ()
-    {
-        return !cursor.isLast();
-    }
-
-    public void close ()
-    {
-        cursor.close();
-    } 
-
 }
