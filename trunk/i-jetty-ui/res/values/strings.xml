@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">I-Jetty</string>
+    <string name="app_name">i-Jetty</string>
     <string name="jetty_started">Jetty started</string>
     <string name="jetty_not_started">Jetty not started</string>
     <string name="jetty_already_started">Jetty already running</string>

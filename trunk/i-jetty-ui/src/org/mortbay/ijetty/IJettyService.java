@@ -403,7 +403,8 @@ public class IJettyService extends Service
     protected void startJetty() throws Exception
     {
         // Bridge Jetty logging to Android logging
-        AndroidLog.__isDebugEnabled = isDebugEnabled;
+        // TODO: Make configurable 
+        AndroidLog.__isDebugEnabled = false;
         System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
         org.mortbay.log.Log.setLog(new AndroidLog());
 
