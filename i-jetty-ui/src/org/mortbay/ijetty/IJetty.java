@@ -225,7 +225,9 @@ public class IJetty extends Activity
         consolePrint("");
         consolePrint("Project: http://code.google.com/p/i-jetty");
         consolePrint("Server: http://jetty.codehaus.org");
-        consolePrint("Commercial Support: http://www.webtide.com");
+        consolePrint("Commercial Support: ");
+        consolePrint("&nbsp;  http://www.intalioworks.com/services/webtide");
+        consolePrint("&nbsp;  http://www.webtide.com/advice");
         consolePrint("");
 
         printNetworkInterfaces();
