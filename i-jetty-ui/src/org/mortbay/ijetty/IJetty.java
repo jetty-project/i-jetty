@@ -55,27 +55,35 @@ import android.widget.TextView;
  */
 public class IJetty extends Activity
 {
+    class ConsoleScrollTask implements Runnable
+    {
+        public void run()
+        {
+            consoleScroller.fullScroll(View.FOCUS_DOWN);
+        }
+    }
     private static final String TAG = "Jetty";
     public static final String __PORT = "org.mortbay.ijetty.port";
     public static final String __NIO = "org.mortbay.ijetty.nio";
     public static final String __SSL = "org.mortbay.ijetty.ssl";
-    public static final String __CONSOLE_PWD = "org.mortbay.ijetty.console";
 
+    public static final String __CONSOLE_PWD = "org.mortbay.ijetty.console";
     public static final String __PORT_DEFAULT = "8080";
     public static final boolean __NIO_DEFAULT = true;
     public static final boolean __SSL_DEFAULT = false;
-    public static final String __CONSOLE_PWD_DEFAULT = "admin";
 
+    public static final String __CONSOLE_PWD_DEFAULT = "admin";
     public static final File __JETTY_DIR;
     public static final String __WEBAPP_DIR = "webapps";
     public static final String __ETC_DIR = "etc";
     public static final String __CONTEXTS_DIR = "contexts";
-    public static final String __TMP_DIR = "tmp";
 
+    public static final String __TMP_DIR = "tmp";
     PackageInfo pi = null;
     private TextView console;
     private ScrollView consoleScroller;
     private StringBuilder out = new StringBuilder();
+
     private Runnable scrollTask;
 
     static
@@ -83,6 +91,71 @@ public class IJetty extends Activity
         __JETTY_DIR = new File(Environment.getExternalStorageDirectory(),"jetty");
     }
 
+    public void consolePrint(String format, Object... args)
+    {
+        String msg = String.format(format,args);
+        if (msg.length() > 0)
+        {
+            out.append(msg).append("<br/>");
+            console.setText(Html.fromHtml(out.toString()));
+            Log.i(TAG,msg); // Only interested in non-empty lines being output to Log
+        }
+        else
+        {
+            out.append(msg).append("<br/>");
+            console.setText(Html.fromHtml(out.toString()));
+        }
+
+        if (scrollTask == null)
+        {
+            scrollTask = new ConsoleScrollTask();
+        }
+
+        consoleScroller.post(scrollTask);
+    }
+
+    protected int getStoredJettyVersion()
+    {
+        File jettyDir = __JETTY_DIR;
+        if (!jettyDir.exists())
+        {
+            return -1;
+        }
+        File versionFile = new File(jettyDir,"version.code");
+        if (!versionFile.exists())
+        {
+            return -1;
+        }
+        int val = -1;
+        ObjectInputStream ois = null;
+        try
+        {
+            ois = new ObjectInputStream(new FileInputStream(versionFile));
+            val = ois.readInt();
+            return val;
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG,"Problem reading version.code",e);
+            return -1;
+        }
+        finally
+        {
+            if (ois != null)
+            {
+                try
+                {
+                    ois.close();
+                }
+                catch (Exception e)
+                {
+                    Log.d(TAG,"Error closing version.code input stream",e);
+                }
+            }
+        }
+    }
+
+    @Override
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
@@ -95,7 +168,7 @@ public class IJetty extends Activity
             public void onClick(View v)
             {
                 printServerUrls();
-                
+
                 //TODO get these values from editable UI elements
                 Intent intent = new Intent(IJetty.this,IJettyService.class);
                 intent.putExtra(__PORT,__PORT_DEFAULT);
@@ -147,8 +220,8 @@ public class IJetty extends Activity
         }
 
         consolePrint("jetty server version %s",Server.UNKNOWN_VERSION);
-        consolePrint("On %s", AndroidInfo.getDeviceModel());
-        consolePrint("OS version %s", AndroidInfo.getOSVersion());
+        consolePrint("On %s",AndroidInfo.getDeviceModel());
+        consolePrint("OS version %s",AndroidInfo.getOSVersion());
         consolePrint("");
         consolePrint("Project: http://code.google.com/p/i-jetty");
         consolePrint("Server: http://jetty.codehaus.org");
@@ -158,6 +231,12 @@ public class IJetty extends Activity
         printNetworkInterfaces();
 
         setupJetty();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
     }
 
     private void printNetworkInterfaces()
@@ -185,7 +264,7 @@ public class IJetty extends Activity
             consolePrint("Socket Exception: No Network Interfaces Available?");
         }
     }
-    
+
     private void printServerUrls()
     {
         consolePrint("");
@@ -218,40 +297,41 @@ public class IJetty extends Activity
             consolePrint("Socket Exception: No Network Interfaces Available?");
         }
     }
-    
-    class ConsoleScrollTask implements Runnable
-    {
-        public void run()
-        {
-            consoleScroller.fullScroll(View.FOCUS_DOWN);
-        }
-    }
 
-    public void consolePrint(String format, Object... args)
+    protected void setStoredJettyVersion(int version)
     {
-        String msg = String.format(format,args);
-        if (msg.length() > 0)
+        File jettyDir = __JETTY_DIR;
+        if (!jettyDir.exists())
         {
-            out.append(msg).append("<br/>");
-            console.setText(Html.fromHtml(out.toString()));
-            Log.i(TAG,msg); // Only interested in non-empty lines being output to Log
+            return;
         }
-        else
+        File versionFile = new File(jettyDir,"version.code");
+        ObjectOutputStream oos = null;
+        try
         {
-            out.append(msg).append("<br/>");
-            console.setText(Html.fromHtml(out.toString()));
+            FileOutputStream fos = new FileOutputStream(versionFile);
+            oos = new ObjectOutputStream(fos);
+            oos.writeInt(version);
+            oos.flush();
         }
-        
-        if(scrollTask == null) {
-            scrollTask = new ConsoleScrollTask();
+        catch (Exception e)
+        {
+            Log.e(TAG,"Problem writing jetty version",e);
         }
-        
-        consoleScroller.post(scrollTask);
-    }
-
-    protected void onResume()
-    {
-        super.onResume();
+        finally
+        {
+            if (oos != null)
+            {
+                try
+                {
+                    oos.close();
+                }
+                catch (Exception e)
+                {
+                    Log.d(TAG,"Error closing version.code output stream",e);
+                }
+            }
+        }
     }
 
     public void setupJetty()
@@ -260,8 +340,10 @@ public class IJetty extends Activity
 
         int storedVersion = getStoredJettyVersion();
 
-        if (pi != null && pi.versionCode > storedVersion)
+        if ((pi != null) && (pi.versionCode > storedVersion))
+        {
             update = true;
+        }
 
         //create the jetty dir structure
         File jettyDir = __JETTY_DIR;
@@ -271,7 +353,18 @@ public class IJetty extends Activity
             Log.i(TAG,"Made " + __JETTY_DIR + ": " + made);
         }
         else
+        {
             Log.i(TAG,__JETTY_DIR + " exists");
+            if (!update)
+            {
+                // Always update if ${jetty.home}/.update exists (DEBUG)
+                File alwaysUpdate = new File(jettyDir,".update");
+                if( alwaysUpdate.exists() ) {
+                    Log.i(TAG, "Always Update tag found " + alwaysUpdate);
+                    update =true;
+                }
+            }
+        }
 
         //make jetty/tmp
         File tmpDir = new File(jettyDir,__TMP_DIR);
@@ -281,7 +374,9 @@ public class IJetty extends Activity
             Log.i(TAG,"Made " + tmpDir + ": " + made);
         }
         else
+        {
             Log.i(TAG,tmpDir + " exists");
+        }
 
         //make jetty/webapps
         File webappsDir = new File(jettyDir,__WEBAPP_DIR);
@@ -291,7 +386,9 @@ public class IJetty extends Activity
             Log.i(TAG,"Made " + webappsDir + ": " + made);
         }
         else
+        {
             Log.i(TAG,webappsDir + " exists");
+        }
 
         //make jetty/etc
         File etcDir = new File(jettyDir,__ETC_DIR);
@@ -301,7 +398,9 @@ public class IJetty extends Activity
             Log.i(TAG,"Made " + etcDir + ": " + made);
         }
         else
+        {
             Log.i(TAG,etcDir + " exists");
+        }
 
         File webdefaults = new File(etcDir,"webdefault.xml");
         if (!webdefaults.exists() || update)
@@ -361,7 +460,9 @@ public class IJetty extends Activity
             Log.i(TAG,"Made " + contextsDir + ": " + made);
         }
         else
+        {
             Log.i(TAG,contextsDir + " exists");
+        }
 
         //unpack the console war, but don't make a context.xml for it
         //Must be deployed by webapp deployer to get the Android ContentResolver
@@ -375,7 +476,7 @@ public class IJetty extends Activity
 
         boolean exists = consoleWar.exists();
         String[] files = consoleWar.list();
-        if (!exists || files == null || files.length == 0)
+        if (!exists || (files == null) || (files.length == 0))
         {
             InputStream is = this.getClassLoader().getResourceAsStream("console.war");
             Installer.install(is,"/console",webappsDir,"console",false);
@@ -385,77 +486,6 @@ public class IJetty extends Activity
         if (pi != null)
         {
             setStoredJettyVersion(pi.versionCode);
-        }
-    }
-
-    protected int getStoredJettyVersion()
-    {
-        File jettyDir = __JETTY_DIR;
-        if (!jettyDir.exists())
-            return -1;
-        File versionFile = new File(jettyDir,"version.code");
-        if (!versionFile.exists())
-            return -1;
-        int val = -1;
-        ObjectInputStream ois = null;
-        try
-        {
-            ois = new ObjectInputStream(new FileInputStream(versionFile));
-            val = ois.readInt();
-            return val;
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG,"Problem reading version.code",e);
-            return -1;
-        }
-        finally
-        {
-            if (ois != null)
-            {
-                try
-                {
-                    ois.close();
-                }
-                catch (Exception e)
-                {
-                    Log.d(TAG,"Error closing version.code input stream",e);
-                }
-            }
-        }
-    }
-
-    protected void setStoredJettyVersion(int version)
-    {
-        File jettyDir = __JETTY_DIR;
-        if (!jettyDir.exists())
-            return;
-        File versionFile = new File(jettyDir,"version.code");
-        ObjectOutputStream oos = null;
-        try
-        {
-            FileOutputStream fos = new FileOutputStream(versionFile);
-            oos = new ObjectOutputStream(fos);
-            oos.writeInt(version);
-            oos.flush();
-        }
-        catch (Exception e)
-        {
-            Log.e(TAG,"Problem writing jetty version",e);
-        }
-        finally
-        {
-            if (oos != null)
-            {
-                try
-                {
-                    oos.close();
-                }
-                catch (Exception e)
-                {
-                    Log.d(TAG,"Error closing version.code output stream",e);
-                }
-            }
         }
     }
 }
