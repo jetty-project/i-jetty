@@ -26,7 +26,9 @@ import org.mortbay.jetty.client.HttpClient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -433,5 +435,10 @@ public class IJettyDownloader extends Activity
             Log.e("Jetty", "Bad resource", e);
             mHandler.sendMessage(Message.obtain(mHandler, __MSG_DOWNLOAD_FAILED, "Exception"));
         }
+    }
+    
+    public static void show(Context context) {
+        final Intent intent = new Intent(context, IJettyDownloader.class);
+        context.startActivity(intent);
     }
 }

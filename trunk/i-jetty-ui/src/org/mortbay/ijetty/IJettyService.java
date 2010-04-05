@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.mortbay.ijetty.util.IJettyToast;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpGenerator;
 import org.mortbay.jetty.Server;
@@ -43,7 +44,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * IJettyService
@@ -114,8 +114,7 @@ public class IJettyService extends Service
     {
         if (server != null)
         {
-            Toast.makeText(IJettyService.this, R.string.jetty_already_started,
-                    Toast.LENGTH_SHORT).show();
+            IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_already_started);
             return;
         }
 
@@ -179,8 +178,7 @@ public class IJettyService extends Service
 
             mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-            Toast.makeText(IJettyService.this, R.string.jetty_started,
-                    Toast.LENGTH_SHORT).show();
+            IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_started);
 
             // The PendingIntent to launch IJetty activity if the user selects this notification
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
@@ -188,7 +186,7 @@ public class IJettyService extends Service
 
             CharSequence text = getText(R.string.manage_jetty);
 
-            Notification notification = new Notification(R.drawable.jicon, 
+            Notification notification = new Notification(R.drawable.ijetty_stat, 
                     text, 
                     System.currentTimeMillis());
 
@@ -202,8 +200,7 @@ public class IJettyService extends Service
         catch (Exception e)
         {
             Log.e("Jetty", "Error starting jetty", e);
-            Toast.makeText(this, getText(R.string.jetty_not_started),
-                    Toast.LENGTH_SHORT).show();
+            IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_started);
         }
     }
 
@@ -228,23 +225,20 @@ public class IJettyService extends Service
                 // Cancel the persistent notification.
                 mNM.cancel(R.string.jetty_started);
                 // Tell the user we stopped.
-                Toast.makeText(this, getText(R.string.jetty_stopped),
-                        Toast.LENGTH_SHORT).show();
+                IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_stopped);
                 Log.i("Jetty", "Jetty stopped");
                 __resources = null;
             }
             else
             {
                 Log.i("Jetty", "Jetty not running");
-                Toast.makeText(IJettyService.this, R.string.jetty_not_running,
-                    Toast.LENGTH_SHORT).show();
+                IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_running);
             }
         }
         catch (Exception e)
         {
             Log.e("Jetty", "Error stopping jetty", e);
-            Toast.makeText(this, getText(R.string.jetty_not_stopped),
-                    Toast.LENGTH_SHORT).show();
+            IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_stopped);
         }
     }
     
