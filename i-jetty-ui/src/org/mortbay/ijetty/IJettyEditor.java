@@ -14,6 +14,8 @@
 
 package org.mortbay.ijetty;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
@@ -23,5 +25,10 @@ public class IJettyEditor extends PreferenceActivity
     {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.ijetty_preference);
+    }
+    
+    public static void show(Context context) {
+        final Intent intent = new Intent(context, IJettyEditor.class);
+        context.startActivity(intent);
     }
 }

@@ -16,7 +16,7 @@
     <string name="start_download">Download</string>
     <string name="download_webapp">Download</string>
     <string name="url">URL</string>
-    <string name="interfaces">Known IP Addresses</string>
+    <string name="console">Console</string>
     <string name="non_ssl_category">Non SSL Port</string>
     <string name="ssl_category">SSL Port</string>
     <string name="console_category">Console</string>
