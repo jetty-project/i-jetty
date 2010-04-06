@@ -92,8 +92,15 @@ public class ContactMethod
 
         String[] whereArgs = new String[]
         { userId };
-        return new ContactMethodsCollection(resolver.query(Contacts.ContactMethods.CONTENT_URI,contactMethodsProjection,android.provider.BaseColumns._ID
-                + " = ?",whereArgs,Contacts.ContactMethodsColumns.KIND + " DESC"));
+        StringBuilder where = new StringBuilder();
+        if (AndroidInfo.isOldContactsSystem())
+        {
+            where.append("people.");
+        }
+        where.append(android.provider.BaseColumns._ID);
+        where.append(" = ?");
+        return new ContactMethodsCollection(resolver.query(Contacts.ContactMethods.CONTENT_URI,contactMethodsProjection,where.toString(),whereArgs,
+                Contacts.ContactMethodsColumns.KIND + " DESC"));
     }
 
     public static void saveContactMethod(ContentResolver resolver, ContentValues contactMethod, String id, String userId)
