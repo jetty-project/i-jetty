@@ -95,8 +95,14 @@ public class Phone
 
         String[] whereArgs = new String[]
         { userId };
-        return new PhoneCollection(resolver.query(Contacts.Phones.CONTENT_URI,phonesProjection,android.provider.BaseColumns._ID + " = ?",whereArgs,
-                Contacts.PhonesColumns.TYPE + " ASC"));
+        StringBuilder where = new StringBuilder();
+        if (AndroidInfo.isOldContactsSystem())
+        {
+            where.append("people.");
+        }
+        where.append(android.provider.BaseColumns._ID);
+        where.append(" = ?");
+        return new PhoneCollection(resolver.query(Contacts.Phones.CONTENT_URI,phonesProjection,where.toString(),whereArgs,Contacts.PhonesColumns.TYPE + " ASC"));
     }
 
     public static void savePhone(ContentResolver resolver, ContentValues phone, String phoneId, String userId)
