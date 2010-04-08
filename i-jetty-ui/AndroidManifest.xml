@@ -29,22 +29,13 @@
 
     <activity
       android:name=".IJettyEditor"
-      android:theme="@style/Theme.IJetty"
-      android:label="@string/edit_preferences">
-      <intent-filter>
-        <action
-          android:name="android.intent.action.MAIN" />
-      </intent-filter>
-    </activity>
+      android:theme="@style/Theme.IJetty" />
     <activity
       android:name=".IJettyDownloader"
-      android:theme="@style/Theme.IJetty"
-      android:label="@string/jetty_downloader">
-      <intent-filter>
-        <action
-          android:name="android.intent.action.MAIN" />
-      </intent-filter>
-    </activity>
+      android:theme="@style/Theme.IJetty" />
+    <activity
+      android:name=".SdCardUnavailableActivity"
+      android:theme="@style/Theme.IJetty" />
     <service
       android:name=".IJettyService"
       android:process=":remote" />

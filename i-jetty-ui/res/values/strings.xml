@@ -15,6 +15,7 @@
     <string name="config_jetty">Configure</string>
     <string name="start_download">Download</string>
     <string name="download_webapp">Download</string>
+    <string name="retry">Retry</string>
     <string name="url">URL</string>
     <string name="console">Console</string>
     <string name="non_ssl_category">Non SSL Port</string>
@@ -75,4 +76,16 @@
     <string name="overwrite">Replace existing file?</string>
     <string name="loading">Loading ... </string>
     <string name="context_path">Context Path</string>
+    
+    <!-- External Storage State Messages -->
+    <string name="sd_media_removed"><b>MEDIA_REMOVED</b>\n\nPlease replace the SD Card and try again.</string>
+    <string name="sd_media_unmounted"><b>MEDIA_UNMOUNTED</b>\n\nMedia is present, but not mounted.\nSee your System Settings &gt; SD Card screen for mounting instructions.</string>
+    <string name="sd_media_checking"><b>MEDIA_CHECKING</b>\n\nMedia is present, but is being disk-checked by the OS.\nPlease wait a few minutes for this process to finish and try again.</string>
+    <string name="sd_media_nofs"><b>MEDIA_NOFS</b>\n\nMedia is present, but is blank or is using a filesystem type that is unsupported by the Android OS.</string>
+    <string name="sd_media_mounted_read_only"><b>MEDIA_MOUNTED_READ_ONLY</b>\n\nMedia is present, and mounted, but is read-only.\nJetty requires a filesystem that it can write to.\n\nPlease correct and try again.</string>
+    <string name="sd_media_shared"><b>MEDIA_SHARED</b>\n\nMedia is present, but is unavailable to Jetty as it is currently involved in USB mass storage file sharing with a desktop.\nComplete your USB mass storage sharing and try again.</string>
+    <string name="sd_media_bad_removal"><b>MEDIA_BAD_REMOVAL</b>\n\nMedia is not present, and the Android OS reports that it was removed unsafely.\nPlease replace media, let Android check it, and try again.</string>
+    <string name="sd_media_unmountable"><b>MEDIA_UNMOUNTABLE</b>\n\nMedia is present, but the Android OS cannot mount it.\nThis typically happens if the filesystem or media is bad or corrupted.\nReplace media and try again.</string>
+    <string name="sd_unknown"><b>UNKNOWN ERROR</b>\n\nMedia state cannot be determined.\nState being reported by Android is <u>%s</u></string>
+    <string name="sd_not_available">SD Not (yet) Available</string>
 </resources>
