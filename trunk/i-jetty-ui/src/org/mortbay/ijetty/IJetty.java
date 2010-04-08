@@ -33,6 +33,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.util.IO;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -83,7 +84,7 @@ public class IJetty extends Activity
     private TextView console;
     private ScrollView consoleScroller;
     private StringBuilder out = new StringBuilder();
-
+    private boolean alreadySetup = false;
     private Runnable scrollTask;
 
     static
@@ -160,6 +161,7 @@ public class IJetty extends Activity
     {
         super.onCreate(icicle);
         setContentView(R.layout.jetty_controller);
+        this.alreadySetup = false;
 
         // Watch for button clicks.
         final Button startButton = (Button)findViewById(R.id.start);
@@ -231,13 +233,21 @@ public class IJetty extends Activity
         consolePrint("");
 
         printNetworkInterfaces();
-
-        setupJetty();
+    }
+    
+    public static void show(Context context) {
+        final Intent intent = new Intent(context, IJetty.class);
+        context.startActivity(intent);
     }
 
     @Override
     protected void onResume()
     {
+        if(SdCardUnavailableActivity.isExternalStorageAvailable() && !alreadySetup) {
+            setupJetty();
+        } else {
+            SdCardUnavailableActivity.show(this);
+        }
         super.onResume();
     }
 
@@ -489,5 +499,7 @@ public class IJetty extends Activity
         {
             setStoredJettyVersion(pi.versionCode);
         }
+        
+        this.alreadySetup = true;
     }
 }
