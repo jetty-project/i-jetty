@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
@@ -33,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.util.IO;
-import org.mortbay.util.URIUtil;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -43,8 +43,10 @@ import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.util.Config;
 import android.util.Log;
 
 public class MediaBrowserServlet extends HttpServlet
@@ -75,21 +77,66 @@ public class MediaBrowserServlet extends HttpServlet
             _scanner = scanner;
         }
     }
+    class PathTokenizer
+    {
+        private StringTokenizer tok;
+        private String pathinfo;
+        private int location;
 
-    private static final String TAG = "MediaBrowserServlet";
+        public PathTokenizer(String pathinfo)
+        {
+            this.pathinfo = pathinfo;
+            this.tok = new StringTokenizer(pathinfo,"/");
+            this.location = 0;
+        }
+
+        public String getPathinfo()
+        {
+            return pathinfo;
+        }
+
+        public String nextOptPathSegment() throws ParseException
+        {
+            if (tok.hasMoreTokens())
+            {
+                location++;
+                String ret = tok.nextToken();
+                if (ret == null)
+                {
+                    return null;
+                }
+                return ret.trim();
+            }
+            return null;
+        }
+
+        public String nextPathSegment() throws ParseException
+        {
+            if (tok.hasMoreTokens())
+            {
+                location++;
+                String ret = tok.nextToken();
+                if (ret == null)
+                {
+                    return null;
+                }
+                return ret.trim();
+            }
+            throw new ParseException("Missing required path segment",location);
+        }
+    }
 
     private static final long serialVersionUID = 1L;
+    private static final String TAG = "MediaBrowserServlet";
 
-    private Uri[] __MEDIA_URIS =
-    { MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.INTERNAL_CONTENT_URI, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            MediaStore.Audio.Media.INTERNAL_CONTENT_URI, MediaStore.Video.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.INTERNAL_CONTENT_URI };
-
-    private String[] __MEDIA_LABELS =
-    { "Images", "Audio", "Video" };
+    private static final String TYPE_VIDEO = "video";
+    private static final String TYPE_AUDIO = "audio";
+    private static final String TYPE_IMAGES = "images";
+    private static final String LOCATION_EXTERNAL = "external";
+    private static final String LOCATION_INTERNAL = "internal";
 
     private int __THUMB_WIDTH = 120;
     private int __THUMB_HEIGHT = 120;
-
     private ContentResolver resolver;
     private Context context;
 
@@ -97,8 +144,6 @@ public class MediaBrowserServlet extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         String pathInfo = request.getPathInfo();
-        String servletPath = request.getServletPath();
-        String pathInContext = URIUtil.addPaths(servletPath,pathInfo);
 
         if (pathInfo == null)
         {
@@ -107,260 +152,314 @@ public class MediaBrowserServlet extends HttpServlet
             return;
         }
 
-        String what = null; // 'json' or 'fetch'
-        String typestr = null; // media type id (0, 1) if what='fetch', media type string (audio, images, etc) if what='json'
-        String item = null; // item id
-        String thumb = null; // 'thumb' if only if thumbnail requested
-
-        StringTokenizer strtok = new StringTokenizer(pathInfo,"/");
-        if (strtok.hasMoreElements())
+        if (Config.LOGD)
         {
-            what = strtok.nextToken();
+            Log.d(TAG,"PathInfo: " + pathInfo);
         }
 
-        if (strtok.hasMoreElements())
+        PathTokenizer pathtok = new PathTokenizer(pathInfo);
+        try
         {
-            typestr = strtok.nextToken();
-        }
+            String action = pathtok.nextPathSegment(); // 'json', 'fetch', or 'embed'
 
-        if (strtok.hasMoreElements())
-        {
-            item = strtok.nextToken();
-        }
-
-        if (strtok.hasMoreElements())
-        {
-            thumb = strtok.nextToken();
-        }
-
-        if (what == null)
-        {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-
-        if ("fetch".equals(what.trim()))
-        {
-            try
+            if ("fetch".equals(action))
             {
-                int type = 0;
-                try
+                String type = pathtok.nextPathSegment();
+                String location = pathtok.nextPathSegment();
+                String item = pathtok.nextPathSegment();
+                String thumb = pathtok.nextOptPathSegment();
+                Uri contenturi = getContentUriByType(type,location);
+                if (contenturi == null)
                 {
-                    type = Integer.parseInt(typestr);
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    return;
                 }
-                catch (NumberFormatException e)
-                {
-                    Log.w(TAG,"Unable to parse typestr from " + pathInfo);
-                }
+                boolean asThumb = "thumb".equals(thumb);
+                doGetFetchMedia(request,response,contenturi,item,asThumb);
+            }
+            else if ("json".equals(action.trim()))
+            {
+                String type = pathtok.nextPathSegment();
+                doGetJson(request,response,type);
+            }
+            else if ("embed".equals(action.trim()))
+            {
+                String type = pathtok.nextPathSegment();
+                String location = pathtok.nextPathSegment();
+                String item = pathtok.nextPathSegment();
+                doGetEmbedHtml(request,response,type,location,item);
+            }
+            else
+            {
+                Log.w(TAG,"invalid action - '" + action + "', returning 404");
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+        }
+        catch (ParseException e)
+        {
+            Log.w(TAG,"Invalid request path: " + pathInfo,e);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
 
-                Uri contenturi = __MEDIA_URIS[type];
-                Uri content = Uri.withAppendedPath(contenturi,item);
+    /**
+     * Get the HTML snippet for embedding the media content in a way suitable for the browser to view the content as
+     *
+     * @param request
+     *            the incoming servlet request
+     * @param response
+     *            the outgoing servlet response
+     * @param type
+     *            the type of media interested in (<code>images</code>, <code>audio</code>, or <code>video</code>)
+     * @param location
+     *            the location of media interested in (<code>internal</code>, or <code>external</code>)
+     * @param item
+     *            the item reference
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void doGetEmbedHtml(HttpServletRequest request, HttpServletResponse response, String type, String location, String item) throws ServletException,
+            IOException
+    {
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html");
+        PrintWriter writer = response.getWriter();
 
-                if ((thumb != null) && "thumb".equals(thumb.trim()))
+        String path = "/console/media/db/fetch/" + type + "/" + location + "/" + item;
+
+        writer.print("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26'");
+        writer.println(" CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95'");
+        writer.println(" STANDBY='Loading...' TYPE='application/x-oleobject'>");
+        writer.printf("  <PARAM NAME='FileName' VALUE='%s'>%n",path);
+        writer.printf("  <EMBED TYPE='application/x-mplayer2' SRC='%s' NAME='MediaPlayer' WIDTH='320' HEIGHT='26' autostart='1'></EMBED>%n",path);
+        writer.println("</OBJECT>");
+    }
+
+    public void doGetFetchMedia(HttpServletRequest request, HttpServletResponse response, Uri contenturi, String item, boolean asThumb)
+            throws ServletException, IOException
+    {
+        try
+        {
+            Uri content = Uri.withAppendedPath(contenturi,item);
+
+            if (asThumb)
+            {
+                Bitmap bitmap_orig = MediaStore.Images.Media.getBitmap(resolver,content);
+                if (bitmap_orig != null)
                 {
-                    Bitmap bitmap_orig = MediaStore.Images.Media.getBitmap(resolver,content);
-                    if (bitmap_orig != null)
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    InputStream stream = null;
+                    OutputStream os = response.getOutputStream();
+                    Bitmap bitmap = null;
+
+                    int width = bitmap_orig.getWidth();
+                    int height = bitmap_orig.getHeight();
+
+                    // If the image is too big (AND the width/height isn't 0), scale it
+                    if (((width > __THUMB_WIDTH) || (height > __THUMB_HEIGHT)) && (height != 0) && (width != 0))
                     {
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        InputStream stream = null;
-                        OutputStream os = response.getOutputStream();
-                        Bitmap bitmap = null;
+                        float scaleWidth = 0;
+                        float scaleHeight = 0;
 
-                        int width = bitmap_orig.getWidth();
-                        int height = bitmap_orig.getHeight();
-
-                        // If the image is too big (AND the width/height isn't 0), scale it
-                        if (((width > __THUMB_WIDTH) || (height > __THUMB_HEIGHT)) && (height != 0) && (width != 0))
+                        if (Config.LOGD)
                         {
-                            float scaleWidth = 0;
-                            float scaleHeight = 0;
+                            Log.d(TAG,"orig height = " + height + ", orig width = " + width);
+                            Log.d(TAG,"__THUMB_HEIGHT = " + __THUMB_HEIGHT + ", __THUMB_WIDTH = " + __THUMB_WIDTH);
+                        }
 
-                            Log.i(TAG,"orig height = " + height + ", orig width = " + width);
-                            Log.i(TAG,"__THUMB_HEIGHT = " + __THUMB_HEIGHT + ", __THUMB_WIDTH = " + __THUMB_WIDTH);
+                        if (width > __THUMB_WIDTH)
+                        {
+                            scaleWidth = ((float)__THUMB_WIDTH) / width;
+                        }
 
-                            if (width > __THUMB_WIDTH)
-                            {
-                                scaleWidth = ((float)__THUMB_WIDTH) / width;
-                            }
+                        if (height > __THUMB_HEIGHT)
+                        {
+                            scaleHeight = ((float)__THUMB_HEIGHT) / height;
+                        }
 
-                            if (height > __THUMB_HEIGHT)
-                            {
-                                scaleHeight = ((float)__THUMB_HEIGHT) / height;
-                            }
+                        if (Config.LOGD)
+                        {
+                            Log.d(TAG,"scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth);
+                        }
 
-                            Log.i(TAG,"scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth);
+                        if ((scaleHeight < scaleWidth) && (scaleHeight != 0))
+                        {
+                            scaleWidth = scaleHeight;
+                        }
+                        else if ((scaleWidth < scaleHeight) && (scaleWidth != 0))
+                        {
+                            scaleHeight = scaleWidth;
+                        }
 
-                            if ((scaleHeight < scaleWidth) && (scaleHeight != 0))
-                            {
-                                scaleWidth = scaleHeight;
-                            }
-                            else if ((scaleWidth < scaleHeight) && (scaleWidth != 0))
-                            {
-                                scaleHeight = scaleWidth;
-                            }
+                        if (scaleWidth == 0)
+                        {
+                            scaleWidth = scaleHeight;
+                        }
 
-                            if (scaleWidth == 0)
-                            {
-                                scaleWidth = scaleHeight;
-                            }
+                        if (scaleHeight == 0)
+                        {
+                            scaleHeight = scaleWidth;
+                        }
 
-                            if (scaleHeight == 0)
-                            {
-                                scaleHeight = scaleWidth;
-                            }
+                        if (Config.LOGD)
+                        {
+                            Log.d(TAG,"scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth + " (final)");
+                        }
 
-                            Log.i(TAG,"scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth + " (final)");
+                        if (scaleHeight == 0)
+                        {
+                            Log.w(TAG,"scaleHeight and scaleWidth both = 0! Setting scale to 50%.");
+                            scaleHeight = 0.5f;
+                            scaleWidth = 0.5f;
+                        }
 
-                            if (scaleHeight == 0)
-                            {
-                                Log.w(TAG,"scaleHeight and scaleWidth both = 0! Setting scale to 50%.");
-                                scaleHeight = 0.5f;
-                                scaleWidth = 0.5f;
-                            }
+                        Matrix matrix = new Matrix();
+                        matrix.postScale(scaleWidth,scaleHeight);
 
-                            Matrix matrix = new Matrix();
-                            matrix.postScale(scaleWidth,scaleHeight);
+                        // recreate the new Bitmap
+                        bitmap = Bitmap.createBitmap(bitmap_orig,0,0,width,height,matrix,true);
 
-                            // recreate the new Bitmap
-                            bitmap = Bitmap.createBitmap(bitmap_orig,0,0,width,height,matrix,true);
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
-                            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-
-                            if (resolver.getType(content) == "image/gif")
-                            {
-                                Log.i(TAG,"Original image was gif, exporting thumb as JPEG as workaround");
-                                response.setContentType("image/gif");
-                                bitmap.compress(Bitmap.CompressFormat.JPEG,90,bytes);
-                            }
-                            else
-                            {
-                                Log.i(TAG,"Exporting thumb in png format");
-                                response.setContentType("image/png");
-                                bitmap.compress(Bitmap.CompressFormat.PNG,100,bytes);
-                            }
-
-                            stream = new ByteArrayInputStream(bytes.toByteArray());
+                        if (resolver.getType(content) == "image/gif")
+                        {
+                            Log.i(TAG,"Original image was gif, exporting thumb as JPEG as workaround");
+                            response.setContentType("image/gif");
+                            bitmap.compress(Bitmap.CompressFormat.JPEG,90,bytes);
                         }
                         else
                         {
-                            if ((height == 0) || (width == 0))
-                            {
-                                Log.w(TAG,"Height or width were 0; sending original image instead!");
-                            }
-                            else
-                            {
-                                Log.i(TAG,"Original was smaller than " + __THUMB_HEIGHT + "x" + __THUMB_WIDTH + ", skipping scale.");
-                            }
-                            // just return the original data from the DB
-                            response.setContentType(resolver.getType(content));
-                            stream = resolver.openInputStream(content);
+                            Log.i(TAG,"Exporting thumb in png format");
+                            response.setContentType("image/png");
+                            bitmap.compress(Bitmap.CompressFormat.PNG,100,bytes);
                         }
 
-                        IO.copy(stream,os);
+                        stream = new ByteArrayInputStream(bytes.toByteArray());
                     }
-                }
-                else
-                {
-                    Log.i(TAG,"Exporting original media");
-                    response.setContentType(resolver.getType(content));
-                    InputStream stream = resolver.openInputStream(content);
-                    OutputStream os = response.getOutputStream();
+                    else
+                    {
+                        if ((height == 0) || (width == 0))
+                        {
+                            Log.w(TAG,"Height or width were 0; sending original image instead!");
+                        }
+                        else
+                        {
+                            Log.i(TAG,"Original was smaller than " + __THUMB_HEIGHT + "x" + __THUMB_WIDTH + ", skipping scale.");
+                        }
+                        // just return the original data from the DB
+                        response.setContentType(resolver.getType(content));
+                        stream = resolver.openInputStream(content);
+                    }
 
-                    response.setStatus(HttpServletResponse.SC_OK);
                     IO.copy(stream,os);
                 }
             }
-            catch (Exception e)
+            else
             {
-                Log.w(TAG,"Failed to fetch media",e);
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                Log.i(TAG,"Exporting original media");
+                response.setContentType(resolver.getType(content));
+                InputStream stream = resolver.openInputStream(content);
+                OutputStream os = response.getOutputStream();
+
+                response.setStatus(HttpServletResponse.SC_OK);
+                IO.copy(stream,os);
             }
         }
-        else if ("json".equals(what.trim()))
+        catch (Exception e)
         {
-            response.setContentType("text/json; charset=utf-8");
-            PrintWriter writer = response.getWriter();
+            Log.w(TAG,"Failed to fetch media",e);
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
 
-            Integer type = -1;
+    /**
+     * A request from the Javascript asking for some JSON describing the type of media being requested.
+     *
+     * @param request
+     *            the incoming servlet request
+     * @param response
+     *            the outgoing servlet response
+     * @param mediatype
+     *            the type of media interested in (<code>images</code>, <code>audio</code>, or <code>video</code>)
+     * @throws ServletException
+     * @throws IOException
+     */
+    public void doGetJson(HttpServletRequest request, HttpServletResponse response, String mediatype) throws ServletException, IOException
+    {
+        response.setContentType("application/json; charset=utf-8");
+        PrintWriter writer = response.getWriter();
 
-            if ("images".equals(typestr.trim()))
+        Uri[] mediaUris = getContentUrisByType(mediatype);
+
+        writer.print("[ ");
+
+        StringBuilder entry = new StringBuilder();
+
+        int length = mediaUris.length;
+        for (int iuri = 0; iuri < length; iuri++)
+        {
+            Uri contenturi = mediaUris[iuri];
+            Log.d(TAG,"Using contenturi: " + contenturi);
+            Cursor cur = resolver.query(contenturi,null,null,null,null);
+            String location = "";
+            if (contenturi.toString().contains("/internal/"))
             {
-                type = 0;
+                location = LOCATION_INTERNAL;
             }
-            else if ("audio".equals(typestr.trim()))
+            else if (contenturi.toString().contains("/external/"))
             {
-                type = 2;
+                location = LOCATION_EXTERNAL;
             }
-            else if ("video".equals(typestr.trim()))
+            else
             {
-                type = 4;
-            }
-
-            if (type == -1)
-            {
-                Log.w(TAG,"Invalid media type " + typestr);
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                Log.w(TAG,"Unknown content uri location (not internal or external?): " + contenturi);
+                continue; // skip (don't know how to handle)
             }
 
-            writer.print("[ ");
-
-            Integer limit = type + 1;
-            while (type <= limit)
+            while (cur.moveToNext())
             {
-                Uri contenturi = __MEDIA_URIS[type];
-                Cursor cur = resolver.query(contenturi,null,null,null,null);
+                Long rowid = cur.getLong(cur.getColumnIndexOrThrow(BaseColumns._ID));
+                String title = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
+                String displayname = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
+                String mimetype = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
+                String size = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE));
 
-                while (cur.moveToNext())
+                entry.setLength(0); // clear buffer.
+
+                entry.append("{");
+                entry.append(" 'type':").append(safeJson(mediatype));
+                entry.append(",'location':").append(safeJson(location));
+                entry.append(",'id':").append(safeJson(rowid));
+                entry.append(",'title':").append(safeJson(title));
+                entry.append(",'displayname':").append(safeJson(displayname));
+                entry.append(",'mimetype':").append(safeJson(mimetype));
+                entry.append(",'size':").append(safeJson(size));
+
+                if ((contenturi == MediaStore.Audio.Media.EXTERNAL_CONTENT_URI) || (contenturi == MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
                 {
-                    Long rowid = cur.getLong(cur.getColumnIndexOrThrow(BaseColumns._ID));
-                    String name = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
-
-                    writer.print(" { 'type' : " + type.toString() + ", 'id' : " + rowid.toString() + ", 'title' : '" + name.replace("'","\\'") + "', ");
-
-                    if ((contenturi == MediaStore.Audio.Media.EXTERNAL_CONTENT_URI) || (contenturi == MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
+                    int music = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.IS_MUSIC));
+                    if (music != 0)
                     {
-                        int music = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.IS_MUSIC));
-                        if (music != 0)
-                        {
-                            String artist = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-                            String album = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+                        String artist = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
+                        String album = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
 
-                            writer.print("'artist' : '" + artist + "', 'album' : '" + album + "' ");
-                        }
-                    }
-
-                    writer.print("}");
-
-                    if (!cur.isLast())
-                    {
-                        writer.print(",");
+                        entry.append(",'artist':").append(safeJson(artist));
+                        entry.append(",'album':").append(safeJson(album));
                     }
                 }
 
-                type++;
+                entry.append("}");
+                Log.d(TAG,entry.toString());
+                writer.print(entry.toString());
+
+                if (!cur.isLast())
+                {
+                    writer.print(",");
+                }
             }
+        }
 
-            writer.print(" ]");
-        }
-        else if ("embed".equals(what.trim()))
-        {
-            String path = "/console/media/db/fetch/" + typestr + "/" + item;
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("text/html");
-            PrintWriter writer = response.getWriter();
-
-            writer
-                    .println("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26' CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95' STANDBY='Loading...' TYPE='application/x-oleobject'>");
-            writer.println("  <PARAM NAME='FileName' VALUE=" + path + ">");
-            writer.println("  <EMBED TYPE='application/x-mplayer2' SRC='" + path + "' NAME='MediaPlayer' WIDTH='320' HEIGHT='26' autostart='1'></EMBED>");
-            writer.println("</OBJECT>");
-        }
-        else
-        {
-            Log.w(TAG,"invalid action - '" + what + "', returning 404");
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        }
+        writer.print(" ]");
     }
 
     @Override
@@ -371,7 +470,8 @@ public class MediaBrowserServlet extends HttpServlet
         PrintWriter writer = response.getWriter();
 
         // Should we use just the servlet directory instead?
-        File sdcarddir = new File("/sdcard/jetty/media");
+        File externalDir = Environment.getExternalStorageDirectory();
+        File sdcarddir = new File(externalDir,"/jetty/media");
 
         // Create file upload directory if it doesn't exist
         if (!sdcarddir.exists())
@@ -383,7 +483,7 @@ public class MediaBrowserServlet extends HttpServlet
 
         try
         {
-            // Save file to /sdcard
+            // Save file to External Storage
             File file = (File)request.getAttribute("fileupload");
             String origName = request.getParameter("fileupload");
 
@@ -421,6 +521,79 @@ public class MediaBrowserServlet extends HttpServlet
         return resolver;
     }
 
+    private Uri getContentUriByType(String mediatype, String location)
+    {
+        // Try by name
+        if (TYPE_IMAGES.equals(mediatype))
+        {
+            if(LOCATION_INTERNAL.equals(location)) {
+                return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
+            } else if(LOCATION_EXTERNAL.equals(location)) {
+                return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            } else {
+                Log.w(TAG,"Unknown location [" + location + "] for type [" + mediatype + "]");
+                return null;
+            }
+        }
+        else if (TYPE_AUDIO.equals(mediatype))
+        {
+            if(LOCATION_INTERNAL.equals(location)) {
+                return MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+            } else if(LOCATION_EXTERNAL.equals(location)) {
+                return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            } else {
+                Log.w(TAG,"Unknown location [" + location + "] for type [" + mediatype + "]");
+                return null;
+            }
+        }
+        else if (TYPE_VIDEO.equals(mediatype))
+        {
+            if(LOCATION_INTERNAL.equals(location)) {
+                return MediaStore.Video.Media.INTERNAL_CONTENT_URI;
+            } else if(LOCATION_EXTERNAL.equals(location)) {
+                return MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            } else {
+                Log.w(TAG,"Unknown location [" + location + "] for type [" + mediatype + "]");
+                return null;
+            }
+        }
+
+        // Not a known name either. fail.
+        Log.w(TAG,"Type String [" + mediatype + "] not a known ContentUri reference");
+        return null;
+    }
+
+    /**
+     * Fetch the list of content uris representing the basic media type.
+     *
+     * @param mediatype
+     *            the basic media type to fetch
+     * @return 2 Uri's representing the Content URIs for the [external, internal] content.
+     */
+    private Uri[] getContentUrisByType(String mediatype)
+    {
+        // Try by name
+        if (TYPE_IMAGES.equals(mediatype))
+        {
+            return new Uri[]
+            { MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.INTERNAL_CONTENT_URI };
+        }
+        else if (TYPE_AUDIO.equals(mediatype))
+        {
+            return new Uri[]
+            { MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MediaStore.Audio.Media.INTERNAL_CONTENT_URI };
+        }
+        else if (TYPE_VIDEO.equals(mediatype))
+        {
+            return new Uri[]
+            { MediaStore.Video.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.INTERNAL_CONTENT_URI };
+        }
+
+        // Not a known name either. fail.
+        Log.w(TAG,"Type String [" + mediatype + "] not a known ContentUri reference");
+        return null;
+    }
+
     @Override
     public void init(ServletConfig config) throws ServletException
     {
@@ -435,5 +608,23 @@ public class MediaBrowserServlet extends HttpServlet
         writer.println("var json = { error: " + resp + ", msg: '" + msg + "', filetype: " + filetype + " };");
         writer.println("if (top.Media) { top.Media.uploadComplete(json); }");
         writer.println("</script>");
+    }
+
+    private String safeJson(Number num)
+    {
+        if (num == null)
+        {
+            return "''";
+        }
+        return num.toString();
+    }
+
+    private String safeJson(String str)
+    {
+        if (str == null)
+        {
+            return "''";
+        }
+        return "'" + str.replaceAll("'","\\'") + "'";
     }
 }
