@@ -6,9 +6,9 @@ var Media =
             "video"  : null
         },
         
-        getMedia: function (type)
+        getMedia: function (type, location)
         {
-            var uri =  "/console/media/db/json/" + type + "/";
+            var uri =  "/console/media/db/json/" + type + "/" + location;
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -17,7 +17,7 @@ var Media =
                 {
                     $("#" + type).empty();
                     $("#" + type).append ("Loading...");
-                    xhr.setRequestHeader('Connection', 'Keep-Alive');
+                    // xhr.setRequestHeader('Connection', 'Keep-Alive'); // NOT POSSIBLE TO SET IN Chromium
                     return true;
                 },
                 success: function(response) 
@@ -40,19 +40,20 @@ var Media =
         {
             for (var type in Media.media)
             {
-                Media.getMedia (type);
+                Media.getMedia (type, "internal");
+                Media.getMedia (type, "external");
             }
         },
         
         renderMedia: function (type)
         {
-            media = Media.media[type];
+            lmedia = Media.media[type];
             parent = $("#" + type);
             parent.empty ();
             
             html = "";
             
-            if (media == null || media.length == 0) {
+            if (lmedia == null || lmedia.length == 0) {
                 parent.append ("<p>No " + type + " found on this phone.</p>");
                 return;
             }
@@ -64,14 +65,17 @@ var Media =
             }
             
             // inner content
-            for (var itemidx in media)
+            for (var itemidx in lmedia)
             {
-                var item = media[itemidx];
+                var item = lmedia[itemidx];
                 
                 if (type == "images") {
-                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "'><div class='thumb'>&nbsp;<img src='/console/media/db/fetch/" + item.type + "/" + item.id + "/thumb/' alt='" + item.title + "'/>&nbsp;</div></a><p>" + item.title + "</p></div>";
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.location + "/" + item.id + 
+                          "'><div class='thumb'>&nbsp;<img src='/console/media/db/fetch/" + item.type + "/" + item.location + "/" + item.id + "/thumb/' alt='" + 
+                          item.title + "'/>&nbsp;</div></a><p>" + item.title + "</p></div>";
                 } else if (type == "audio") {
-                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.id + "' onclick='return playMedia(this);'><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + item.title;
+                    html += "<div class='float'><a href='/console/media/db/fetch/" + item.type + "/" + item.location + "/" + item.id + 
+                    	  "' onclick='return playMedia(this);'><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + item.title;
                     
                     if (item.artist != null || item.album != null) {
                         html += "<span class='trackinfo'>";
