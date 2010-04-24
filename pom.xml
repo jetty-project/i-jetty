@@ -20,8 +20,8 @@
    <properties>
      <jetty-version>6.1.21</jetty-version>
      <servlet-version>2.5-20081211</servlet-version>
-     <android-version>1.6</android-version>
-     <android-platform>platforms/android-1.6</android-platform>
+     <android-sdk-version>4</android-sdk-version>
+     <android-platform>platforms/android-${android-sdk-version}</android-platform>
    </properties>
 
    <dependencyManagement>
@@ -64,7 +64,7 @@
         <dependency>
           <groupId>android</groupId>
           <artifactId>android</artifactId>
-          <version>${android-version}</version>
+          <version>${android-sdk-version}</version>
           <scope>system</scope>
           <systemPath>${android.home}${file.separator}${android-platform}${file.separator}android.jar</systemPath>
         </dependency>

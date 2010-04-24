@@ -151,7 +151,7 @@
                 <configuration>
                   <executable>${android.home}/${android-platform}/tools/dx</executable>
                   <arguments>
-                    <!-- argument>-JXmx1024M</argument -->
+                    <argument>-JXmx256M</argument>
                     <argument>--dex</argument>
                     <argument>--verbose</argument>
                     <argument>--core-library</argument>
