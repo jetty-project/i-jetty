@@ -9,7 +9,7 @@ Depedencies
 * Subversion
 * Java 1.5 (or 1.6, but only report bugs if they occur with 1.5)
 * Maven
-* Google Android SDK
+* Google Android SDK (Generation 3. sdk-r05+)
 
 Steps
 -----
