@@ -10,9 +10,9 @@ Building i-jetty at the command line is very straightforward.
 You'll need these tools:
 
  * svn
- * java 1.5 or above
- * maven 2.0.8 or above
- * android sdk installation
+ * [http://java.sun.com/javase/ java jdk] - 1.5 or above
+ * [http://maven.apache.org/ maven] - 2.0.8 or above
+ * [http://developer.android.com/sdk/index.html android sdk] installation - r05 or above
 
 To build:
 
@@ -27,7 +27,7 @@ You should add the following lines to your [http://maven.apache.org/settings.htm
     <profile>
       <id>android</id>
       <properties>
-        <android.home>/usr/local/java/android-sdk-linux_x86-1.6_r1</android.home>
+        <android.home>/usr/local/java/android-sdk-linux_r05-linux_86</android.home>
       </properties>
     </profile>
   </profiles>
@@ -64,4 +64,6 @@ emulator -sdcard ./sdcard.img
 
 You can import the i-jetty project into Eclipse. We use the wonderful [http://m2eclipse.codehaus.org/ m2 Eclipse plugin] to make it easy. 
 
-A word of warning though, we haven't been using the android Eclipse plugin since the early days of i-jetty. We prefer to develop by keeping the emulator running from the command line and then using the `adb uninstall/install` commands to upload new build bundles. If you've had success getting the Eclipse plugin to work with i-jetty then please post *dev@jetty.codehaus.org* with the instructions and we'll update this page.
+Note: due to some massaging of the i-jetty-server component to comply with the Dalvik JVM running on Android, we advise that you do not have that project open in eclipse, as the [http://developer.android.com/sdk/eclipse-adt.html Eclipse Android Plugin] cannot properly do what's needed to get it working on Android.  The Maven build is what creates the proper i-jetty-server component that i-jetty-ui (and Android) eventually use.
+
+Please contact the i-jetty developers at *dev@jetty.codehaus.org* for help.
