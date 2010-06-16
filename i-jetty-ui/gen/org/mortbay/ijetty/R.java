@@ -61,6 +61,9 @@ public final class R {
         public static final int download_webapp=0x7f07000e;
         public static final int edit_preferences=0x7f07003b;
         public static final int failure=0x7f070040;
+        /**  External Storage State Messages 
+         */
+        public static final int header_sd_media=0x7f070046;
         public static final int jetty_already_started=0x7f070003;
         public static final int jetty_controller=0x7f070008;
         public static final int jetty_downloader=0x7f070009;
@@ -113,18 +116,16 @@ public final class R {
         public static final int pref_truststore_pwd_title=0x7f070031;
         public static final int pref_truststore_pwd_value=0x7f070032;
         public static final int retry=0x7f07000f;
-        public static final int sd_media_bad_removal=0x7f07004c;
-        public static final int sd_media_checking=0x7f070048;
-        public static final int sd_media_mounted_read_only=0x7f07004a;
-        public static final int sd_media_nofs=0x7f070049;
-        /**  External Storage State Messages 
-         */
-        public static final int sd_media_removed=0x7f070046;
-        public static final int sd_media_shared=0x7f07004b;
-        public static final int sd_media_unmountable=0x7f07004d;
-        public static final int sd_media_unmounted=0x7f070047;
-        public static final int sd_not_available=0x7f07004f;
-        public static final int sd_unknown=0x7f07004e;
+        public static final int sd_media_bad_removal=0x7f07004d;
+        public static final int sd_media_checking=0x7f070049;
+        public static final int sd_media_mounted_read_only=0x7f07004b;
+        public static final int sd_media_nofs=0x7f07004a;
+        public static final int sd_media_removed=0x7f070047;
+        public static final int sd_media_shared=0x7f07004c;
+        public static final int sd_media_unmountable=0x7f07004e;
+        public static final int sd_media_unmounted=0x7f070048;
+        public static final int sd_not_available=0x7f070050;
+        public static final int sd_unknown=0x7f07004f;
         public static final int ssl_category=0x7f070013;
         public static final int start_download=0x7f07000d;
         public static final int start_jetty=0x7f07000a;
