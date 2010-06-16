@@ -54,55 +54,56 @@ public class SdCardUnavailableActivity extends Activity
     private void refreshSDState()
     {
         TextView message = (TextView)findViewById(R.id.message);
+        String header = getString(R.string.header_sd_media) + "\n\n";
 
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_REMOVED.equals(state))
         {
-            message.setText(R.string.sd_media_removed);
+            message.setText(header + getString(R.string.sd_media_removed));
             return;
         }
         if (Environment.MEDIA_UNMOUNTED.equals(state))
         {
-            message.setText(R.string.sd_media_unmounted);
+            message.setText(header + getString(R.string.sd_media_unmounted));
             return;
         }
 
         if (Environment.MEDIA_CHECKING.equals(state))
         {
-            message.setText(R.string.sd_media_checking);
+            message.setText(header + getString(R.string.sd_media_checking));
             return;
         }
 
         if (Environment.MEDIA_NOFS.equals(state))
         {
-            message.setText(R.string.sd_media_nofs);
+            message.setText(header + getString(R.string.sd_media_nofs));
             return;
         }
 
         if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))
         {
-            message.setText(R.string.sd_media_mounted_read_only);
+            message.setText(header + getString(R.string.sd_media_mounted_read_only));
             return;
         }
 
         if (Environment.MEDIA_SHARED.equals(state))
         {
-            message.setText(R.string.sd_media_shared);
+            message.setText(header + getString(R.string.sd_media_shared));
             return;
         }
 
         if (Environment.MEDIA_BAD_REMOVAL.equals(state))
         {
-            message.setText(R.string.sd_media_bad_removal);
+            message.setText(header + getString(R.string.sd_media_bad_removal));
             return;
         }
 
         if (Environment.MEDIA_UNMOUNTABLE.equals(state))
         {
-            message.setText(R.string.sd_media_unmountable);
+            message.setText(header + getString(R.string.sd_media_unmountable));
             return;
         }
 
-        message.setText(getString(R.string.sd_unknown,state));
+        message.setText(header + getString(R.string.sd_unknown,state));
     }
 }

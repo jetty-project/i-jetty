@@ -78,6 +78,7 @@
     <string name="context_path">Context Path</string>
     
     <!-- External Storage State Messages -->
+    <string name="header_sd_media"><b>External Media Unavailable</b>\n\nThe SD Card is a required part of i-jetty, and needs to be present, formatted, mounted, <u>not</u> read-only, and with sufficient space to hold the temporary files that i-jetty needs.\n\nPlease correct your SD-Card state.</string>
     <string name="sd_media_removed"><b>MEDIA_REMOVED</b>\n\nPlease replace the SD Card and try again.</string>
     <string name="sd_media_unmounted"><b>MEDIA_UNMOUNTED</b>\n\nMedia is present, but not mounted.\nSee your System Settings &gt; SD Card screen for mounting instructions.</string>
     <string name="sd_media_checking"><b>MEDIA_CHECKING</b>\n\nMedia is present, but is being disk-checked by the OS.\nPlease wait a few minutes for this process to finish and try again.</string>
@@ -86,6 +87,6 @@
     <string name="sd_media_shared"><b>MEDIA_SHARED</b>\n\nMedia is present, but is unavailable to Jetty as it is currently involved in USB mass storage file sharing with a desktop.\nComplete your USB mass storage sharing and try again.</string>
     <string name="sd_media_bad_removal"><b>MEDIA_BAD_REMOVAL</b>\n\nMedia is not present, and the Android OS reports that it was removed unsafely.\nPlease replace media, let Android check it, and try again.</string>
     <string name="sd_media_unmountable"><b>MEDIA_UNMOUNTABLE</b>\n\nMedia is present, but the Android OS cannot mount it.\nThis typically happens if the filesystem or media is bad or corrupted.\nReplace media and try again.</string>
-    <string name="sd_unknown"><b>UNKNOWN ERROR</b>\n\nMedia state cannot be determined.\nState being reported by Android is <u>%s</u></string>
+    <string name="sd_unknown"><b>UNHANDLED ERROR</b>\n\nMedia state cannot be determined.\nState being reported by Android is <u>%s</u></string>
     <string name="sd_not_available">SD Not (yet) Available</string>
 </resources>
