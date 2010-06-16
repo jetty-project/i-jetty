@@ -234,19 +234,23 @@ public class IJetty extends Activity
 
         printNetworkInterfaces();
     }
-    
-    public static void show(Context context) {
-        final Intent intent = new Intent(context, IJetty.class);
+
+    public static void show(Context context)
+    {
+        final Intent intent = new Intent(context,IJetty.class);
         context.startActivity(intent);
     }
 
     @Override
     protected void onResume()
     {
-        if(SdCardUnavailableActivity.isExternalStorageAvailable() && !alreadySetup) {
-            setupJetty();
-        } else {
+        if (!SdCardUnavailableActivity.isExternalStorageAvailable())
+        {
             SdCardUnavailableActivity.show(this);
+        }
+        else if (!alreadySetup)
+        {
+            setupJetty();
         }
         super.onResume();
     }
@@ -371,9 +375,10 @@ public class IJetty extends Activity
             {
                 // Always update if ${jetty.home}/.update exists (DEBUG)
                 File alwaysUpdate = new File(jettyDir,".update");
-                if( alwaysUpdate.exists() ) {
-                    Log.i(TAG, "Always Update tag found " + alwaysUpdate);
-                    update =true;
+                if (alwaysUpdate.exists())
+                {
+                    Log.i(TAG,"Always Update tag found " + alwaysUpdate);
+                    update = true;
                 }
             }
         }
@@ -499,7 +504,7 @@ public class IJetty extends Activity
         {
             setStoredJettyVersion(pi.versionCode);
         }
-        
+
         this.alreadySetup = true;
     }
 }
