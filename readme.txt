@@ -25,7 +25,7 @@ Steps
     <profile>
       <id>android</id>
       <properties>
-        <android.home>/usr/local/java/android-sdk-linux_x86-1.6_r1</android.home>
+        <android.home>/usr/local/java/android-sdk_r06-linux_86</android.home>
       </properties>
     </profile>
   </profiles>
