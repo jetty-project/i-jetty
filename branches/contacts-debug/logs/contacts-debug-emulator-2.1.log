@@ -1,0 +1,47 @@
+
+Build.BOARD=unknown
+Build.BRAND=generic
+Build.CPU_ABI=armeabi
+Build.DEVICE=generic
+Build.FINGERPRINT=generic/google_sdk/generic/:2.1/ERD79/22607:eng/test-keys
+Build.HOST=genki.mtv.corp.google.com
+Build.ID=ERD79
+Build.MANUFACTURER=unknown
+Build.MODEL=google_sdk
+Build.PRODUCT=google_sdk
+Build.TAGS=test-keys
+Build.TYPE=eng
+Build.USER=android-build
+Build.VERSION.RELEASE=2.1
+Build.VERSION.SDK_INT=7
+
+.getDeviceModel=google_sdk [unknown google_sdk]
+.getOSVersion=2.1
+
+.getApplicationLabel=Contacts Debug
+
+--Contacts ContentProvider--
+Rows of Data=0
+Column.count=22
+[0] _id
+[1] custom_ringtone
+[2] display_name
+[3] im_account
+[4] im_handle
+[5] im_protocol
+[6] label
+[7] last_time_contacted
+[8] mode
+[9] name
+[10] notes
+[11] number
+[12] number_key
+[13] phonetic_name
+[14] primary_email
+[15] primary_organization
+[16] primary_phone
+[17] send_to_voicemail
+[18] starred
+[19] status
+[20] times_contacted
+[21] type

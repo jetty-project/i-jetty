@@ -41,7 +41,8 @@ public class ContactsDebugActivity extends Activity {
         str.append("\nBuild.VERSION.RELEASE=").append(Build.VERSION.RELEASE);
         str.append("\nBuild.VERSION.SDK_INT=").append(Build.VERSION.SDK_INT);
         str.append("\n");
-        str.append("\n.getUniqueID=").append(AndroidInfo.getUniqueDeviceID(this));
+        // Do not share this value with strangers
+        // str.append("\n.getUniqueID=").append(AndroidInfo.getUniqueDeviceID(this));
         str.append("\n.getDeviceModel=").append(AndroidInfo.getDeviceModel());
         str.append("\n.getOSVersion=").append(AndroidInfo.getOSVersion());
         str.append("\n");

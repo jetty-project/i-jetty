@@ -1,0 +1,54 @@
+
+Build.BOARD=unknown
+Build.BRAND=generic
+Build.CPU_ABI=armeabi
+Build.DEVICE=generic
+Build.FINGERPRINT=generic/google_sdk/generic/:1.6/Donut/20842:eng/test-keys
+Build.HOST=e-honda.mtv.corp.google.com
+Build.ID=Donut
+Build.MANUFACTURER=unknown
+Build.MODEL=google_sdk
+Build.PRODUCT=google_sdk
+Build.TAGS=test-keys
+Build.TYPE=eng
+Build.USER=android-build
+Build.VERSION.RELEASE=1.6
+Build.VERSION.SDK_INT=4
+
+.getDeviceModel=google_sdk [unknown google_sdk]
+.getOSVersion=1.6
+
+.getApplicationLabel=Contacts Debug
+
+--Contacts ContentProvider--
+Rows of Data=1
+Column.count=29
+[0] _id
+[1] _sync_account
+[2] _sync_dirty
+[3] _sync_id
+[4] _sync_local_id
+[5] _sync_time
+[6] _sync_version
+[7] custom_ringtone
+[8] display_name
+[9] im_account
+[10] im_handle
+[11] im_protocol
+[12] label
+[13] last_time_contacted
+[14] mode
+[15] name
+[16] notes
+[17] number
+[18] number_key
+[19] phonetic_name
+[20] primary_email
+[21] primary_organization
+[22] primary_phone
+[23] send_to_voicemail
+[24] sort_string
+[25] starred
+[26] status
+[27] times_contacted
+[28] type

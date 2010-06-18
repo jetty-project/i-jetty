@@ -1,0 +1,47 @@
+
+Build.BOARD=mahimahi
+Build.BRAND=google
+Build.CPU_ABI=armeabi-v7a
+Build.DEVICE=passion
+Build.FINGERPRINT=google/passion/passion/mahimahi:2.1-update1/ERE27/24178:user/release-keys
+Build.HOST=android-test-4.mtv.corp.google.com
+Build.ID=ERE27
+Build.MANUFACTURER=HTC
+Build.MODEL=Nexus One
+Build.PRODUCT=passion
+Build.TAGS=release-keys
+Build.TYPE=user
+Build.USER=android-build
+Build.VERSION.RELEASE=2.1-update1
+Build.VERSION.SDK_INT=7
+
+.getDeviceModel=Nexus One [HTC passion]
+.getOSVersion=2.1-update1
+
+.getApplicationLabel=Contacts Debug
+
+--Contacts ContentProvider--
+Rows of Data=306
+Column.count=22
+[0] _id
+[1] custom_ringtone
+[2] display_name
+[3] im_account
+[4] im_handle
+[5] im_protocol
+[6] label
+[7] last_time_contacted
+[8] mode
+[9] name
+[10] notes
+[11] number
+[12] number_key
+[13] phonetic_name
+[14] primary_email
+[15] primary_organization
+[16] primary_phone
+[17] send_to_voicemail
+[18] starred
+[19] status
+[20] times_contacted
+[21] type
