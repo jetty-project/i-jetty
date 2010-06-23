@@ -13,11 +13,15 @@ Depedencies
 
 Steps
 -----
+These instructions are loosely adapted from
+http://code.google.com/p/i-jetty/source/checkout
+Please see this URL for more details (and ability to browse the repository)
+
 1) Check out the project from code.google.com:
     $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
 
 2) Edit your maven settings.xml file to create a profile that defines the
-   location of your android sdk, and ensures that the profile is active. 
+   location of your android sdk, and ensures that the profile is active.
    Here's an example:
 
 <settings>
