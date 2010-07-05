@@ -13,7 +13,7 @@ You'll need these tools:
  * [http://java.sun.com/javase/ java jdk] - 1.5 or above
  * [http://maven.apache.org/ maven] - 2.0.8 or above
  * [http://developer.android.com/sdk/index.html android sdk] installation - 1.6 or above
- * [http://developer.android.com/sdk/adding-components.html platform definition for 1.6 (api version 4)] 
+ * [http://developer.android.com/sdk/adding-components.html android platform definition for 1.6 (api version 4)] 
 
 To build:
 
