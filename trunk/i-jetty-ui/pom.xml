@@ -123,7 +123,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>${android.home}/${android-platform}/tools/aapt</executable>
+                  <executable>${android.home}/${android.platform}/tools/aapt</executable>
                   <arguments>
                     <argument>package</argument>
                     <argument>-J</argument>
@@ -134,7 +134,7 @@
                     <argument>-S</argument>
                     <argument>${basedir}/res</argument>
                     <argument>-I</argument>
-                    <argument>${android.home}/${android-platform}/android.jar</argument>
+                    <argument>${android.home}/${android.platform}/android.jar</argument>
                     <argument>-F</argument>
                     <argument>${project.build.directory}/${artifactId}-resources.apk</argument>
                   </arguments>
@@ -149,7 +149,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>${android.home}/${android-platform}/tools/dx</executable>
+                  <executable>${android.home}/${android.platform}/tools/dx</executable>
                   <arguments>
                     <argument>-JXmx256M</argument>
                     <argument>--dex</argument>
@@ -185,7 +185,7 @@
                         <argument>-rf</argument>
                         <argument>${war.classes.dir}</argument>
                         <argument>-nf</argument>
-                        <argument>${android.home}/${android-platform}</argument>
+                        <argument>${android.home}/${android.platform}</argument>
                     </arguments>
                 </configuration>
               </execution>
@@ -234,7 +234,7 @@
                         <argument>-rf</argument>
                         <argument>${war.classes.dir}</argument>
                         <argument>-nf</argument>
-                        <argument>${android.home}/${android-platform}</argument>
+                        <argument>${android.home}/${android.platform}</argument>
                     </arguments>
                 </configuration>
               </execution>

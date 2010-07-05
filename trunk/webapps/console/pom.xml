@@ -47,7 +47,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>${android.home}/${android-platform}/tools/dx</executable>
+              <executable>${android.home}/${android.platform}/tools/dx</executable>
               <arguments>
                 <!--<argument>-JXmx1024M</argument>-->
                 <argument>--dex</argument>
