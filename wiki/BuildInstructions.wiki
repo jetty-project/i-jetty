@@ -47,6 +47,20 @@ Then, assuming you checked out the code to $I_JETTY_HOME, and you have the andro
 
 Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/i-jetty-ui/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
 
+=== Building on Windows ===
+Several users have reported memory problems when building on Windows. This can manifest itself as a mysterious and unhelpful error message from the build system.
+
+To avoid this problem, try increasing the amount of memory available to dex during compilation. To do that, edit the $I_JETTY_HOME/i-jetty-ui/pom.xml file and find the line that looks like:
+{{{
+  <executable>${android.home}/${android-platform}/tools/dx</executable>
+}}}
+
+Under that, as the first argument, add this line:
+
+{{{   
+<argument>-JXmx1024M</argument>
+}}}
+
 ===Making an SDCard Image===
 i-jetty requires an sd card. If you're running with the emulator, you'll need to use the [http://developer.android.com/guide/developing/tools/othertools.html#mksdcard mksdcard] utility from the [http://developer.android.com/ android sdk]. Here's an example of creating a file called "sdcard.img" which is a card with 60Mb storage:
 
