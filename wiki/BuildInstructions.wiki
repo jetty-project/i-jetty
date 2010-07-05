@@ -12,7 +12,8 @@ You'll need these tools:
  * svn
  * [http://java.sun.com/javase/ java jdk] - 1.5 or above
  * [http://maven.apache.org/ maven] - 2.0.8 or above
- * [http://developer.android.com/sdk/index.html android sdk] installation - r05 or above
+ * [http://developer.android.com/sdk/index.html android sdk] installation - 1.6 or above
+ * [http://developer.android.com/sdk/adding-components.html android platform version 4] 
 
 To build:
 
@@ -27,7 +28,7 @@ You should add the following lines to your [http://maven.apache.org/settings.htm
     <profile>
       <id>android</id>
       <properties>
-        <android.home>/usr/local/java/android-sdk-linux_r05-linux_86</android.home>
+        <android.home>/usr/local/java/android-sdk-linux_86</android.home>
       </properties>
     </profile>
   </profiles>
@@ -44,7 +45,7 @@ Then, assuming you checked out the code to $I_JETTY_HOME, and you have the andro
  mvn clean install
 }}}
 
-Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/modules/i-jetty/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
+Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/i-jetty-ui/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
 
 ===Making an SDCard Image===
 i-jetty requires an sd card. If you're running with the emulator, you'll need to use the [http://developer.android.com/guide/developing/tools/othertools.html#mksdcard mksdcard] utility from the [http://developer.android.com/ android sdk]. Here's an example of creating a file called "sdcard.img" which is a card with 60Mb storage:
@@ -53,11 +54,22 @@ i-jetty requires an sd card. If you're running with the emulator, you'll need to
 mksdcard 60M ./sdcard.img
 }}}
 
-Remember you need to start the emulator with the scard option:
+When you start the emulator, you can choose which android platform runtime to use, but remember you need to start the emulator with the scard option. Here's an example of starting the 1.6 runtime with the sdcard we created in the step above:
 {{{
-emulator -sdcard ./sdcard.img
+emulator -avd avd1.6 -sdcard ./sdcard.img
 }}}
 
+If you're using the emulator, you'll want to install the ijetty package:
+{{{
+adb install i-jetty-ui/target/i-jetty-debug-[ijetty.version].apk
+}}}
+
+Where ijetty.version is the version number of i-jetty, eg 2.1-SNAPSHOT.
+
+If you want to make changes to i-jetty, you can remove the installed i-jetty with:
+{{{
+adb uninstall org.mortbay.ijetty
+}}}
 
 
 ==Using the Eclipse Plugin==
