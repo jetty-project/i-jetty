@@ -6,6 +6,7 @@
     <groupId>org.mortbay.ijetty</groupId>
     <artifactId>ijetty-parent</artifactId>
     <version>2.2-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>hello</artifactId>
@@ -86,7 +87,7 @@
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>${android.version}</version>
+      <version>${android.sdk.version}</version>
     </dependency>
   </dependencies>
 </project>
