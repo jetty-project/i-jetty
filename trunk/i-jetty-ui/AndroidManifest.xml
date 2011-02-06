@@ -16,7 +16,7 @@
       android:label="@string/app_name"
       android:icon="@drawable/icon"
       android:theme="@style/Theme.IJetty"
-      android:screenOrientation="portrait"
+      android:screenOrientation="sensor"
       android:multiprocess="false"
       android:launchMode="singleInstance">
       <intent-filter>

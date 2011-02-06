@@ -14,7 +14,6 @@
   <description>Jetty Server Binary Cleaned up for Android</description>
   <properties>
     <assembly.directory>target/assembly</assembly.directory>
-    <jetty.version>6.1.24</jetty.version>
     <servlet.version>2.5-20081211</servlet.version>
   </properties>
   <dependencies>

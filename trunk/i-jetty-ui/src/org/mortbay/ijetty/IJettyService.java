@@ -31,6 +31,7 @@ import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.SslSocketConnector;
 
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -40,7 +41,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -56,6 +59,10 @@ public class IJettyService extends Service
     private static Resources __resources;
     private static final String CONTENT_RESOLVER_ATTRIBUTE = "org.mortbay.ijetty.contentResolver";
     private static final String ANDROID_CONTEXT_ATTRIBUTE = "org.mortbay.ijetty.context"; 
+    
+    public static final int __START_PROGRESS_DIALOG = 0;
+    public static final int __STARTED = 0;
+    public static final int __NOT_STARTED = 1;
     
     public static final String[] __configurationClasses = 
         new String[]
@@ -81,10 +88,87 @@ public class IJettyService extends Service
     private String _truststoreFile;
     private SharedPreferences preferences;
     private PackageInfo pi;
-    private boolean isDebugEnabled = false;
+    private android.os.Handler _handler;
+
     PowerManager.WakeLock wakeLock;
     
 
+    
+    public class JettyStarterThread extends Thread
+    {
+        android.os.Handler _handler;
+        
+        public JettyStarterThread(android.os.Handler handler)
+        {
+            _handler = handler;
+        }
+        public void run ()
+        {
+            try
+            {
+                startJetty();
+                sendMessage(__STARTED);
+              
+                Log.i("Jetty", "Jetty started");
+            }
+            catch (Exception e)
+            {
+                sendMessage(__NOT_STARTED);
+                Log.e("Jetty", "Error starting jetty", e);
+                
+            }
+        }
+        
+        public void sendMessage(int state)
+        {
+            Message msg = _handler.obtainMessage();
+            Bundle b = new Bundle();
+            b.putInt("state", state);
+            msg.setData(b);
+            _handler.sendMessage(msg);
+        }
+    }
+    
+    
+    public IJettyService()
+    {
+        super();
+        _handler = new android.os.Handler ()
+        {
+            public void handleMessage(Message msg) {
+                switch (msg.getData().getInt("state"))
+                {
+                    case __STARTED:
+                    {
+                        IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_started);
+                        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                        // The PendingIntent to launch IJetty activity if the user selects this notification
+                        PendingIntent contentIntent = PendingIntent.getActivity(IJettyService.this, 0,
+                                new Intent(IJettyService.this, IJetty.class), 0);
+
+                        CharSequence text = getText(R.string.manage_jetty);
+
+                        Notification notification = new Notification(R.drawable.ijetty_stat, 
+                                text, 
+                                System.currentTimeMillis());
+
+                        notification.setLatestEventInfo(IJettyService.this, getText(R.string.app_name),
+                                text, contentIntent);
+
+                        mNM.notify(R.string.jetty_started, notification);
+                        break;
+                    }
+                    case __NOT_STARTED:
+                    {
+                        IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_started);
+                        break;
+                    }
+                }
+               
+            }
+ 
+        };
+    }
     /** 
      * Android Service create
      * @see android.app.Service#onCreate()
@@ -96,8 +180,6 @@ public class IJettyService extends Service
         try
         {
             pi = getPackageManager().getPackageInfo(getPackageName(), 0); 
-            if (pi.versionName == null || pi.versionName.toLowerCase().endsWith("snapshot"))
-                isDebugEnabled = true;
         }
         catch (Exception e)
         {
@@ -174,27 +256,9 @@ public class IJettyService extends Service
             wakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "IJetty");
             wakeLock.acquire();
 
-            startJetty();
+            new JettyStarterThread(_handler).start();
 
-            mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-            IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_started);
-
-            // The PendingIntent to launch IJetty activity if the user selects this notification
-            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                    new Intent(this, IJetty.class), 0);
-
-            CharSequence text = getText(R.string.manage_jetty);
-
-            Notification notification = new Notification(R.drawable.ijetty_stat, 
-                    text, 
-                    System.currentTimeMillis());
-
-            notification.setLatestEventInfo(this, getText(R.string.app_name),
-                    text, contentIntent);
-
-            mNM.notify(R.string.jetty_started, notification);
-            Log.i("Jetty", "Jetty started");
+ 
             super.onStart(intent, startId);
         }
         catch (Exception e)
@@ -242,6 +306,8 @@ public class IJettyService extends Service
         }
     }
     
+    
+   
     
 
     public void onLowMemory()
@@ -410,7 +476,7 @@ public class IJettyService extends Service
 
         //Set jetty.home
         System.setProperty ("jetty.home", IJetty.__JETTY_DIR.getAbsolutePath());
-
+        
         server = newServer();
         
         configureConnectors();
@@ -419,7 +485,7 @@ public class IJettyService extends Service
         configureRealm ();
 
         server.start();
-
+        
         //TODO
         // Less than ideal solution to the problem that dalvik doesn't know about manifests of jars.
         // A as the version field is private to Server, its difficult
