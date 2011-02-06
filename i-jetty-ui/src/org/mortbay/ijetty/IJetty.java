@@ -29,16 +29,21 @@ import java.util.Collections;
 import java.util.Enumeration;
 
 import org.mortbay.ijetty.util.AndroidInfo;
+import org.mortbay.ijetty.util.IJettyToast;
 import org.mortbay.jetty.Server;
 import org.mortbay.util.IO;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
@@ -80,16 +85,235 @@ public class IJetty extends Activity
     public static final String __CONTEXTS_DIR = "contexts";
 
     public static final String __TMP_DIR = "tmp";
+    public static final String __WORK_DIR = "work";
+    public static final int __SETUP_PROGRESS_DIALOG = 0;
+    public static final int __SETUP_DONE = 2;
+    public static final int __SETUP_RUNNING = 1;
+    public static final int __SETUP_NOTDONE = 0;
     PackageInfo pi = null;
     private TextView console;
     private ScrollView consoleScroller;
     private StringBuilder out = new StringBuilder();
-    private boolean alreadySetup = false;
+    private int setupState = -1;
     private Runnable scrollTask;
+    private ProgressDialog progressDialog;
+    private Thread progressThread;
+    private Handler handler;
 
+    /**
+     * ProgressThread
+     *
+     * Handles finishing install tasks for Jetty.
+     */
+    class ProgressThread extends Thread
+    {
+        private Handler _handler;
+    
+        public ProgressThread(Handler h) {
+            _handler = h;
+        }
+
+        public void sendProgressUpdate (int prog)
+        { 
+            Message msg = _handler.obtainMessage();
+            Bundle b = new Bundle();
+            b.putInt("prog", prog);
+            msg.setData(b);
+            _handler.sendMessage(msg);
+        }
+        
+        public void run ()
+        {
+            boolean updateNeeded = isUpdateNeeded();
+            
+            //create the jetty dir structure
+            File jettyDir = __JETTY_DIR;
+            if (!jettyDir.exists())
+            {
+                boolean made = jettyDir.mkdirs();
+                Log.i(TAG,"Made " + __JETTY_DIR + ": " + made);
+            }
+            else
+            {
+                Log.i(TAG,__JETTY_DIR + " exists");
+
+                // Always update if ${jetty.home}/.update exists (DEBUG)
+                File alwaysUpdate = new File(jettyDir,".update");
+                if (alwaysUpdate.exists())
+                {
+                    Log.i(TAG,"Always Update tag found " + alwaysUpdate);
+                    updateNeeded = true;
+                }
+            }
+            sendProgressUpdate(10);
+
+            
+            //set the directory into which all webapps should be unpacked
+            //on deployment. Note this is a "work" directory, so the contents
+            //will not be deleted each time on undeploy.
+            File workDir = new File(jettyDir, __WORK_DIR);
+            if (!workDir.exists())
+            {
+                boolean made = workDir.mkdirs();
+                Log.i(TAG, "Made "+workDir+": "+made);
+            }
+            else
+                Log.i(TAG, workDir+" exists");
+
+
+            //make jetty/tmp
+            File tmpDir = new File(jettyDir,__TMP_DIR);
+            if (!tmpDir.exists())
+            {
+                boolean made = tmpDir.mkdirs();
+                Log.i(TAG,"Made " + tmpDir + ": " + made);
+            }
+            else
+            {
+                Log.i(TAG,tmpDir + " exists");
+            }
+
+            //make jetty/webapps
+            File webappsDir = new File(jettyDir,__WEBAPP_DIR);
+            if (!webappsDir.exists())
+            {
+                boolean made = webappsDir.mkdirs();
+                Log.i(TAG,"Made " + webappsDir + ": " + made);
+            }
+            else
+            {
+                Log.i(TAG,webappsDir + " exists");
+            }
+
+            //make jetty/etc
+            File etcDir = new File(jettyDir,__ETC_DIR);
+            if (!etcDir.exists())
+            {
+                boolean made = etcDir.mkdirs();
+                Log.i(TAG,"Made " + etcDir + ": " + made);
+            }
+            else
+            {
+                Log.i(TAG,etcDir + " exists");
+            }
+            sendProgressUpdate(30);
+            
+
+            File webdefaults = new File(etcDir,"webdefault.xml");
+            if (!webdefaults.exists() || updateNeeded)
+            {
+                //get the webdefaults.xml file out of resources
+                try
+                {
+                    InputStream is = getResources().openRawResource(R.raw.webdefault);
+                    OutputStream os = new FileOutputStream(webdefaults);
+                    IO.copy(is,os);
+                    Log.i(TAG,"Loaded webdefault.xml");
+                }
+                catch (Exception e)
+                {
+                    Log.e(TAG,"Error loading webdefault.xml",e);
+                }
+            }
+            sendProgressUpdate(40);
+            
+            File realm = new File(etcDir,"realm.properties");
+            if (!realm.exists() || updateNeeded)
+            {
+                try
+                {
+                    //get the realm.properties file out resources
+                    InputStream is = getResources().openRawResource(R.raw.realm_properties);
+                    OutputStream os = new FileOutputStream(realm);
+                    IO.copy(is,os);
+                    Log.i(TAG,"Loaded realm.properties");
+                }
+                catch (Exception e)
+                {
+                    Log.e(TAG,"Error loading realm.propeties",e);
+                }
+            }
+            sendProgressUpdate(50);
+            
+            File keystore = new File(etcDir,"keystore");
+            if (!keystore.exists() || updateNeeded)
+            {
+                try
+                {
+                    //get the keystore out of resources
+                    InputStream is = getResources().openRawResource(R.raw.keystore);
+                    OutputStream os = new FileOutputStream(keystore);
+                    IO.copy(is,os);
+                    Log.i(TAG,"Loaded keystore");
+                }
+                catch (Exception e)
+                {
+                    Log.e(TAG,"Error loading keystore",e);
+                }
+            }
+            sendProgressUpdate(60);
+            
+            //make jetty/contexts
+            File contextsDir = new File(jettyDir,__CONTEXTS_DIR);
+            if (!contextsDir.exists())
+            {
+                boolean made = contextsDir.mkdirs();
+                Log.i(TAG,"Made " + contextsDir + ": " + made);
+            }
+            else
+            {
+                Log.i(TAG,contextsDir + " exists");
+            }
+            sendProgressUpdate(70);
+            
+            //unpack the console war, but don't make a context.xml for it
+            //Must be deployed by webapp deployer to get the Android ContentResolver
+            //setting.
+            File consoleWar = new File(webappsDir,"console");
+            if (updateNeeded)
+            {
+                Installer.deleteWebapp(consoleWar);
+                Log.i(TAG,"Cleaned console webapp for update");
+            }
+
+            boolean exists = consoleWar.exists();
+            String[] files = consoleWar.list();
+            if (!exists || (files == null) || (files.length == 0))
+            {
+                InputStream is = IJetty.this.getClassLoader().getResourceAsStream("console.war");
+                Installer.install(is,"/console",webappsDir,"console",false);
+                Log.i(TAG,"Loaded console webapp");
+            }
+
+            if (pi != null)
+            {
+                setStoredJettyVersion(pi.versionCode);
+            }
+
+            IJetty.this.setupState = __SETUP_DONE;
+            sendProgressUpdate(100);
+        }
+    };
+    
     static
     {
-        __JETTY_DIR = new File(Environment.getExternalStorageDirectory(),"jetty");
+        __JETTY_DIR = new File(Environment.getExternalStorageDirectory(),"jetty"); 
+    }
+    
+    public IJetty ()
+    {
+        super();
+        handler = new Handler ()
+        {
+            public void handleMessage(Message msg) {
+                int total = msg.getData().getInt("prog");
+                progressDialog.setProgress(total);
+                if (total >= 100){
+                    dismissDialog(__SETUP_PROGRESS_DIALOG);
+                }
+            }
+ 
+        };
     }
 
     public void consolePrint(String format, Object... args)
@@ -160,8 +384,8 @@ public class IJetty extends Activity
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
+       
         setContentView(R.layout.jetty_controller);
-        this.alreadySetup = false;
 
         // Watch for button clicks.
         final Button startButton = (Button)findViewById(R.id.start);
@@ -169,15 +393,20 @@ public class IJetty extends Activity
         {
             public void onClick(View v)
             {
-                printServerUrls();
+                if (isUpdateNeeded() && setupState != __SETUP_DONE)
+                    IJettyToast.showQuickToast(IJetty.this,R.string.loading);
+                else 
+                {
+                    printServerUrls();
 
-                //TODO get these values from editable UI elements
-                Intent intent = new Intent(IJetty.this,IJettyService.class);
-                intent.putExtra(__PORT,__PORT_DEFAULT);
-                intent.putExtra(__NIO,__NIO_DEFAULT);
-                intent.putExtra(__SSL,__SSL_DEFAULT);
-                intent.putExtra(__CONSOLE_PWD,__CONSOLE_PWD_DEFAULT);
-                startService(intent);
+                    //TODO get these values from editable UI elements
+                    Intent intent = new Intent(IJetty.this,IJettyService.class);
+                    intent.putExtra(__PORT,__PORT_DEFAULT);
+                    intent.putExtra(__NIO,__NIO_DEFAULT);
+                    intent.putExtra(__SSL,__SSL_DEFAULT);
+                    intent.putExtra(__CONSOLE_PWD,__CONSOLE_PWD_DEFAULT);
+                    startService(intent);
+                }
             }
         });
 
@@ -248,11 +477,44 @@ public class IJetty extends Activity
         {
             SdCardUnavailableActivity.show(this);
         }
-        else if (!alreadySetup)
+        else 
         {
-            setupJetty();
+            //work out if we need to do the installation finish step
+            //or not. We do it iff:
+            // - there is no previous jetty version on disk
+            // - the previous version does not match the current version
+            // - we're not already doing the update
+            if (setupState != __SETUP_DONE && setupState != __SETUP_RUNNING)
+            {
+                if (isUpdateNeeded())
+                {
+                    setupState = __SETUP_RUNNING;
+                    setupJetty();
+                }
+            }
         }
         super.onResume();
+    }
+    
+    
+
+    @Override
+    protected Dialog onCreateDialog(int id)
+    {
+        switch(id) 
+        {
+            case __SETUP_PROGRESS_DIALOG:
+            {
+                progressDialog = new ProgressDialog(IJetty.this);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setMessage("Finishing inital install ...");
+                progressThread = new ProgressThread(handler);
+                progressThread.start();
+                return progressDialog;
+            }
+            default:
+                return null;
+        }
     }
 
     private void printNetworkInterfaces()
@@ -349,162 +611,39 @@ public class IJetty extends Activity
             }
         }
     }
+  
+    /**
+     * We need to an update iff we don't know the current
+     * jetty version or it is different to the last version
+     * that was installed.
+     * 
+     * @return
+     */
+    public boolean isUpdateNeeded ()
+    {        
+        int storedVersion = getStoredJettyVersion();
+        if (storedVersion <= 0)
+            return true;
+
+        try
+        {
+            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(),0);
+            if (pi == null)
+                return true;
+            if (pi.versionCode != storedVersion)
+                return true;
+        }
+        catch (Exception e)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     public void setupJetty()
     {
-        boolean update = false;
+        showDialog(__SETUP_PROGRESS_DIALOG);        
+    };
 
-        int storedVersion = getStoredJettyVersion();
-
-        if ((pi != null) && (pi.versionCode > storedVersion))
-        {
-            update = true;
-        }
-
-        //create the jetty dir structure
-        File jettyDir = __JETTY_DIR;
-        if (!jettyDir.exists())
-        {
-            boolean made = jettyDir.mkdirs();
-            Log.i(TAG,"Made " + __JETTY_DIR + ": " + made);
-        }
-        else
-        {
-            Log.i(TAG,__JETTY_DIR + " exists");
-            if (!update)
-            {
-                // Always update if ${jetty.home}/.update exists (DEBUG)
-                File alwaysUpdate = new File(jettyDir,".update");
-                if (alwaysUpdate.exists())
-                {
-                    Log.i(TAG,"Always Update tag found " + alwaysUpdate);
-                    update = true;
-                }
-            }
-        }
-
-        //make jetty/tmp
-        File tmpDir = new File(jettyDir,__TMP_DIR);
-        if (!tmpDir.exists())
-        {
-            boolean made = tmpDir.mkdirs();
-            Log.i(TAG,"Made " + tmpDir + ": " + made);
-        }
-        else
-        {
-            Log.i(TAG,tmpDir + " exists");
-        }
-
-        //make jetty/webapps
-        File webappsDir = new File(jettyDir,__WEBAPP_DIR);
-        if (!webappsDir.exists())
-        {
-            boolean made = webappsDir.mkdirs();
-            Log.i(TAG,"Made " + webappsDir + ": " + made);
-        }
-        else
-        {
-            Log.i(TAG,webappsDir + " exists");
-        }
-
-        //make jetty/etc
-        File etcDir = new File(jettyDir,__ETC_DIR);
-        if (!etcDir.exists())
-        {
-            boolean made = etcDir.mkdirs();
-            Log.i(TAG,"Made " + etcDir + ": " + made);
-        }
-        else
-        {
-            Log.i(TAG,etcDir + " exists");
-        }
-
-        File webdefaults = new File(etcDir,"webdefault.xml");
-        if (!webdefaults.exists() || update)
-        {
-            //get the webdefaults.xml file out of resources
-            try
-            {
-                InputStream is = getResources().openRawResource(R.raw.webdefault);
-                OutputStream os = new FileOutputStream(webdefaults);
-                IO.copy(is,os);
-                Log.i(TAG,"Loaded webdefault.xml");
-            }
-            catch (Exception e)
-            {
-                Log.e(TAG,"Error loading webdefault.xml",e);
-            }
-        }
-        File realm = new File(etcDir,"realm.properties");
-        if (!realm.exists() || update)
-        {
-            try
-            {
-                //get the realm.properties file out resources
-                InputStream is = getResources().openRawResource(R.raw.realm_properties);
-                OutputStream os = new FileOutputStream(realm);
-                IO.copy(is,os);
-                Log.i(TAG,"Loaded realm.properties");
-            }
-            catch (Exception e)
-            {
-                Log.e(TAG,"Error loading realm.propeties",e);
-            }
-        }
-
-        File keystore = new File(etcDir,"keystore");
-        if (!keystore.exists() || update)
-        {
-            try
-            {
-                //get the keystore out of resources
-                InputStream is = getResources().openRawResource(R.raw.keystore);
-                OutputStream os = new FileOutputStream(keystore);
-                IO.copy(is,os);
-                Log.i(TAG,"Loaded keystore");
-            }
-            catch (Exception e)
-            {
-                Log.e(TAG,"Error loading keystore",e);
-            }
-        }
-
-        //make jetty/contexts
-        File contextsDir = new File(jettyDir,__CONTEXTS_DIR);
-        if (!contextsDir.exists())
-        {
-            boolean made = contextsDir.mkdirs();
-            Log.i(TAG,"Made " + contextsDir + ": " + made);
-        }
-        else
-        {
-            Log.i(TAG,contextsDir + " exists");
-        }
-
-        //unpack the console war, but don't make a context.xml for it
-        //Must be deployed by webapp deployer to get the Android ContentResolver
-        //setting.
-        File consoleWar = new File(webappsDir,"console");
-        if (update)
-        {
-            Installer.deleteWebapp(consoleWar);
-            Log.i(TAG,"Cleaned console webapp for update");
-        }
-
-        boolean exists = consoleWar.exists();
-        String[] files = consoleWar.list();
-        if (!exists || (files == null) || (files.length == 0))
-        {
-            InputStream is = this.getClassLoader().getResourceAsStream("console.war");
-            Installer.install(is,"/console",webappsDir,"console",false);
-            Log.i(TAG,"Loaded console webapp");
-        }
-
-        if (pi != null)
-        {
-            setStoredJettyVersion(pi.versionCode);
-        }
-
-        this.alreadySetup = true;
-    }
 }

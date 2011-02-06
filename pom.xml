@@ -18,7 +18,7 @@
    </modules>
 
    <properties>
-     <jetty.version>6.1.24</jetty.version>
+     <jetty.version>6.1.26</jetty.version>
      <servlet.version>2.5-20081211</servlet.version>
      <android.sdk.version>4</android.sdk.version>
      <android.platform>platforms/android-${android.sdk.version}</android.platform>
