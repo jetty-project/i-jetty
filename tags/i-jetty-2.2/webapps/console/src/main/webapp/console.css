@@ -1,0 +1,236 @@
+body {
+    margin: 0;
+    padding: 0;
+    font: 1em Verdana, sans-serif;
+    /*background-color: #eeeeec;*/
+}
+
+#navigation {
+    /*padding-top: 1px;*/
+    margin: 0;
+    background-color: #4b84c2;
+    color: white;
+    background-image: url(navbar.png);
+    background-repeat: repeat-x;
+    
+    font-size: 12px;
+    letter-spacing: -0.2pt;
+    font-family: verdana,sans-serif;
+}
+
+#navigation ul {
+    margin: 0;
+    padding: 0;
+    padding-left: 1em;
+    min-height: 32px;
+    line-height: 32px;
+}
+
+#navigation li {
+    display: inline;
+    /*position: relative;
+    top: -0.5em;*/
+    
+    list-style-type: none;
+    
+    padding-right: 0.5em;
+    
+    margin: 0;
+}
+
+#content ul {
+    margin-left: 1.5em;
+}
+
+h1, h2 {font: 2em Georgia, "Times New Roman", serif; letter-spacing: 1px;}
+h2 {font-size: 1.5em; }
+h3 {font: bold 1em Verdana, Arial, sans-serif; letter-spacing: 2px;
+  text-transform: uppercase;}
+h4 {font: bold 1.1em Georgia, "Times New Roman", serif; letter-spacing: 1px;}
+
+a {
+    text-decoration: none;
+    color: #4e9a06;
+}
+
+#navigation a {
+    color: #eeeeec;
+    padding: 5px;
+}
+
+#navigation a:hover,
+#navigation a.selected {
+    color: #fff;
+    background-color: #72b2cf;
+    border: 1px solid #4b84c2;
+    padding: 4px;
+}
+
+h1.pageheader {
+    margin: 0;
+    background-image: url(titlebar.png);
+    background-repeat: repeat-x;
+    background-color: #cccccc;
+    padding: 0.25em;
+    
+    position: relative;
+    top: -1px;
+    text-align: center;
+    border-bottom: 1px solid #babdb6;
+}
+
+hr {
+    border: 0px none;
+    margin-top: 1.5em;
+    border-bottom: 1.5em;
+    border-bottom: 1px solid #babdb6;
+    width: 400px;
+}
+
+#content {
+    padding: 1em;
+    font-size: 85%;
+}
+
+#footer {
+    clear: both;
+    text-align: left;
+    font-size: 80%;
+    color: #babdb6;
+    padding: 1em;
+    /*width: 100%;*/
+}
+
+table {
+    border-collapse: collapse;
+    border: 1px solid #babdb6;
+}
+
+th {
+    /*font: bold 11px Georgia, "Times New Roman", serif;*/
+    font-weight: bold;
+    font-size: 11px;
+    letter-spacing: -1px;
+	color: #6D929B;
+	
+	border: 1px solid #babdb6;
+	letter-spacing: 2px;
+	text-align: center;
+	padding: 6px 6px 6px 12px;
+    background: #4b84c2 url(table.png) repeat-x;
+}
+
+th.nobg {
+	background: none;
+}
+
+td {
+    border-right: 1px dashed #babdb6;
+	border-bottom: 1px solid #babdb6;
+	background: #fff;
+	padding: 6px 6px 6px 12px;
+	color: #4f6b72;
+
+}
+
+td.odd {
+	background: #f2f6fb;
+	color: #797268;
+}
+
+th.headerSortUp {
+    background-image: url(asc.gif);
+    background-repeat: no-repeat;
+}
+
+th.headerSortDown {
+    background-image: url(desc.gif);
+    background-repeat: no-repeat;
+}
+
+th.header {
+    cursor: pointer;
+    background-position: right center;
+    background-color: #E6EEEE;
+    
+    padding-right: 18px;
+}
+
+td, tr {
+    font-size: 95% !important;
+}
+
+.hidden {
+    display: none;
+}
+
+p.singline {
+	margin-top: 0px;
+	margin-bottom: 2px;	
+}
+
+#contacts {
+  float: left;
+}
+	
+/* Pane that contains all user info. Only used on desktop browsers with JS. */
+#userinfo {
+	float: right;
+    /*padding: 1em;*/
+
+}
+
+#user-photo-link {
+    float: right;
+    padding: 0.2em;
+}
+
+/* Hint text to say you can click to edit fields. */
+#user-edit-hint {
+    color: #babdb6;
+}
+
+/* Phone numbers table for side pane. */
+#user-numbers {
+    width: 100%;
+}
+
+#user-contacts {
+	width: 100%;
+}
+
+/* Button to add numbers to list. */
+#user-numbers-add {
+    float: right;
+}
+
+/* Button to click to remove a phone number from the list. */
+.user-number-remove {
+    float: right;
+}
+
+img {
+    border: 0px none;
+}
+
+.star:hover,
+.star:focus {
+    background-position: 0 -32px !important;
+    text-decoration: none;
+}
+
+div.star.starred {
+    background-position: 0 -16px;
+}
+
+div.star {
+    float: left;
+    display: block;
+    list-style:none;
+    margin: 0 6px 0 0;
+    padding:0px;
+    width: 16px;
+    height: 16px;
+    background: url(star-widget.png) 0 0 no-repeat;
+    text-indent: -1000em;
+}

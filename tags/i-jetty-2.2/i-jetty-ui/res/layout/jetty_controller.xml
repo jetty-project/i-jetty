@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:padding="4dip"
+  android:gravity="center_horizontal"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+  <ImageView
+    android:src="@drawable/ijetty_logo"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:scaleType="fitXY" />
+
+  <TableLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+    <TableRow
+      android:layout_weight="1.0"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+      <Button
+        android:id="@+id/start"
+        android:layout_weight="1.0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/start_jetty" />
+      <Button
+        android:id="@+id/stop"
+        android:layout_weight="1.0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_jetty" />
+    </TableRow>
+    <TableRow
+      android:layout_weight="1.0"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+      <Button
+        android:id="@+id/config"
+        android:layout_weight="1.0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/config_jetty" />
+      <Button
+        android:id="@+id/download"
+        android:layout_weight="1.0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/download_webapp" />
+    </TableRow>
+  </TableLayout>
+
+  <TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textStyle="bold"
+    android:paddingTop="4dip"
+    android:paddingBottom="2dip"
+    android:text="@string/console" />
+
+  <ScrollView
+    android:id="@+id/consoleScroller"
+    android:fillViewport="true"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <TextView
+      android:id="@+id/console"
+      android:autoLink="all"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content" />
+  </ScrollView>
+</LinearLayout>
+
