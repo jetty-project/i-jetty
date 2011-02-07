@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.mortbay.ijetty</groupId>
     <artifactId>ijetty-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>2.2</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>console</artifactId>
   <packaging>war</packaging>
-  <version>2.2-SNAPSHOT</version>
+  <version>2.2</version>
   <name>I-Jetty :: Console</name>
   <dependencies>
     <dependency>

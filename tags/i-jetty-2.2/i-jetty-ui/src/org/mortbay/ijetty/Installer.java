@@ -136,7 +136,7 @@ public class Installer
         writer.println("<Set name=\"configurationClasses\">"+configurationClassesXml+"</Set>");   
         writer.println("<Set name=\"contextPath\">"+contextPath+"</Set>");
         writer.println("<Set name=\"war\"><SystemProperty name=\"jetty.home\" default=\".\"/>/webapps/"+webappName+"</Set>");
-        writer.println("<Set name=\"defaultsDescriptor\">/sdcard/jetty/etc/webdefault.xml</Set>");
+        writer.println("<Set name=\"defaultsDescriptor\"><SystemProperty name=\"jetty.home\" default=\".\"/>/etc/webdefault.xml</Set>");
        
         writer.println("</Configure>");
         writer.flush();
