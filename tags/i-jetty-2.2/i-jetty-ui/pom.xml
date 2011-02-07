@@ -228,7 +228,7 @@
                         <argument>-f</argument>
                         <argument>${project.build.directory}/classes.dex</argument>
                         <argument>-rf</argument>
-                        <argument>${project.build.directory}/generated-sources</argument>
+                        <argument>${dep.classes.dir}</argument>
                         <argument>-rf</argument>
                         <argument>${basedir}/src</argument>
                         <argument>-rf</argument>
