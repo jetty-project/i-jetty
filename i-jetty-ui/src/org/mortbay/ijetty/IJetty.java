@@ -507,7 +507,7 @@ public class IJetty extends Activity
             {
                 progressDialog = new ProgressDialog(IJetty.this);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progressDialog.setMessage("Finishing inital install ...");
+                progressDialog.setMessage("Finishing initial install ...");
                 progressThread = new ProgressThread(handler);
                 progressThread.start();
                 return progressDialog;
