@@ -63,6 +63,10 @@ public class IJettyService extends Service
     public static final int __START_PROGRESS_DIALOG = 0;
     public static final int __STARTED = 0;
     public static final int __NOT_STARTED = 1;
+    public static final int __STOPPED = 2;
+    public static final int __NOT_STOPPED = 3;
+    public static final int __STARTING = 4;
+    public static final int __STOPPING = 5;
     
     public static final String[] __configurationClasses = 
         new String[]
@@ -106,6 +110,7 @@ public class IJettyService extends Service
         {
             try
             {
+                sendMessage(__STARTING);
                 startJetty();
                 sendMessage(__STARTED);
               
@@ -116,6 +121,44 @@ public class IJettyService extends Service
                 sendMessage(__NOT_STARTED);
                 Log.e("Jetty", "Error starting jetty", e);
                 
+            }
+        }
+        
+        public void sendMessage(int state)
+        {
+            Message msg = _handler.obtainMessage();
+            Bundle b = new Bundle();
+            b.putInt("state", state);
+            msg.setData(b);
+            _handler.sendMessage(msg);
+        }
+    }
+    
+    
+    public class JettyStopperThread extends Thread
+    { 
+        android.os.Handler _handler;
+        
+        public JettyStopperThread(android.os.Handler handler)
+        {
+            _handler = handler;
+        }
+        
+        public void run ()
+        {
+            try
+            {
+                sendMessage(__STOPPING);
+                stopJetty();
+                Log.i("Jetty", "Jetty stopped");
+                sendMessage(__STOPPED);
+               
+            }
+            catch (Exception e)
+            {
+                
+                sendMessage(__NOT_STOPPED);
+                Log.e("Jetty", "Error stopping jetty", e);
             }
         }
         
@@ -161,6 +204,32 @@ public class IJettyService extends Service
                     case __NOT_STARTED:
                     {
                         IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_started);
+                        break;
+                    }
+                    case __STOPPED:
+                    {
+                        // Cancel the persistent notification.
+                        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                        mNM.cancel(R.string.jetty_started);
+                        // Tell the user we stopped.
+                        IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_stopped);
+                       
+                        break;
+                    }
+                    
+                    case __NOT_STOPPED:
+                    {
+                        IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_stopped);
+                        break;
+                    }
+                    case __STARTING:
+                    {
+                        IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_starting);
+                        break;
+                    }                    
+                    case __STOPPING:
+                    {
+                        IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_stopping);
                         break;
                     }
                 }
@@ -285,13 +354,8 @@ public class IJettyService extends Service
             
             if (server != null)
             {
-                stopJetty();
-                // Cancel the persistent notification.
-                mNM.cancel(R.string.jetty_started);
-                // Tell the user we stopped.
-                IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_stopped);
-                Log.i("Jetty", "Jetty stopped");
-                __resources = null;
+                new JettyStopperThread(_handler).start();
+                
             }
             else
             {
@@ -373,6 +437,7 @@ public class IJettyService extends Service
             {
                 SocketConnector bioConnector = new SocketConnector();
                 bioConnector.setPort(_port);
+                bioConnector.setMaxIdleTime(3000);
                 server.addConnector(bioConnector);
             }
 
@@ -496,9 +561,17 @@ public class IJettyService extends Service
 
     protected void stopJetty() throws Exception
     {
-        Log.i("Jetty", "Jetty stopping");
-        server.stop();
-        server.join();
-        server = null;
+        try
+        {
+            Log.i("Jetty", "Jetty stopping");
+            server.stop();
+            Log.i("Jetty", "Jetty server stopped");
+            server = null;
+            __resources = null;
+        }
+        finally
+        {
+            Log.i("Jetty","Finally stopped");
+        }
     }
 }
