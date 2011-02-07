@@ -4,11 +4,11 @@
    <parent>
      <groupId>org.mortbay.ijetty</groupId>
      <artifactId>ijetty-parent</artifactId>
-     <version>2.3-SNAPSHOT</version>
+     <version>2.2</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <artifactId>i-jetty</artifactId>
-   <version>2.3-SNAPSHOT</version>
+   <version>2.2</version>
    <packaging>jar</packaging>
    <name>I-Jetty :: Android Application</name>
    <description>Jetty on Android</description>
@@ -228,7 +228,7 @@
                         <argument>-f</argument>
                         <argument>${project.build.directory}/classes.dex</argument>
                         <argument>-rf</argument>
-                        <argument>${project.build.directory}/generated-sources</argument>
+                        <argument>${dep.classes.dir}</argument>
                         <argument>-rf</argument>
                         <argument>${basedir}/src</argument>
                         <argument>-rf</argument>
