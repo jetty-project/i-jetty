@@ -39,6 +39,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
@@ -321,6 +322,10 @@ public class MediaBrowserServlet extends HttpServlet
                         //release original bitmap as soon as possible
                         bitmap_orig.recycle();
                         bitmap_orig = null;
+                      
+                
+                        //TODO - if we updated to newer Api rev level we could use this
+                        //Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(resolver, Integer.valueOf(item).intValue(), MediaStore.Images.Thumbnails.MINI_KIND, new BitmapFactory.Options());
 
                         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
