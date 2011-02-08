@@ -318,6 +318,9 @@ public class MediaBrowserServlet extends HttpServlet
 
                         // recreate the new Bitmap
                         bitmap = Bitmap.createBitmap(bitmap_orig,0,0,width,height,matrix,true);
+                        //release original bitmap as soon as possible
+                        bitmap_orig.recycle();
+                        bitmap_orig = null;
 
                         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
@@ -401,6 +404,10 @@ public class MediaBrowserServlet extends HttpServlet
             Uri contenturi = mediaUris[iuri];
             Log.d(TAG,"Using contenturi: " + contenturi);
             Cursor cur = resolver.query(contenturi,null,null,null,null);
+            
+            if (cur == null)
+                continue; //skip - no results?
+            
             String location = "";
             if (contenturi.toString().contains("/internal/"))
             {
@@ -457,6 +464,8 @@ public class MediaBrowserServlet extends HttpServlet
                     writer.print(",");
                 }
             }
+            
+            cur.close();
         }
 
         writer.print(" ]");
