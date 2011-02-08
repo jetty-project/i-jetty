@@ -19,19 +19,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.mortbay.ijetty.deployer.AndroidContextDeployer;
+import org.mortbay.ijetty.deployer.AndroidWebAppDeployer;
 import org.mortbay.ijetty.util.IJettyToast;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpGenerator;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.SslSocketConnector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.http.HttpGenerator;
+import org.eclipse.jetty.http.security.Credential;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
-import android.app.Dialog;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -71,10 +74,10 @@ public class IJettyService extends Service
     public static final String[] __configurationClasses = 
         new String[]
         {
-            "org.mortbay.ijetty.AndroidWebInfConfiguration",
-            "org.mortbay.jetty.webapp.WebXmlConfiguration",
-            "org.mortbay.jetty.webapp.JettyWebXmlConfiguration",
-            "org.mortbay.jetty.webapp.TagLibConfiguration" 
+            "org.mortbay.ijetty.webapp.AndroidWebInfConfiguration",
+            "org.eclipse.jetty.webapp.WebXmlConfiguration",
+            "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
+            "org.eclipse.jetty.webapp.TagLibConfiguration" 
         };
  
     private NotificationManager mNM;
@@ -437,7 +440,7 @@ public class IJettyService extends Service
             {
                 SocketConnector bioConnector = new SocketConnector();
                 bioConnector.setPort(_port);
-                bioConnector.setMaxIdleTime(3000);
+                //bioConnector.setMaxIdleTime(3000);
                 server.addConnector(bioConnector);
             }
 
@@ -512,8 +515,10 @@ public class IJettyService extends Service
 
         if (server != null)
         {
-            server.addLifeCycle(contextDeployer);
-            server.addLifeCycle(staticDeployer); 
+            Log.i("Jetty", "Adding context deployer: ");
+            server.addBean(contextDeployer);
+            Log.i("Jetty", "Adding webapp deployer: ");
+            server.addBean(staticDeployer); 
         }
     }
     
@@ -522,25 +527,23 @@ public class IJettyService extends Service
         File realmProps = new File(IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
         if (realmProps.exists())
         {
-            HashUserRealm realm = new HashUserRealm("Console", IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
+            HashLoginService realm = new HashLoginService("Console", IJetty.__JETTY_DIR+"/"+IJetty.__ETC_DIR+"/realm.properties");
             realm.setRefreshInterval(0);
             if (_consolePassword != null)
-                realm.put("admin", _consolePassword); //set the admin password for console webapp
-            server.addUserRealm(realm);
+                realm.putUser("admin", Credential.getCredential(_consolePassword), new String[]{"admin"}); //set the admin password for console webapp
+            server.addBean(realm);
         }
     }
     
     
     protected void startJetty() throws Exception
     {
-        // Bridge Jetty logging to Android logging
-        // TODO: Make configurable 
-        AndroidLog.__isDebugEnabled = false;
-        System.setProperty("org.mortbay.log.class","org.mortbay.log.AndroidLog");
-        org.mortbay.log.Log.setLog(new AndroidLog());
 
         //Set jetty.home
         System.setProperty ("jetty.home", IJetty.__JETTY_DIR.getAbsolutePath());
+
+        //ipv6 workaround for froyo
+        System.setProperty("java.net.preferIPv6Addresses", "false");
         
         server = newServer();
         

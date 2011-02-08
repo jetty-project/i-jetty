@@ -11,7 +11,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>hello</artifactId>
   <name>I-Jetty :: Hello</name>
-  <version>2.3-SNAPSHOT</version>
+  <version>3.0-SNAPSHOT</version>
   <packaging>war</packaging>
   <url>http://maven.apache.org</url>
   <build>
@@ -78,12 +78,21 @@
     </plugins>
   </build>
   <dependencies>
+<!--
     <dependency>
       <groupId>org.mortbay.ijetty</groupId>
       <artifactId>i-jetty-server</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
+-->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>${servlet.version}</version>
+      <scope>provided</scope>
+     </dependency>
+
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>

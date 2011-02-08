@@ -34,7 +34,7 @@
 	
 	<filter>
 	    <filter-name>MultiPart</filter-name>
-	    <filter-class>org.mortbay.servlet.MultiPartFilter</filter-class>
+	    <filter-class>org.eclipse.jetty.servlets.MultiPartFilter</filter-class>
 	</filter>
 	
 	<servlet-mapping>

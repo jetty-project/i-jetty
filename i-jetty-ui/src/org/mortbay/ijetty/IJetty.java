@@ -28,10 +28,10 @@ import java.net.SocketException;
 import java.util.Collections;
 import java.util.Enumeration;
 
+import org.eclipse.jetty.util.IO;
+import org.mortbay.ijetty.log.AndroidLog;
 import org.mortbay.ijetty.util.AndroidInfo;
 import org.mortbay.ijetty.util.IJettyToast;
-import org.mortbay.jetty.Server;
-import org.mortbay.util.IO;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -79,7 +79,7 @@ public class IJetty extends Activity
     public static final boolean __SSL_DEFAULT = false;
 
     public static final String __CONSOLE_PWD_DEFAULT = "admin";
-    public static final File __JETTY_DIR;
+    
     public static final String __WEBAPP_DIR = "webapps";
     public static final String __ETC_DIR = "etc";
     public static final String __CONTEXTS_DIR = "contexts";
@@ -90,11 +90,13 @@ public class IJetty extends Activity
     public static final int __SETUP_DONE = 2;
     public static final int __SETUP_RUNNING = 1;
     public static final int __SETUP_NOTDONE = 0;
-    PackageInfo pi = null;
+
+    
+    public static final File __JETTY_DIR;
+    
     private TextView console;
     private ScrollView consoleScroller;
     private StringBuilder out = new StringBuilder();
-    private int setupState = -1;
     private Runnable scrollTask;
     private ProgressDialog progressDialog;
     private Thread progressThread;
@@ -285,12 +287,19 @@ public class IJetty extends Activity
                 Log.i(TAG,"Loaded console webapp");
             }
 
-            if (pi != null)
+            try
             {
-                setStoredJettyVersion(pi.versionCode);
+                PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(),0);
+                if (pi != null)
+                {
+                    setStoredJettyVersion(pi.versionCode);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.w(TAG, "Unable to get PackageInfo for i-jetty");
             }
 
-            IJetty.this.setupState = __SETUP_DONE;
             sendProgressUpdate(100);
         }
     };
@@ -298,11 +307,15 @@ public class IJetty extends Activity
     static
     {
         __JETTY_DIR = new File(Environment.getExternalStorageDirectory(),"jetty"); 
+        // Bridge Jetty logging to Android logging
+        System.setProperty("org.eclipse.jetty.util.log.class","org.mortbay.ijetty.AndroidLog");
+        org.eclipse.jetty.util.log.Log.setLog(new AndroidLog());
     }
     
     public IJetty ()
     {
-        super();
+        super();    
+        
         handler = new Handler ()
         {
             public void handleMessage(Message msg) {
@@ -393,7 +406,7 @@ public class IJetty extends Activity
         {
             public void onClick(View v)
             {
-                if (isUpdateNeeded() && setupState != __SETUP_DONE)
+                if (isUpdateNeeded())
                     IJettyToast.showQuickToast(IJetty.this,R.string.loading);
                 else 
                 {
@@ -442,7 +455,7 @@ public class IJetty extends Activity
 
         try
         {
-            pi = getPackageManager().getPackageInfo(getPackageName(),0);
+            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(),0);
             consolePrint("i-jetty version %s (%s)",pi.versionName,pi.versionCode);
         }
         catch (NameNotFoundException e)
@@ -450,15 +463,13 @@ public class IJetty extends Activity
             consolePrint("Unable to determine running i-jetty version");
         }
 
-        consolePrint("jetty server version %s",Server.UNKNOWN_VERSION);
         consolePrint("On %s",AndroidInfo.getDeviceModel());
         consolePrint("OS version %s",AndroidInfo.getOSVersion());
         consolePrint("");
         consolePrint("Project: http://code.google.com/p/i-jetty");
-        consolePrint("Server: http://jetty.codehaus.org");
+        consolePrint("Server: http://www.eclipse.org/jetty");
         consolePrint("Commercial Support: ");
-        consolePrint("&nbsp;  http://www.intalioworks.com/services/webtide");
-        consolePrint("&nbsp;  http://www.webtide.com/advice");
+        consolePrint("&nbsp;  http://www.intalio.com/jetty/services");
         consolePrint("");
 
         printNetworkInterfaces();
@@ -484,13 +495,10 @@ public class IJetty extends Activity
             // - there is no previous jetty version on disk
             // - the previous version does not match the current version
             // - we're not already doing the update
-            if (setupState != __SETUP_DONE && setupState != __SETUP_RUNNING)
+
+            if (isUpdateNeeded())
             {
-                if (isUpdateNeeded())
-                {
-                    setupState = __SETUP_RUNNING;
-                    setupJetty();
-                }
+                setupJetty();
             }
         }
         super.onResume();
@@ -508,8 +516,7 @@ public class IJetty extends Activity
                 progressDialog = new ProgressDialog(IJetty.this);
                 progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 progressDialog.setMessage("Finishing initial install ...");
-                progressThread = new ProgressThread(handler);
-                progressThread.start();
+
                 return progressDialog;
             }
             default:
@@ -643,7 +650,9 @@ public class IJetty extends Activity
 
     public void setupJetty()
     {
-        showDialog(__SETUP_PROGRESS_DIALOG);        
+        showDialog(__SETUP_PROGRESS_DIALOG);    
+        progressThread = new ProgressThread(handler);
+        progressThread.start();
     };
 
 }
