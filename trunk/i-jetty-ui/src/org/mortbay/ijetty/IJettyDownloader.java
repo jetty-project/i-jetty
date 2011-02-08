@@ -19,10 +19,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.mortbay.io.Buffer;
-import org.mortbay.jetty.HttpStatus;
-import org.mortbay.jetty.client.ContentExchange;
-import org.mortbay.jetty.client.HttpClient;
+import org.eclipse.jetty.io.Buffer;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.client.ContentExchange;
+import org.eclipse.jetty.client.HttpClient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -312,7 +312,7 @@ public class IJettyDownloader extends Activity
             protected void onResponseComplete() throws IOException
             {  
                 closeOutputStream();
-                if (getResponseStatus() == HttpStatus.ORDINAL_200_OK)
+                if (getResponseStatus() == HttpStatus.OK_200)
                     install (warFile, path);
                 else
                 {

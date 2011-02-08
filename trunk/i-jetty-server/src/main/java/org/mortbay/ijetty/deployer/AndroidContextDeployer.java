@@ -1,4 +1,4 @@
-package org.mortbay.ijetty;
+package org.mortbay.ijetty.deployer;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -8,15 +8,15 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.deployer.ConfigurationManager;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.AttributesMap;
-import org.mortbay.util.Scanner;
-import org.mortbay.xml.XmlConfiguration;
+import org.eclipse.jetty.util.component.AbstractLifeCycle;
+import org.eclipse.jetty.deploy.ConfigurationManager;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.util.AttributesMap;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.Scanner;
+import org.eclipse.jetty.xml.XmlConfiguration;
 
 /**
  * AndroidContextDeployer

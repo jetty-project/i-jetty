@@ -25,9 +25,9 @@ import java.net.MalformedURLException;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.mortbay.resource.JarResource;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.IO;
+import org.eclipse.jetty.util.resource.JarResource;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.IO;
 
 import android.util.Log;
 
@@ -45,7 +45,7 @@ public class Installer
             webapp.mkdirs();
         
         Resource war = Resource.newResource("jar:"+warFile.toURL()+"!/");
-        JarResource.extract(war, webapp, false);
+        ((JarResource)war).copyTo(webapp);
         if (createContextXml)
             installContextFile(webappName, contextPath);
     }
@@ -130,9 +130,9 @@ public class Installer
        
         PrintWriter writer = new PrintWriter(tmpContextFile);
         writer.println("<?xml version=\"1.0\"  encoding=\"ISO-8859-1\"?>");
-        writer.println("<!DOCTYPE Configure PUBLIC \"-//Mort Bay Consulting//DTD Configure//EN\" \"http://jetty.mortbay.org/configure.dtd\">"
+        writer.println("<!DOCTYPE Configure PUBLIC \"-//Jetty//Configure//EN\" \"http://www.eclipse.org/jetty/configure.dtd\">"
 );
-        writer.println("<Configure class=\"org.mortbay.jetty.webapp.WebAppContext\">");
+        writer.println("<Configure class=\"org.eclipse.jetty.webapp.WebAppContext\">");
         writer.println("<Set name=\"configurationClasses\">"+configurationClassesXml+"</Set>");   
         writer.println("<Set name=\"contextPath\">"+contextPath+"</Set>");
         writer.println("<Set name=\"war\"><SystemProperty name=\"jetty.home\" default=\".\"/>/webapps/"+webappName+"</Set>");

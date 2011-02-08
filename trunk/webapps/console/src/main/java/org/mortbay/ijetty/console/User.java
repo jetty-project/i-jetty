@@ -19,7 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
-import org.mortbay.util.IO;
+import org.eclipse.jetty.util.IO;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;

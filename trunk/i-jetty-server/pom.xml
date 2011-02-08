@@ -4,11 +4,12 @@
   <parent>
     <groupId>org.mortbay.ijetty</groupId>
     <artifactId>ijetty-parent</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.ijetty</groupId>
   <artifactId>i-jetty-server</artifactId>
+  <version>3.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>I-Jetty :: Jetty Server Binary Cleaned up for Android</name>
   <description>Jetty Server Binary Cleaned up for Android</description>
@@ -17,6 +18,7 @@
     <servlet.version>2.5-20081211</servlet.version>
   </properties>
   <dependencies>
+<!--
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
@@ -57,6 +59,25 @@
       <groupId>android</groupId>
       <artifactId>android</artifactId>
     </dependency>
+-->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <version>${jetty.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-deploy</artifactId>
+      <version>${jetty.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>android</groupId>
+      <artifactId>android</artifactId>
+    </dependency>
+   
+
   </dependencies>
   <build>
     <plugins>
@@ -68,6 +89,7 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+<!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -82,7 +104,7 @@
             <configuration>
               <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
               <excludeArtifactIds>android</excludeArtifactIds>
-              <excludes>META-INF/**,org/mortbay/log/Slf4jLog.class,org/mortbay/xml/XmlParser*</excludes>
+              <excludes>META-INF/**</excludes>
               <outputDirectory>${project.build.outputDirectory}</outputDirectory>
               <overWriteReleases>true</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
@@ -90,6 +112,7 @@
           </execution>
         </executions>
       </plugin>
+-->
     </plugins>
   </build>
 </project>

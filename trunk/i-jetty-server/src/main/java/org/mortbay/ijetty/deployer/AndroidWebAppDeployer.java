@@ -13,24 +13,25 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.ijetty;
+package org.mortbay.ijetty.deployer;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HandlerContainer;
-import org.mortbay.jetty.deployer.ContextDeployer;
-import org.mortbay.jetty.deployer.WebAppDeployer;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.log.Log;
-import org.mortbay.resource.Resource;
-import org.mortbay.util.AttributesMap;
-import org.mortbay.util.URIUtil;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.deploy.ContextDeployer;
+import org.eclipse.jetty.deploy.WebAppDeployer;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.AttributesMap;
+import org.eclipse.jetty.util.URIUtil;
 
 /**
  * Web Application Deployer.
@@ -49,7 +50,7 @@ import org.mortbay.util.URIUtil;
  * @see {@link ContextDeployer}
  */
 public class AndroidWebAppDeployer extends WebAppDeployer {
-    private List<? super Context>     _deployed;
+    private List<? super ServletContextHandler>     _deployed;
     private AttributesMap _attributes = new AttributesMap();
 
     /* ------------------------------------------------------------ */
@@ -58,7 +59,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer {
      */
     @Override
     public void doStart() throws Exception {
-        _deployed = new ArrayList<Context>();
+        _deployed = new ArrayList<ServletContextHandler>();
         scan();
 
     }
@@ -162,7 +163,7 @@ public class AndroidWebAppDeployer extends WebAppDeployer {
 
             // create a webapp
             WebAppContext wah = null;
-            HandlerContainer contexts = getContexts();
+            HandlerCollection contexts = getContexts();
             if ((contexts instanceof ContextHandlerCollection)
                     && WebAppContext.class.isAssignableFrom(((ContextHandlerCollection) contexts).getContextClass())) {
                 try {
@@ -198,6 +199,8 @@ public class AndroidWebAppDeployer extends WebAppDeployer {
             Log.debug("AndroidWebAppDeployer: prepared " + app.toString());
             contexts.addHandler(wah);
             _deployed.add(wah);
+            //jetty-7.3.0 onwards need to start explicitly due to different startup time ordering
+            wah.start();
         }
     }
 

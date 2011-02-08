@@ -33,8 +33,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.util.IO;
-import org.mortbay.util.URIUtil;
+import org.eclipse.jetty.util.IO;
+import org.eclipse.jetty.util.URIUtil;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
