@@ -12,9 +12,6 @@
    <modules>
        <module>webapps/console</module>
        <module>webapps/hello</module>
-<!--
-       <module>webapps/chat</module>
--->
        <module>i-jetty-server</module>
        <module>i-jetty-ui</module>
    </modules>

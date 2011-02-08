@@ -78,8 +78,8 @@ public class User
         {
             return null;
         }
-        Uri uri = Contacts.People.createPersonInMyContactsGroup(resolver,values);
-        //Uri uri = resolver.insert(Contacts.People.CONTENT_URI, values);
+        //Uri uri = Contacts.People.createPersonInMyContactsGroup(resolver,values);
+        Uri uri = resolver.insert(Contacts.People.CONTENT_URI, values);
         return String.valueOf(ContentUris.parseId(uri));
     }
 

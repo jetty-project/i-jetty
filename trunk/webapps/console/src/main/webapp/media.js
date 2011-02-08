@@ -103,7 +103,7 @@ var Media =
                     
                     html += "</p></div>";
                 } else {
-                    html += "<li><a href='/console/media/db/fetch/" + item.type + "/" + item.id + ">" + item.title + "</a></li>";
+                    html += "<li><a href='/console/media/db/fetch/" + item.type + "/" + item.location+ "/" + item.id + "'>" + item.title + "</a></li>";
                 }
             }
             
