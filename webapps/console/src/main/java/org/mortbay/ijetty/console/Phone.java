@@ -20,6 +20,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Contacts;
+import android.util.Log;
 
 public class Phone
 {
@@ -93,15 +94,12 @@ public class Phone
             return null;
         }
 
-        String[] whereArgs = new String[]
-        { userId };
+        String[] whereArgs = new String[]{ userId };
         StringBuilder where = new StringBuilder();
-        if (AndroidInfo.isOldContactsSystem())
-        {
-            where.append("people.");
-        }
-        where.append(android.provider.BaseColumns._ID);
+
+        where.append(Contacts.Phones.PERSON_ID);
         where.append(" = ?");
+        Log.i("Jetty", "getPhones where="+where.toString());
         return new PhoneCollection(resolver.query(Contacts.Phones.CONTENT_URI,phonesProjection,where.toString(),whereArgs,Contacts.PhonesColumns.TYPE + " ASC"));
     }
 
