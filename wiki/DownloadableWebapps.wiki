@@ -42,3 +42,7 @@ That's all you need to do for a simple webapp that uses no libraries. For more c
 The "Chat" web application is a much more sophisticated beast than "HelloWorld". It uses 3rd party java libraries, such as the [http://jetty.mortbay.org Jetty] implementation of the [http://docs.codehaus.org/display/JETTY/Cometd+(aka+Bayeux) cometd Bayeux protocol], along with the [http://cometdproject.dojotoolkit.org/documentation/cometd-dojox dojox.cometd] javascript library to implement the now-classic Ajax chat room. 
 
 Again, this is essentially a straight-forward webapp, with the only added complication that the 3rd party jars need to be dex-ified. Looking at the [http://code.google.com/p/i-jetty/source/browse/trunk/modules/chat/pom.xml pom.xml] for the Chat application, you'll see that prior to the 2 steps outlined above in the HelloWorld app, the build first unpacks the classes from the dependency jars. Thus, during the `dx` step, all classes - both those of the webapp and those from the libraries it uses - are all compiled into the `classes.dex` and then `classes.zip` file.
+
+===Other Examples===
+
+[http://www.hybridserverpages.com HybridServerPages] has a Sample application permanently running on http://www.hybridjava.com:8080/HJ_Sample/, which can be run under i-jetty on Android. It is downloadable via the web or via i-jetty's *Download* feature from http://www.hybridjava.com:8080/HJ.war.
