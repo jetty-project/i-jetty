@@ -20,12 +20,15 @@
     <string name="retry">Retry</string>
     <string name="url">URL</string>
     <string name="console">Console</string>
-    <string name="non_ssl_category">Non SSL Port</string>
-    <string name="ssl_category">SSL Port</string>
+    <string name="i_jetty_information">i-jetty</string>
+    <string name="non_ssl_category">HTTP Connector</string>
+    <string name="ssl_category">HTTPS Connector</string>
     <string name="console_category">Console</string>
-    <string name="pref_nio_value">false</string>
+    <string name="pref_nio_value">true</string>
     <string name="pref_nio_title">Use NIO</string>
     <string name="pref_nio_key">org.mortbay.ijetty.pref_nio</string>
+    <string name="pref_ssl_nio_key">org.mortbay.ijetty.pref_ssl_nio</string>
+    <string name="pref_ssl_nio_value">true</string>
     <string name="pref_ssl_value">false</string>
     <string name="pref_ssl_title">Use SSL</string>
     <string name="pref_ssl_key">org.mortbay.ijetty.pref_ssl</string>
@@ -68,6 +71,7 @@
     <string name="pref_console_pwd_title">Edit Console Password</string>
     <string name="pref_console_pwd_key">org.mortbay.ijetty.pref.pwd</string>
     <string name="edit_preferences">Edit IJetty Settings</string>
+    <string name="connector_settings">Connector settings</string>
     <string name="webapp_exists">Already Exists</string>
     <string name="download_fail">Download Failed.</string>
     <string name="download_success">Web app installed.</string>

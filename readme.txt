@@ -7,9 +7,9 @@ Building  from Source
 Depedencies
 -----------
 * Subversion
-* Java 1.5 (or 1.6, but only report bugs if they occur with 1.5)
+* Java 1.6 
 * Maven
-* Google Android SDK (Generation 3. sdk-r05+)
+* Google Android SDK
 
 Steps
 -----
@@ -20,27 +20,14 @@ Please see this URL for more details (and ability to browse the repository)
 1) Check out the project from code.google.com:
     $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
 
-2) Edit your maven settings.xml file to create a profile that defines the
-   location of your android sdk, and ensures that the profile is active.
-   Here's an example:
-
-<settings>
-  <profiles>
-    <profile>
-      <id>android</id>
-      <properties>
-        <android.home>/usr/local/java/android-sdk_r06-linux_86</android.home>
-      </properties>
-    </profile>
-  </profiles>
-  <activeProfiles>
-    <activeProfile>android</activeProfile>
-  </activeProfiles>
-</settings>
+2) Ensure your ANDROID_HOME environment variable is set and points to
+   your local installation of the Android SDK. Also ensure that your PATH
+   environment variable is set. For instructions on downloading and installing
+   the Android SDK, see http://developer.android.com/sdk/installing.html
 
 
 3) Go to your i-jetty-read-only directory and type "mvn clean install". This will
-   produce an adroid bundle in modules/i-jetty/target/i-jetty-debug.apk. This apk
+   produce an adroid bundle in i-jetty-ui/target/i-jetty-debug.apk. This apk
    file can then be installed to the phone or to an emulator. For help on installing
    apk bundles to the phone or the emulator, see http://developer.android.com
 
@@ -113,6 +100,7 @@ webapp.
 
 Console Web Application
 -----------------------
+TODO TODO TODO TODO 
 I-jetty comes preconfigured with a console-like web application that
 makes available the information on your phone over the web. This means
 that you can browse and control your phone from your desktop browser,

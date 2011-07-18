@@ -25,12 +25,12 @@
         </configuration>
       </plugin>
 
+          <!-- Convert the compiled classes into a clases.dex. -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.1</version>
         <executions>
-          <!-- Convert the compiled classes into a clases.dex. -->
           <execution>
             <id>generate-dex</id>
             <phase>process-classes</phase>
@@ -38,9 +38,12 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>${android.home}/${android.platform}/tools/dx</executable>
+              <!-- executable>${env.ANDROID_HOME}/platform-tools/dx</executable -->
+              <executable>java</executable>
               <arguments>
-                <!--<argument>-JXmx1024M</argument>-->
+               <!-- <argument>-JXmx1024M</argument> -->
+                <argument>-jar</argument>
+                <argument>${env.ANDROID_HOME}/platform-tools/lib/dx.jar</argument>
                 <argument>--dex</argument>
                 <argument>--verbose</argument>
                 <argument>--core-library</argument>
@@ -86,9 +89,10 @@
      </dependency>
 
     <dependency>
-      <groupId>android</groupId>
+      <groupId>com.google.android</groupId>
       <artifactId>android</artifactId>
-      <version>${android.sdk.version}</version>
+      <version>${android.version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>

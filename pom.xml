@@ -10,30 +10,38 @@
    <description>Jetty on Android</description>
 
    <modules>
+<!--
        <module>webapps/console</module>
        <module>webapps/hello</module>
+-->
        <module>i-jetty-server</module>
        <module>i-jetty-ui</module>
    </modules>
 
    <properties>
-
-     <jetty.version>7.3.0.v20110203</jetty.version>
+     <android.version>1.6_r2</android.version>
+     <!-- jetty.version>7.3.0.v20110203</jetty.version -->
+     <jetty.version>7.5.0-SNAPSHOT</jetty.version>
      <servlet.version>2.5-20081211</servlet.version>
      <android.sdk.version>4</android.sdk.version>
      <android.platform>platforms/android-${android.sdk.version}</android.platform>
    </properties>
 
-   <dependencyManagement>
-     <dependencies>
-        <dependency>
-          <groupId>android</groupId>
-          <artifactId>android</artifactId>
-          <version>${android.sdk.version}</version>
-          <scope>system</scope>
-          <systemPath>${android.home}${file.separator}${android.platform}${file.separator}android.jar</systemPath>
-        </dependency>
-      </dependencies>
-   </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3</version>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>
