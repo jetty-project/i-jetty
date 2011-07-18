@@ -37,8 +37,7 @@
       android:name=".SdCardUnavailableActivity"
       android:theme="@style/Theme.IJetty" />
     <service
-      android:name=".IJettyService"
-      android:process=":remote" />
+      android:name=".IJettyService"/>
   </application>
 
   <uses-permission

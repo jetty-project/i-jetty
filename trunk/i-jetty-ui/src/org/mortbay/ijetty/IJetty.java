@@ -26,6 +26,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 
 import org.eclipse.jetty.util.IO;
@@ -36,8 +37,10 @@ import org.mortbay.ijetty.util.IJettyToast;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
@@ -69,6 +72,10 @@ public class IJetty extends Activity
         }
     }
     private static final String TAG = "Jetty";
+    
+    public static final String __START_ACTION = "org.mortbay.ijetty.start";
+    public static final String __STOP_ACTION = "org.mortbay.ijetty.stop";
+    
     public static final String __PORT = "org.mortbay.ijetty.port";
     public static final String __NIO = "org.mortbay.ijetty.nio";
     public static final String __SSL = "org.mortbay.ijetty.ssl";
@@ -93,10 +100,14 @@ public class IJetty extends Activity
 
     
     public static final File __JETTY_DIR;
-    
+    private Button startButton;
+    private Button stopButton;
+    private Button configButton;
+    private TextView footer;
+    private TextView info;
     private TextView console;
     private ScrollView consoleScroller;
-    private StringBuilder out = new StringBuilder();
+    private StringBuilder consoleBuffer = new StringBuilder();
     private Runnable scrollTask;
     private ProgressDialog progressDialog;
     private Thread progressThread;
@@ -232,7 +243,7 @@ public class IJetty extends Activity
                 }
                 catch (Exception e)
                 {
-                    Log.e(TAG,"Error loading realm.propeties",e);
+                    Log.e(TAG,"Error loading realm.properties",e);
                 }
             }
             sendProgressUpdate(50);
@@ -267,25 +278,6 @@ public class IJetty extends Activity
                 Log.i(TAG,contextsDir + " exists");
             }
             sendProgressUpdate(70);
-            
-            //unpack the console war, but don't make a context.xml for it
-            //Must be deployed by webapp deployer to get the Android ContentResolver
-            //setting.
-            File consoleWar = new File(webappsDir,"console");
-            if (updateNeeded)
-            {
-                Installer.deleteWebapp(consoleWar);
-                Log.i(TAG,"Cleaned console webapp for update");
-            }
-
-            boolean exists = consoleWar.exists();
-            String[] files = consoleWar.list();
-            if (!exists || (files == null) || (files.length == 0))
-            {
-                InputStream is = IJetty.this.getClassLoader().getResourceAsStream("console.war");
-                Installer.install(is,"/console",webappsDir,"console",false);
-                Log.i(TAG,"Loaded console webapp");
-            }
 
             try
             {
@@ -307,6 +299,9 @@ public class IJetty extends Activity
     static
     {
         __JETTY_DIR = new File(Environment.getExternalStorageDirectory(),"jetty"); 
+        // Ensure parsing is not validating - does not work with android
+        System.setProperty("org.eclipse.jetty.xml.XmlParser.Validating","false");
+
         // Bridge Jetty logging to Android logging
         System.setProperty("org.eclipse.jetty.util.log.class","org.mortbay.ijetty.AndroidLog");
         org.eclipse.jetty.util.log.Log.setLog(new AndroidLog());
@@ -328,20 +323,30 @@ public class IJetty extends Activity
  
         };
     }
+    
+    public String formatJettyInfoLine (String format, Object ... args)
+    {
+        String ms = "";
+        if (format != null)
+            ms = String.format(format, args);
+        return ms+"<br/>";
+    }
+    
+   
 
     public void consolePrint(String format, Object... args)
     {
         String msg = String.format(format,args);
         if (msg.length() > 0)
         {
-            out.append(msg).append("<br/>");
-            console.setText(Html.fromHtml(out.toString()));
+            consoleBuffer.append(msg).append("<br/>");
+            console.setText(Html.fromHtml(consoleBuffer.toString()));
             Log.i(TAG,msg); // Only interested in non-empty lines being output to Log
         }
         else
         {
-            out.append(msg).append("<br/>");
-            console.setText(Html.fromHtml(out.toString()));
+            consoleBuffer.append(msg).append("<br/>");
+            console.setText(Html.fromHtml(consoleBuffer.toString()));
         }
 
         if (scrollTask == null)
@@ -351,6 +356,8 @@ public class IJetty extends Activity
 
         consoleScroller.post(scrollTask);
     }
+    
+    
 
     protected int getStoredJettyVersion()
     {
@@ -397,11 +404,58 @@ public class IJetty extends Activity
     public void onCreate(Bundle icicle)
     {
         super.onCreate(icicle);
-       
+        
         setContentView(R.layout.jetty_controller);
+        
+        startButton = (Button)findViewById(R.id.start);
+        stopButton = (Button)findViewById(R.id.stop);
+        configButton = (Button)findViewById(R.id.config);
+        final Button downloadButton = (Button)findViewById(R.id.download);
+        
+        
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(__START_ACTION);
+        filter.addAction(__STOP_ACTION);
+        filter.addCategory("default");
+
+        registerReceiver(new BroadcastReceiver()
+        {
+
+            public void onReceive(Context context, Intent intent)
+            {
+                if (__START_ACTION.equalsIgnoreCase(intent.getAction()))
+                {
+                    startButton.setEnabled(false);
+                    configButton.setEnabled(false);
+                    stopButton.setEnabled(true);
+                    consolePrint("<br/>Started Jetty at %s", new Date());
+                    String[] connectors = intent.getExtras().getStringArray("connectors");
+                    if (null != connectors)
+                    {
+                        for (int i=0;i<connectors.length;i++)
+                            consolePrint(connectors[i]);
+                    }  
+                    
+                    printNetworkInterfaces();
+                    
+                    if (AndroidInfo.isOnEmulator(IJetty.this))
+                        consolePrint("Set up port forwarding to see i-jetty outside of the emulator.");
+                }
+                else if (__STOP_ACTION.equalsIgnoreCase(intent.getAction()))
+                {
+                    startButton.setEnabled(true);
+                    configButton.setEnabled(true);
+                    stopButton.setEnabled(false);
+                    consolePrint("<br/> Jetty stopped at %s",new Date());
+                }                   
+            }
+            
+        }, filter);
+       
+
+     
 
         // Watch for button clicks.
-        final Button startButton = (Button)findViewById(R.id.start);
         startButton.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
@@ -410,8 +464,6 @@ public class IJetty extends Activity
                     IJettyToast.showQuickToast(IJetty.this,R.string.loading);
                 else 
                 {
-                    printServerUrls();
-
                     //TODO get these values from editable UI elements
                     Intent intent = new Intent(IJetty.this,IJettyService.class);
                     intent.putExtra(__PORT,__PORT_DEFAULT);
@@ -423,7 +475,6 @@ public class IJetty extends Activity
             }
         });
 
-        Button stopButton = (Button)findViewById(R.id.stop);
         stopButton.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
@@ -432,7 +483,7 @@ public class IJetty extends Activity
             }
         });
 
-        Button configButton = (Button)findViewById(R.id.config);
+        
         configButton.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
@@ -441,7 +492,7 @@ public class IJetty extends Activity
             }
         });
 
-        Button downloadButton = (Button)findViewById(R.id.download);
+ 
         downloadButton.setOnClickListener(new OnClickListener()
         {
             public void onClick(View v)
@@ -450,29 +501,29 @@ public class IJetty extends Activity
             }
         });
 
+        info = (TextView)findViewById(R.id.info);
+        footer = (TextView)findViewById(R.id.footer);
         console = (TextView)findViewById(R.id.console);
         consoleScroller = (ScrollView)findViewById(R.id.consoleScroller);
 
+        StringBuilder infoBuffer = new StringBuilder(); 
         try
         {
-            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(),0);
-            consolePrint("i-jetty version %s (%s)",pi.versionName,pi.versionCode);
+            PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(),0);        
+            infoBuffer.append(formatJettyInfoLine ("i-jetty version %s (%s)",pi.versionName,pi.versionCode));
         }
         catch (NameNotFoundException e)
         {
-            consolePrint("Unable to determine running i-jetty version");
+            infoBuffer.append(formatJettyInfoLine ("i-jetty version unknown"));
         }
+        infoBuffer.append(formatJettyInfoLine("On %s using Android version %s",AndroidInfo.getDeviceModel(), AndroidInfo.getOSVersion()));         
+        info.setText(Html.fromHtml(infoBuffer.toString())); 
 
-        consolePrint("On %s",AndroidInfo.getDeviceModel());
-        consolePrint("OS version %s",AndroidInfo.getOSVersion());
-        consolePrint("");
-        consolePrint("Project: http://code.google.com/p/i-jetty");
-        consolePrint("Server: http://www.eclipse.org/jetty");
-        consolePrint("Commercial Support: ");
-        consolePrint("&nbsp;  http://www.intalio.com/jetty/services");
-        consolePrint("");
-
-        printNetworkInterfaces();
+        StringBuilder footerBuffer = new StringBuilder();
+        footerBuffer.append("<b>Project:</b> <a href=\"http://code.google.com/p/i-jetty\">http://code.google.com/p/i-jetty</a> <br/>");
+        footerBuffer.append("<b>Server:</b> http://www.eclipse.org/jetty <br/>");
+        footerBuffer.append("<b>Support:</b> http://www.intalio.com/jetty/services <br/>");
+        footer.setText(Html.fromHtml(footerBuffer.toString()));
     }
 
     public static void show(Context context)
@@ -501,6 +552,20 @@ public class IJetty extends Activity
                 setupJetty();
             }
         }
+        
+        
+        if (IJettyService.isRunning())
+        {
+            startButton.setEnabled(false);
+            configButton.setEnabled(false);
+            stopButton.setEnabled(true);
+        }
+        else 
+        {
+            startButton.setEnabled(true);
+            configButton.setEnabled(true);
+            stopButton.setEnabled(false);
+        }
         super.onResume();
     }
     
@@ -526,7 +591,6 @@ public class IJetty extends Activity
 
     private void printNetworkInterfaces()
     {
-        consolePrint("<b>Your Network Interfaces:</b>");
         try
         {
             Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
@@ -535,53 +599,17 @@ public class IJetty extends Activity
                 Enumeration<InetAddress> iis = ni.getInetAddresses();
                 for (InetAddress ia : Collections.list(iis))
                 {
-                    consolePrint("%s: %s",ni.getDisplayName(),ia.getHostAddress());
-                    if (ia.getHostAddress().equals("10.0.2.15") && AndroidInfo.isOnEmulator(this))
-                    {
-                        consolePrint("<i>Running on Emulator</i>");
-                        consolePrint("<i>Be sure you setup emulator port forwarding.<br/>http://bit.ly/adb-port-forwarding</i>");
-                    }
+                    consoleBuffer.append(formatJettyInfoLine("Network interface: %s: %s",ni.getDisplayName(),ia.getHostAddress()));
                 }
             }
         }
         catch (SocketException e)
         {
-            consolePrint("Socket Exception: No Network Interfaces Available?");
+            Log.w(TAG, e);
         }
     }
 
-    private void printServerUrls()
-    {
-        consolePrint("");
-        consolePrint("<b>Server URLs:</b>");
-        try
-        {
-            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
-            for (NetworkInterface ni : Collections.list(nis))
-            {
-                Enumeration<InetAddress> iis = ni.getInetAddresses();
-                for (InetAddress ia : Collections.list(iis))
-                {
-                    StringBuffer url = new StringBuffer();
-                    url.append("http://").append(ia.getHostAddress());
-                    url.append(":").append(__PORT_DEFAULT);
-                    url.append("/console");
-                    if (ia.getHostAddress().equals("10.0.2.15") && AndroidInfo.isOnEmulator(this))
-                    {
-                        url.append("  <i>This URL only available on emulator itself");
-                        url.append(", setup port forwarding to see i-jetty outside of emulator.");
-                        url.append("<br/>http://bit.ly/adb-port-forwarding");
-                        url.append("</i>");
-                    }
-                    consolePrint(url.toString());
-                }
-            }
-        }
-        catch (SocketException e)
-        {
-            consolePrint("Socket Exception: No Network Interfaces Available?");
-        }
-    }
+
 
     protected void setStoredJettyVersion(int version)
     {

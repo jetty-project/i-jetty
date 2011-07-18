@@ -24,7 +24,10 @@ public class IJettyEditor extends PreferenceActivity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.ijetty_preference);
+        if (android.os.Build.VERSION.SDK_INT < 8)
+            addPreferencesFromResource(R.xml.ijetty_preference);
+        else
+            addPreferencesFromResource(R.xml.ijetty_preference_froyo);
     }
     
     public static void show(Context context) {

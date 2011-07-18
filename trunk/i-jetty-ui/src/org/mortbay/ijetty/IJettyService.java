@@ -21,17 +21,21 @@ import java.io.InputStream;
 
 import org.mortbay.ijetty.deployer.AndroidContextDeployer;
 import org.mortbay.ijetty.deployer.AndroidWebAppDeployer;
+import org.mortbay.ijetty.handler.DefaultHandler;
+import org.mortbay.ijetty.util.AndroidInfo;
 import org.mortbay.ijetty.util.IJettyToast;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.http.HttpGenerator;
 import org.eclipse.jetty.http.security.Credential;
+import org.eclipse.jetty.http.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
 
 
@@ -44,6 +48,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -59,6 +64,8 @@ import android.util.Log;
  */
 public class IJettyService extends Service
 {
+    private static final String TAG = "Jetty";
+    
     private static Resources __resources;
     private static final String CONTENT_RESOLVER_ATTRIBUTE = "org.mortbay.ijetty.contentResolver";
     private static final String ANDROID_CONTEXT_ATTRIBUTE = "org.mortbay.ijetty.context"; 
@@ -79,6 +86,8 @@ public class IJettyService extends Service
             "org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
             "org.eclipse.jetty.webapp.TagLibConfiguration" 
         };
+    
+    private static boolean __isRunning;
  
     private NotificationManager mNM;
     private Server server;
@@ -97,10 +106,33 @@ public class IJettyService extends Service
     private PackageInfo pi;
     private android.os.Handler _handler;
 
-    PowerManager.WakeLock wakeLock;
-    
+    private PowerManager.WakeLock wakeLock;
+    private final IBinder binder = new LocalBinder();
 
     
+    static 
+    {
+        __isRunning = false;
+    }
+    
+    
+    /**
+     * IJettyService always runs in-process with the IJetty activity.
+     */
+    public class LocalBinder extends Binder {
+        IJettyService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return IJettyService.this;
+        }
+    }
+    
+    
+    
+    /**
+     * JettyStarterThread
+     *
+     *
+     */
     public class JettyStarterThread extends Thread
     {
         android.os.Handler _handler;
@@ -117,12 +149,12 @@ public class IJettyService extends Service
                 startJetty();
                 sendMessage(__STARTED);
               
-                Log.i("Jetty", "Jetty started");
+                Log.i(TAG, "Jetty started");
             }
             catch (Exception e)
             {
                 sendMessage(__NOT_STARTED);
-                Log.e("Jetty", "Error starting jetty", e);
+                Log.e(TAG, "Error starting jetty", e);
                 
             }
         }
@@ -138,6 +170,11 @@ public class IJettyService extends Service
     }
     
     
+    /**
+     * JettyStopperThread
+     *
+     *
+     */
     public class JettyStopperThread extends Thread
     { 
         android.os.Handler _handler;
@@ -153,7 +190,7 @@ public class IJettyService extends Service
             {
                 sendMessage(__STOPPING);
                 stopJetty();
-                Log.i("Jetty", "Jetty stopped");
+                Log.i(TAG, "Jetty stopped");
                 sendMessage(__STOPPED);
                
             }
@@ -161,7 +198,7 @@ public class IJettyService extends Service
             {
                 
                 sendMessage(__NOT_STOPPED);
-                Log.e("Jetty", "Error stopping jetty", e);
+                Log.e(TAG, "Error stopping jetty", e);
             }
         }
         
@@ -175,7 +212,31 @@ public class IJettyService extends Service
         }
     }
     
+
+    /**
+     * Hack to get around bug in ResourceBundles
+     * 
+     * @param id
+     * @return
+     */
+    public static InputStream getStreamToRawResource(int id)
+    {
+        if (__resources != null)
+            return __resources.openRawResource(id);
+        else
+            return null;
+    }
+
+
     
+    public static boolean isRunning ()
+    {
+        return __isRunning;
+    }
+    
+    /**
+     * 
+     */
     public IJettyService()
     {
         super();
@@ -202,6 +263,21 @@ public class IJettyService extends Service
                                 text, contentIntent);
 
                         mNM.notify(R.string.jetty_started, notification);
+                        
+                        Intent startIntent = new Intent(IJetty.__START_ACTION);
+                        startIntent.addCategory("default");
+                        Connector[] connectors = server.getConnectors();
+                        if (connectors != null)
+                        {
+                            String[] tmp = new String[connectors.length];
+                            
+                            for (int i=0;i<connectors.length;i++)
+                                tmp[i] = connectors[i].toString();
+
+                            startIntent.putExtra("connectors", tmp);
+                        }
+                       
+                        sendBroadcast(startIntent);
                         break;
                     }
                     case __NOT_STARTED:
@@ -216,7 +292,9 @@ public class IJettyService extends Service
                         mNM.cancel(R.string.jetty_started);
                         // Tell the user we stopped.
                         IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_stopped);
-                       
+                        Intent stopIntent = new Intent(IJetty.__STOP_ACTION);
+                        stopIntent.addCategory("default");
+                        sendBroadcast(stopIntent);
                         break;
                     }
                     
@@ -241,6 +319,15 @@ public class IJettyService extends Service
  
         };
     }
+    
+    
+
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
     /** 
      * Android Service create
      * @see android.app.Service#onCreate()
@@ -255,7 +342,7 @@ public class IJettyService extends Service
         }
         catch (Exception e)
         {
-            Log.e("Jetty", "Unable to determine running jetty version");
+            Log.e(TAG, "Unable to determine running jetty version");
         }
     }
 
@@ -329,13 +416,12 @@ public class IJettyService extends Service
             wakeLock.acquire();
 
             new JettyStarterThread(_handler).start();
-
  
             super.onStart(intent, startId);
         }
         catch (Exception e)
         {
-            Log.e("Jetty", "Error starting jetty", e);
+            Log.e(TAG, "Error starting jetty", e);
             IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_started);
         }
     }
@@ -362,13 +448,13 @@ public class IJettyService extends Service
             }
             else
             {
-                Log.i("Jetty", "Jetty not running");
+                Log.i(TAG, "Jetty not running");
                 IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_running);
             }
         }
         catch (Exception e)
         {
-            Log.e("Jetty", "Error stopping jetty", e);
+            Log.e(TAG, "Error stopping jetty", e);
             IJettyToast.showServiceToast(IJettyService.this,R.string.jetty_not_stopped);
         }
     }
@@ -379,29 +465,10 @@ public class IJettyService extends Service
 
     public void onLowMemory()
     {
-        Log.i("Jetty", "Low on memory");
+        Log.i(TAG, "Low on memory");
         super.onLowMemory();
     }
 
-
-    /**
-     * Hack to get around bug in ResourceBundles
-     * 
-     * @param id
-     * @return
-     */
-    public static InputStream getStreamToRawResource(int id)
-    {
-        if (__resources != null)
-            return __resources.openRawResource(id);
-        else
-            return null;
-    }
-
-    public IBinder onBind(Intent intent)
-    {
-        return null;
-    }
 
     
     /**
@@ -413,6 +480,7 @@ public class IJettyService extends Service
         return server;
     }
     
+
     
     protected Server newServer()
     {
@@ -435,32 +503,43 @@ public class IJettyService extends Service
                 nioConnector.setUseDirectBuffers(false);
                 nioConnector.setPort(_port);
                 server.addConnector(nioConnector);
+                Log.i(TAG, "Configured "+SelectChannelConnector.class.getName()+" on port "+_port);
             }
             else
             {
                 SocketConnector bioConnector = new SocketConnector();
                 bioConnector.setPort(_port);
-                //bioConnector.setMaxIdleTime(3000);
                 server.addConnector(bioConnector);
+                Log.i(TAG, "Configured "+SocketConnector.class.getName()+" on port "+_port);
             }
 
             if (_useSSL)
             {
-              SslSocketConnector sslConnector = new SslSocketConnector();
-              sslConnector.setPort(_sslPort);
-              //sslConnector.setKeystore("/sdcard/jetty/etc/keystore");
-              sslConnector.setKeystore(_keystoreFile);
-              sslConnector.setKeystoreType("bks");
-              //sslConnector.setTruststore("/sdcard/jetty/etc/keystore");
-              sslConnector.setTruststore(_truststoreFile);
-              //sslConnector.setPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-              sslConnector.setPassword(_keystorePassword);
-              //sslConnector.setKeyPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-              sslConnector.setKeyPassword(_keymgrPassword);
-              //sslConnector.setTrustPassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-              sslConnector.setTrustPassword(_truststorePassword);
-              sslConnector.setTruststoreType("bks");
-              server.addConnector(sslConnector);
+                SslContextFactory sslContextFactory = new SslContextFactory();
+                sslContextFactory.setKeyStore(_keystoreFile);
+                sslContextFactory.setTrustStore(_truststoreFile);
+                sslContextFactory.setKeyStorePassword(_keystorePassword);
+                sslContextFactory.setKeyManagerPassword(_keymgrPassword);
+                sslContextFactory.setKeyStoreType("bks");
+                sslContextFactory.setTrustStorePassword(_truststorePassword);
+                sslContextFactory.setTrustStoreType("bks");
+
+                //TODO SslSelectChannelConnector does not work on android 1.6, but does work on android 2.2
+                if (_useNIO)
+                {
+                    SslSelectChannelConnector sslConnector = new SslSelectChannelConnector(sslContextFactory);
+                    sslConnector.setPort(_sslPort);
+                    server.addConnector(sslConnector);
+                    Log.i(TAG, "Configured "+sslConnector.getClass().getName()+" on port "+_sslPort); 
+                }
+                else
+                {
+                    SslSocketConnector sslConnector = new SslSocketConnector(sslContextFactory);
+                    sslConnector.setPort(_sslPort);
+                    server.addConnector(sslConnector);
+                    Log.i(TAG, "Configured "+sslConnector.getClass().getName()+" on port "+_sslPort); 
+                }
+               
             }
         }
     }
@@ -483,10 +562,9 @@ public class IJettyService extends Service
      
         File jettyDir = IJetty.__JETTY_DIR;
         
-        // Load any webapps we find on the card.
         if (jettyDir.exists())
         {
-            // Deploy any static webapps we have.
+            // If the webapps dir exists, start the static webapp deployer
             if (new File(jettyDir, IJetty.__WEBAPP_DIR).exists())
             {
                 staticDeployer.setWebAppDir(IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR);
@@ -507,18 +585,18 @@ public class IJettyService extends Service
                 contextDeployer.setAttribute(ANDROID_CONTEXT_ATTRIBUTE, (Context) IJettyService.this);             
                 contextDeployer.setContexts(contexts);
             }
+            
+            if (server != null)
+            {
+                Log.i(TAG, "Adding context deployer: ");
+                server.addBean(contextDeployer);
+                Log.i(TAG, "Adding webapp deployer: ");
+                server.addBean(staticDeployer); 
+            }
         }
         else
         {
-            Log.w("Jetty", "Not loading any webapps - none on SD card.");
-        }
-
-        if (server != null)
-        {
-            Log.i("Jetty", "Adding context deployer: ");
-            server.addBean(contextDeployer);
-            Log.i("Jetty", "Adding webapp deployer: ");
-            server.addBean(staticDeployer); 
+            Log.w(TAG, "Not loading any webapps - none on SD card.");
         }
     }
     
@@ -551,8 +629,10 @@ public class IJettyService extends Service
         configureHandlers();
         configureDeployers();
         configureRealm ();
-
+    
         server.start();
+        
+        __isRunning = true;
         
         //TODO
         // Less than ideal solution to the problem that dalvik doesn't know about manifests of jars.
@@ -566,15 +646,18 @@ public class IJettyService extends Service
     {
         try
         {
-            Log.i("Jetty", "Jetty stopping");
+            Log.i(TAG, "Jetty stopping");
             server.stop();
-            Log.i("Jetty", "Jetty server stopped");
+            Log.i(TAG, "Jetty server stopped");
             server = null;
             __resources = null;
+            __isRunning = false;
         }
         finally
         {
-            Log.i("Jetty","Finally stopped");
+            Log.i(TAG,"Finally stopped");
         }
     }
+    
+    
 }

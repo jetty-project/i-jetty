@@ -4,4 +4,5 @@
     <color name="translucent_dark">#99000000</color>
     <color name="translucenter_dark">#bf000000</color>
     <color name="bright_foreground_dark">#ffffffff</color>
+    <color name="mid_blue">#3658bf</color>
 </resources>
