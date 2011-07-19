@@ -10,17 +10,12 @@
    <description>Jetty on Android</description>
 
    <modules>
-<!--
-       <module>webapps/console</module>
-       <module>webapps/hello</module>
--->
        <module>i-jetty-server</module>
        <module>i-jetty-ui</module>
    </modules>
 
    <properties>
      <android.version>1.6_r2</android.version>
-     <!-- jetty.version>7.3.0.v20110203</jetty.version -->
      <jetty.version>7.5.0-SNAPSHOT</jetty.version>
      <servlet.version>2.5-20081211</servlet.version>
      <android.sdk.version>4</android.sdk.version>
