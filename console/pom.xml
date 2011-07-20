@@ -11,6 +11,7 @@
   <description>Parent project for console</description>
   <modules>
     <module>webapp</module>
+    <module>apk</module>
   </modules>
   <properties>
      <android.version>1.6_r2</android.version>
