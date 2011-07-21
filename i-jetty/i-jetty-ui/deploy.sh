@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+#
+# deploy.sh
+#  
+# A convenience script to install the i-jetty apk to
+# connected devices.
+#
 
 DEVICEID=$1
 
