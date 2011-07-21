@@ -1,8 +1,13 @@
 package org.mortbay.ijetty.console;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+
+import org.eclipse.jetty.util.IO;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,6 +29,11 @@ import android.widget.TextView;
 
 
 
+/**
+ * InstallerActivity
+ *
+ *
+ */
 public class InstallerActivity extends Activity
 {
     private static final String TAG = "Console.Inst";
@@ -45,6 +55,12 @@ public class InstallerActivity extends Activity
     private boolean cleanInstall = false;
     
     
+    /**
+     * InstallerThread
+     *  
+     *  Perform the installation.
+     *
+     */
     class InstallerThread extends Thread
     { 
         private Handler handler;
@@ -70,35 +86,19 @@ public class InstallerActivity extends Activity
             if (cleanInstall)
                 delete(getWebApp());
 
-            sendProgressUpdate(30);
+            sendProgressUpdate(50);
 
-            //extract war file from apk
-            InputStream is = getResources().openRawResource(R.raw.console);
-            long count = 0;
             try
             {
-                int done = -1;
-                do
-                {
-                    done = is.read();
-                    if (done >= 0)
-                        ++count;
-                    
-                }while (done >=0);
+                extract (getResources().openRawResource(R.raw.console));
+                sendProgressUpdate(100);
             }
-            catch (IOException e)
+            catch (Exception e)
             {
-                Log.e(TAG, "IO error", e);
+                error = getString(R.string.errorExtracting)+" "+e.getMessage();
+                sendProgressUpdate(100);
+                return;
             }
-
-            Log.i(TAG, "console.war size="+count);
-            
-            //TODO 
-            sendProgressUpdate(60);
-
-            //unpack war to jetty webapps dir
-            //TODO
-            sendProgressUpdate(100);
         }
     }
 
@@ -344,11 +344,80 @@ public class InstallerActivity extends Activity
                 progressDialog.setProgress(total);
                 if (total >= 100)
                 {
-                    progressDialog.dismiss();                    
-                    showDialog(FINISH_DIALOG_ID);
+                    progressDialog.dismiss();    
+                    if (error == null)
+                        showDialog(FINISH_DIALOG_ID);
+                    else
+                        showDialog(ERROR_DIALOG_ID);
                 }
             }; 
         });
         thread.start();
+    }
+    
+    
+    
+    /**
+     * Extract the war.
+     * 
+     * @param warStream
+     * @throws IOException
+     */
+    public void extract (InputStream warStream) 
+    throws IOException
+    {
+        if (warStream == null)
+            throw new IllegalArgumentException ("No war file found");
+
+        File jettyDir = getJettyInstallDir();
+        if (jettyDir == null)
+        {
+            throw new IllegalStateException (getString(R.string.jettyNotInstalled));
+        }
+        
+        File webappsDir = new File (jettyDir, "webapps");
+        if (!webappsDir.exists())
+        {
+            throw new IllegalStateException (getString(R.string.jettyNotInstalled));
+        }
+        
+        File webapp = new File (webappsDir, "console");
+        JarInputStream jin = new JarInputStream(warStream);
+        JarEntry entry;
+        while((entry=jin.getNextJarEntry())!=null)
+        {
+            String entryName = entry.getName();             
+            File file=new File(webapp,entryName);
+            if (entry.isDirectory())
+            {
+                // Make directory
+                if (!file.exists())
+                    file.mkdirs();
+            }
+            else
+            {
+                // make directory (some jars don't list dirs)
+                File dir = new File(file.getParent());
+                if (!dir.exists())
+                    dir.mkdirs();
+
+                // Make file
+                FileOutputStream fout = null;
+                try
+                {
+                    fout = new FileOutputStream(file);
+                    IO.copy(jin,fout);
+                }
+                finally
+                {
+                    IO.close(fout);
+                }
+
+                // touch the file.
+                if (entry.getTime()>=0)
+                    file.setLastModified(entry.getTime());
+            }
+        }
+        IO.close(jin);
     }
 }

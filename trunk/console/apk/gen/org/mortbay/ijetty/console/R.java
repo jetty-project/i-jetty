@@ -38,9 +38,11 @@ public final class R {
         public static final int alreadyInstalled=0x7f060008;
         public static final int app_name=0x7f060000;
         public static final int defaultError=0x7f060007;
+        public static final int errorExtracting=0x7f06000e;
         public static final int info=0x7f060005;
         public static final int install=0x7f060002;
         public static final int installing=0x7f06000c;
+        public static final int jettyNotInstalled=0x7f06000f;
         public static final int no=0x7f06000a;
         public static final int notInstalled=0x7f060006;
         public static final int ok=0x7f06000b;

@@ -13,6 +13,7 @@
    <name>I-Jetty :: Console Android Installer</name>
    <description>Installer for I-Jetty Console on Android</description>
    <properties>
+       <jetty.version>7.4.4.v20110707</jetty.version>
    </properties>
    <dependencies>
       <dependency>
@@ -20,6 +21,11 @@
          <artifactId>android</artifactId>
          <version>${android.version}</version>
          <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-util</artifactId>
+        <version>${jetty.version}</version>
       </dependency>
       <dependency>
         <groupId>org.mortbay.ijetty</groupId>
@@ -76,7 +82,7 @@
               <extractDuplicates>true</extractDuplicates> 
               <undeployBeforeDeploy>true</undeployBeforeDeploy>
               <resourceOverlayDirectories>
-              <resourceOverlayDirectory>${project.build.directory}/res-overlay</resourceOverlayDirectory>
+                <resourceOverlayDirectory>${project.build.directory}/res-overlay</resourceOverlayDirectory>
               </resourceOverlayDirectories>
           </configuration>
           <executions>
