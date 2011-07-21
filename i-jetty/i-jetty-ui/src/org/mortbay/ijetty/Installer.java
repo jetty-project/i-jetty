@@ -33,6 +33,7 @@ import android.util.Log;
 
 public class Installer
 { 
+    private static final String TAG = "Jetty.install";
     
 
                                         
@@ -101,18 +102,18 @@ public class Installer
             }
             catch (Exception e)
             {
-                Log.e("Jetty", "Error inflating console.war", e);
+                Log.e(TAG, "Error inflating console.war", e);
             }
         }
         else
-            Log.e("Jetty", "No war");
+            Log.e(TAG, "No war");
     }
     
     
     public static void installContextFile (String webappName, String contextPath) 
     throws FileNotFoundException
     {
-        Log.i("Jetty", "Installing "+webappName+".xml");
+        Log.i(TAG, "Installing "+webappName+".xml");
         contextPath = contextPath == null ? webappName : contextPath;           
         contextPath = contextPath.equals("/") ? "root" : contextPath;
         contextPath = contextPath.startsWith("/") ? contextPath : "/"+contextPath;
@@ -144,7 +145,7 @@ public class Installer
         File contextDir = new File (IJetty.__JETTY_DIR+"/"+IJetty.__CONTEXTS_DIR); 
         File contextFile = new File (contextDir, webappName+".xml");
         if (!tmpContextFile.renameTo(contextFile))
-            Log.e("Jetty", "mv "+tmpContextFile.getAbsolutePath()+" "+contextFile.getAbsolutePath()+" failed");
+            Log.e(TAG, "mv "+tmpContextFile.getAbsolutePath()+" "+contextFile.getAbsolutePath()+" failed");
     }
 
     
@@ -172,10 +173,10 @@ public class Installer
         
         if (webapp.exists())
             deleteWebapp(webapp);
-        Log.i("Jetty", "deleted "+IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR+"/"+webappName);
+        Log.i(TAG, "deleted "+IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR+"/"+webappName);
         
         warFile.delete();
-        Log.i("Jetty", "deleted "+warFile.getAbsolutePath());
+        Log.i(TAG, "deleted "+warFile.getAbsolutePath());
     }
 
     public static void deleteWebapp (File webapp)
