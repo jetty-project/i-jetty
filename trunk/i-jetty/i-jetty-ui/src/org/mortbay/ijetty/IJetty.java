@@ -64,13 +64,7 @@ import android.widget.TextView;
  */
 public class IJetty extends Activity
 {
-    class ConsoleScrollTask implements Runnable
-    {
-        public void run()
-        {
-            consoleScroller.fullScroll(View.FOCUS_DOWN);
-        }
-    }
+
     private static final String TAG = "Jetty";
     
     public static final String __START_ACTION = "org.mortbay.ijetty.start";
@@ -112,7 +106,15 @@ public class IJetty extends Activity
     private ProgressDialog progressDialog;
     private Thread progressThread;
     private Handler handler;
-
+    
+    class ConsoleScrollTask implements Runnable
+    {
+        public void run()
+        {
+            consoleScroller.fullScroll(View.FOCUS_DOWN);
+        }
+    }
+    
     /**
      * ProgressThread
      *
