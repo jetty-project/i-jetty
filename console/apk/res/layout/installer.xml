@@ -32,7 +32,7 @@
     android:id="@+id/scroller"
     android:paddingTop="6dp"
     android:layout_width="fill_parent"
-    android:layout_height="80dp"
+    android:layout_height="120dp"
     android:scrollbars="vertical"
     android:gravity="left"
     android:scrollbarAlwaysDrawVerticalTrack="true">  
@@ -48,6 +48,7 @@
      android:layout_width="fill_parent"
      android:layout_height="wrap_content"
      android:textAppearance="@style/H2"
+     android:textStyle="bold"
      android:gravity="left"
      android:paddingBottom="6dp"
      android:paddingTop="6dp"
@@ -69,6 +70,7 @@
     android:text="@string/install" 
     android:layout_height="wrap_content" 
     android:layout_below="@+id/heading" 
+    android:layout_gravity="center_vertical|center_horizontal"
     android:layout_width="wrap_content"/>
 
   
