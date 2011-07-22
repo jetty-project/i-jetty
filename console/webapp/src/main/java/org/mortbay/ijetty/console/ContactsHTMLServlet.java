@@ -142,7 +142,7 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
 
     protected void doDeleteUser(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
     {
-        User.delete(getContentResolver(),id);
+        Contact.delete(getContentResolver(),id);
     }
 
     /**
@@ -157,7 +157,7 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
      * @throws ServletException
      * @throws IOException
      */
-    private void doEditUser(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
+    private void doEditContact(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
     {
         String name = "";
         String notes = "";
@@ -186,7 +186,7 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
 
         if (editing)
         {
-            ContentValues user = User.get(getContentResolver(),id);
+            ContentValues user = Contact.get(getContentResolver(),id);
             if (user != null)
             {
                 name = user.getAsString(Contacts.PeopleColumns.DISPLAY_NAME);
@@ -262,7 +262,7 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
     protected void doGetUser(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {
         //query for the user's standard details
-        ContentValues values = User.get(getContentResolver(),who);
+        ContentValues values = Contact.get(getContentResolver(),who);
         formatSummaryUserDetails(values,writer);
 
         //query for all phone details
@@ -296,7 +296,7 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
         // This HTML is used for the side pane for desktop browsers that use Javascript.
         writer.println("<h1 id='pg-head' class='pageheader'>Contact List</h1>");
         // Print out the table that everyone can read.
-        User.UserCollection users = User.getAll(getContentResolver());
+        Contact.ContactCollection users = Contact.getContacts(getContentResolver());
 
         formatUserDetails(users,writer);
         users.close();
@@ -483,7 +483,7 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
      * @param users
      * @param writer
      */
-    private void formatUserDetails(User.UserCollection users, PrintWriter writer)
+    private void formatUserDetails(Contact.ContactCollection users, PrintWriter writer)
     {
         if ((users != null) && (writer != null))
         {
@@ -524,25 +524,25 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
     }
 
     @Override
-    public void handleAddUser(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public void handleAddContact(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         PrintWriter writer = response.getWriter();
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         HTMLHelper.doHeader(writer,request,response);
         HTMLHelper.doMenuBar(writer,request,response);
-        doEditUser(writer,request,response,null);
+        doEditContact(writer,request,response,null);
         HTMLHelper.doFooter(writer,request,response);
     }
 
     @Override
     public void handleDefault(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
-        handleGetUsers(request,response);
+        handleGetContacts(request,response, __DEFAULT_PG_START, __DEFAULT_PG_SIZE);
     }
 
     @Override
-    public void handleDeleteUser(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
+    public void handleDeleteContact(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
     {
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
@@ -555,19 +555,19 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
     }
 
     @Override
-    public void handleEditUser(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
+    public void handleEditContact(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
     {
         PrintWriter writer = response.getWriter();
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         HTMLHelper.doHeader(writer,request,response);
         HTMLHelper.doMenuBar(writer,request,response);
-        doEditUser(writer,request,response,who);
+        doEditContact(writer,request,response,who);
         HTMLHelper.doFooter(writer,request,response);
     }
 
     @Override
-    public void handleGetUser(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
+    public void handleGetContact(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
     {
 
         response.setContentType("text/html; charset=utf-8");
@@ -580,25 +580,25 @@ public class ContactsHTMLServlet extends AbstractContactsServlet
     }
 
     @Override
-    public void handleGetUsers(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public void handleGetContacts(HttpServletRequest request, HttpServletResponse response, int pgStart, int pgSize) throws IOException, ServletException
     {
         PrintWriter writer = response.getWriter();
         response.setContentType("text/html; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        User.UserCollection users = User.getAll(getContentResolver());
+        Contact.ContactCollection users = Contact.getContacts(getContentResolver());
         doGetUsers(writer,request,response);
         users.close();
     }
 
     @Override
-    public void handleSaveUser(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
+    public void handleSaveContact(HttpServletRequest request, HttpServletResponse response, String who) throws IOException, ServletException
     {
         response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
         response.setStatus(HttpServletResponse.SC_OK);
         HTMLHelper.doHeader(writer,request,response);
         HTMLHelper.doMenuBar(writer,request,response);
-        saveUserFormData(request,response,request.getParameter("id"));
+        saveContactFormData(request,response,request.getParameter("id"));
         HTMLHelper.doFooter(writer,request,response);
     }
 

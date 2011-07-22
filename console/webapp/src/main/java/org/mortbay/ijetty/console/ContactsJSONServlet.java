@@ -26,15 +26,24 @@ import javax.servlet.http.HttpServletResponse;
 import android.content.ContentValues;
 import android.provider.Contacts;
 
+/**
+ * ContactsJSONServlet
+ *
+ * A servlet to support restful style requests for Android Contacts.
+ * 
+ */
 public class ContactsJSONServlet extends AbstractContactsServlet
 {
     private static final long serialVersionUID = 1L;
 
+    
+    
+    
     protected void deleteUser(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
     {
         try
         {
-            User.delete(getContentResolver(),id);
+            Contact.delete(getContentResolver(),id);
         }
         catch (Exception e)
         {
@@ -127,7 +136,7 @@ public class ContactsJSONServlet extends AbstractContactsServlet
     }
 
     /**
-     * Generate a JSON representation of a user: eg.
+     * Generate a JSON representation of a Contact: eg.
      *
      * <pre>
      * {
@@ -176,11 +185,11 @@ public class ContactsJSONServlet extends AbstractContactsServlet
      * @throws ServletException
      * @throws IOException
      */
-    protected void getUser(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
+    protected void getContact (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {
         //query for the user's standard details
         writer.print("{ \"summary\" : ");
-        ContentValues values = User.get(getContentResolver(),who);
+        ContentValues values = Contact.get(getContentResolver(),who);
         getSummary(values,writer);
 
         writer.print(", \"phones\" : ");
@@ -202,16 +211,19 @@ public class ContactsJSONServlet extends AbstractContactsServlet
         writer.print(" }");
     }
 
-    private void getUsers(User.UserCollection users, PrintWriter writer)
-    {
-        writer.println("{\"version\": " + __VERSION);
-        writer.println(", \"users\": ");
+    private void getContacts (Contact.ContactCollection users, PrintWriter writer, int pgSize)
+    {        
+        writer.println("{\"version\": " + __VERSION+", ");
+        writer.println("\"total\": "+users.getTotal()+", ");
+        writer.println("\"contacts\": ");
         writer.println("[");
         if (users != null)
         {
-            int row = 0;
             ContentValues user = null;
-            while ((user = users.next()) != null)
+            int count = pgSize;
+           
+            
+            while ((pgSize <= 0 || count-- > 0) && (user = users.next()) != null)
             {
                 writer.println("{");
                 String id = user.getAsString(android.provider.BaseColumns._ID);
@@ -233,19 +245,22 @@ public class ContactsJSONServlet extends AbstractContactsServlet
     }
 
     @Override
-    public void handleAddUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void handleAddContact(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException
     {
         //No-op for JSON as putting up a form to add a user is handled by the front end
     }
 
     @Override
-    public void handleDefault(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void handleDefault(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException
     {
-        handleGetUsers(request,response);
+        handleGetContacts(request,response, __DEFAULT_PG_START, __DEFAULT_PG_SIZE);
     }
 
     @Override
-    public void handleDeleteUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
+    public void handleDeleteContact(HttpServletRequest request, HttpServletResponse response, String who)
+    throws ServletException, IOException
     {
         response.setContentType("text/json; charset=utf-8");
         PrintWriter writer = response.getWriter();
@@ -253,41 +268,45 @@ public class ContactsJSONServlet extends AbstractContactsServlet
     }
 
     @Override
-    public void handleEditUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
+    public void handleEditContact(HttpServletRequest request, HttpServletResponse response, String who)
+    throws ServletException, IOException
     {
         //No-op for JSON as putting up a form to add a user is handled by the front end
     }
 
     @Override
-    public void handleGetUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
+    public void handleGetContact(HttpServletRequest request, HttpServletResponse response, String who)
+    throws ServletException, IOException
     {
         response.setContentType("text/json; charset=utf-8");
         PrintWriter writer = response.getWriter();
-        getUser(writer,request,response,who);
+        getContact (writer,request,response,who);
         response.setStatus(HttpServletResponse.SC_OK);
         writer.write("\r\n");
         writer.close();
     }
 
     @Override
-    public void handleGetUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    public void handleGetContacts(HttpServletRequest request, HttpServletResponse response,
+                                  int pgStart, int pgSize)
+    throws ServletException, IOException
     {
         PrintWriter writer = response.getWriter();
         response.setContentType("text/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        User.UserCollection users = User.getAll(getContentResolver());
+        Contact.ContactCollection users = Contact.getContacts(getContentResolver(), pgStart, pgSize);
 
-        getUsers(users,writer);
+        getContacts(users,writer, pgSize);
         users.close();
     }
 
     @Override
-    public void handleSaveUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
+    public void handleSaveContact(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {
         //Do NOT return any data. This is because the json form submission is
         //being sent to a hidden iframe otherwise the multipart mime enctype of
         //form would cause the browser to replace the whole content of the page
         //with the response.
-        saveUserFormData(request,response,request.getParameter("id"));
+        saveContactFormData(request,response,request.getParameter("id"));
     }
 }

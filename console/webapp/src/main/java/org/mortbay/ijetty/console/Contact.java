@@ -29,19 +29,41 @@ import android.net.Uri;
 import android.provider.Contacts;
 import android.util.Log;
 
-public class User
+public class Contact
 {
 
+    
+ 
+    private static final String TAG = "IJetty.Cnsl";
+
+    public final static String __DEFAULT_SORT_ORDER = android.provider.BaseColumns._ID+" ASC";
+    public static final String[] baseProjection = new String[]
+                                                             { 
+                                                              android.provider.BaseColumns._ID, 
+                                                              android.provider.Contacts.PeopleColumns.DISPLAY_NAME, 
+                                                              android.provider.Contacts.PeopleColumns.NOTES,
+                                                              android.provider.Contacts.PeopleColumns.STARRED, 
+                                                              android.provider.Contacts.PeopleColumns.SEND_TO_VOICEMAIL,
+                                                              android.provider.Contacts.PeopleColumns.CUSTOM_RINGTONE 
+                                                             };
+
+    
     /**
-     * UserCollection
+     * ContactCollection
      *
      * Inner class wrapping a Cursor over Contacts
      */
-    public static class UserCollection extends DatabaseCollection
+    public static class ContactCollection extends DatabaseCollection
     {
-        public UserCollection(Cursor cursor)
+        
+        public ContactCollection(Cursor cursor)
         {
             super(cursor);
+        }
+        
+        public ContactCollection(Cursor cursor, int startPosition, int limit)
+        {
+            super(cursor, startPosition, limit);
         }
 
         @Override
@@ -52,13 +74,8 @@ public class User
 
     }
 
-    private static final String TAG = "JettyConsole";
-
-    static final String[] baseProjection = new String[]
-    { android.provider.BaseColumns._ID, android.provider.Contacts.PeopleColumns.DISPLAY_NAME, android.provider.Contacts.PeopleColumns.NOTES,
-            android.provider.Contacts.PeopleColumns.STARRED, android.provider.Contacts.PeopleColumns.SEND_TO_VOICEMAIL,
-            android.provider.Contacts.PeopleColumns.CUSTOM_RINGTONE };
-
+    
+    
     /**
      * create
      *
@@ -164,9 +181,16 @@ public class User
      * @param resolver
      * @return
      */
-    public static UserCollection getAll(ContentResolver resolver)
+    public static ContactCollection getContacts (ContentResolver resolver)
     {
-        return new UserCollection(resolver.query(Contacts.People.CONTENT_URI,baseProjection,null,null,null));
+        return new ContactCollection(resolver.query(Contacts.People.CONTENT_URI,baseProjection,null,null,__DEFAULT_SORT_ORDER));
+    }
+    
+    
+    
+    public static ContactCollection getContacts (ContentResolver resolver, int pgStart, int limit)
+    {
+        return new ContactCollection(resolver.query(Contacts.People.CONTENT_URI, baseProjection, null, null, __DEFAULT_SORT_ORDER), pgStart, limit);
     }
 
     /**

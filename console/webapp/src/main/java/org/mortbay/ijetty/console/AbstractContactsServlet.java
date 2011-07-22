@@ -43,18 +43,65 @@ import android.net.Uri;
 import android.provider.Contacts;
 import android.util.Log;
 
+
+
+
+
+/**
+ * AbstractContactsServlet
+ *
+ * Restful request uri structure:
+ * 
+ *  /contacts/json/[who]/[what][?action=0|1|2|3|4][&id=x]
+ *  
+ *  what = "photo"|""
+ *  who = contact db id
+ *  
+ *  eg request to retrieve Contact information about Contact 123:
+ *  
+ *   /contacts/json/123
+ *   
+ * eg request to delete Contact 123:
+ * 
+ *   /contacts/json/123?action=3
+ *   
+ * eg request to save a new Contact:
+ *   /contacts/json?action=4
+ *   
+ *   
+ * eg request to saved updated Contact:
+ *   /contacts/json/123?action=1&id=123
+ *   
+ * eg request to retrieve 10 contacts starting at Contact 25:
+ *   /contacts/json?start=25&pg=10
+ *   
+ * eg request to retrieve all contacts:
+ *   /contacts/json
+ *   
+ */
 public abstract class AbstractContactsServlet extends HttpServlet
 {
     private static final String TAG = "ContactsServlet";
     private static final long serialVersionUID = 1L;
     public static int __VERSION = 0;
 
+    /*
+     * parameter "action" values
+     */
     public static final int __ACTION_NONE = -1;
     public static final int __ACTION_CALL = 0;
     public static final int __ACTION_EDIT = 1;
     public static final int __ACTION_ADD = 2;
     public static final int __ACTION_DEL = 3;
     public static final int __ACTION_SAVE = 4;
+    
+    public static final int __DEFAULT_PG_START = 0;
+    public static final int __DEFAULT_PG_SIZE = 10;
+    
+    
+    public static final String __ACTION_PARAM = "action";
+    public static final String __PG_START_PARAM = "pgStart";
+    public static final String __PG_SIZE_PARAM = "pgSize";
 
     private ContentResolver resolver;
 
@@ -88,7 +135,7 @@ public abstract class AbstractContactsServlet extends HttpServlet
                 what = strtok.nextToken();
             }
 
-            String str = request.getParameter("action");
+            String str = request.getParameter(__ACTION_PARAM);
             int action = (str == null?__ACTION_NONE:Integer.parseInt(str.trim()));
 
             str = request.getParameter("json");
@@ -103,16 +150,21 @@ public abstract class AbstractContactsServlet extends HttpServlet
                     if ((what == null) && (who != null))
                     {
                         //
-                        // No specific action, but a user, so return their details
+                        // No specific action, but a Contact, so return their details
                         //
-                        handleGetUser(request,response,who);
+                        handleGetContact(request,response,who);
                     }
                     else if ((what == null) && (who == null))
                     {
                         //
-                        // No action and no specific user, return a list of all users
+                        // No action and no specific Contact, return a list of all Contacts
                         //
-                        handleGetUsers(request,response);
+                        String tmp = request.getParameter(__PG_START_PARAM);
+                        int pgStart = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
+                        tmp = request.getParameter(__PG_SIZE_PARAM);
+                        int pgSize = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
+                        
+                        handleGetContacts(request,response, pgStart, pgSize);
                     }
                     else if ("photo".equals(what.trim()))
                     {
@@ -126,7 +178,7 @@ public abstract class AbstractContactsServlet extends HttpServlet
                 case __ACTION_CALL:
                 {
                     //
-                    // Call a user
+                    // Call a Contact
                     // TODO not implemented
                     //
 
@@ -135,27 +187,27 @@ public abstract class AbstractContactsServlet extends HttpServlet
                 case __ACTION_ADD:
                 {
                     //
-                    //Handle request to put up a form to add a new user
+                    //Handle request to put up a form to add a new Contact
                     //
-                    handleAddUser(request,response);
+                    handleAddContact(request,response);
 
                     break;
                 }
                 case __ACTION_EDIT:
                 {
                     //
-                    // Handle request to edit a user
+                    // Handle request to edit a Contact
                     //
-                    handleEditUser(request,response,who);
+                    handleEditContact(request,response,who);
 
                     break;
                 }
                 case __ACTION_SAVE:
                 {
                     //
-                    // Save a user, either new or edited
+                    // Save a Contact, either new or edited
                     //
-                    handleSaveUser(request,response,request.getParameter("id"));
+                    handleSaveContact(request,response,request.getParameter("id"));
 
                     break;
                 }
@@ -164,7 +216,7 @@ public abstract class AbstractContactsServlet extends HttpServlet
                     //
                     // Delete a contact
                     //
-                    handleDeleteUser(request,response,who);
+                    handleDeleteContact(request,response,who);
 
                     break;
                 }
@@ -187,13 +239,13 @@ public abstract class AbstractContactsServlet extends HttpServlet
         return resolver;
     }
 
-    public abstract void handleAddUser(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
+    public abstract void handleAddContact(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
 
     public abstract void handleDefault(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
 
-    public abstract void handleDeleteUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
+    public abstract void handleDeleteContact(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
 
-    public abstract void handleEditUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
+    public abstract void handleEditContact(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
 
     public void handleGetImage(HttpServletRequest request, HttpServletResponse response, String who) throws IOException
     {
@@ -214,11 +266,11 @@ public abstract class AbstractContactsServlet extends HttpServlet
         }
     }
 
-    public abstract void handleGetUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
+    public abstract void handleGetContact(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
 
-    public abstract void handleGetUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException;
+    public abstract void handleGetContacts(HttpServletRequest request, HttpServletResponse response, int pgStart, int pgSize) throws ServletException, IOException;
 
-    public abstract void handleSaveUser(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
+    public abstract void handleSaveContact(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException;
 
     @Override
     public void init(ServletConfig config) throws ServletException
@@ -227,7 +279,7 @@ public abstract class AbstractContactsServlet extends HttpServlet
         resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
     }
 
-    public void saveUserFormData(HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
+    public void saveContactFormData(HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
     {
         ContentValues person = new ContentValues();
         person.put(Contacts.People.NAME,request.getParameter("name"));
@@ -244,15 +296,15 @@ public abstract class AbstractContactsServlet extends HttpServlet
         if (id == null)
         {
             // Create it first if necessary (so we can save phone data)
-            id = User.create(getContentResolver(),person);
-            Log.d(TAG,"Inserted new user id " + id);
+            id = Contact.create(getContentResolver(),person);
+            Log.d(TAG,"Inserted new Contact id " + id);
         }
 
         File photo = (File)request.getAttribute("new-pic");
         if (photo != null)
         {
-            //a new picture for the user has been uploaded
-            User.savePhoto(getContentResolver(),id,photo);
+            //a new picture for the Contact has been uploaded
+            Contact.savePhoto(getContentResolver(),id,photo);
         }
         List<String> deletedPhones = new ArrayList<String>();
         Map<String, ContentValues> modifiedPhones = new HashMap<String, ContentValues>();
@@ -373,8 +425,8 @@ public abstract class AbstractContactsServlet extends HttpServlet
             ContactMethod.deleteContactMethod(getContentResolver(),methodId,id);
         }
 
-        User.save(getContentResolver(),person,id);
+        Contact.save(getContentResolver(),person,id);
         __VERSION++;
-        Log.d(TAG,"Updating user id " + id);
+        Log.d(TAG,"Updating Contact id " + id);
     }
 }

@@ -1,5 +1,8 @@
-var User = 
+var Contacts = 
 {
+		page_size : 10,
+		page_pos : 0,
+		total : 0, 
         action_none : -1,
         action_edit: 1,
         action_add: 2,
@@ -45,13 +48,31 @@ var User =
             starred: false,
             voicemail: false
         },
-        users: [],
+        contacts: [],
         version: -1,
         
-        
-        getUsers: function (successfn, errfn)
+        dummy: function ()
         {
-            var uri =  "/console/contacts/json/";
+        	
+        },
+        
+        
+        prev:  function ()
+        {
+        	Contacts.page_pos = Contacts.page_pos - Contacts.page_size;
+        	Contacts.getContacts();
+        },
+        
+        
+        next:  function ()
+        {
+        	Contacts.page_pos = Contacts.page_pos + Contacts.page_size;
+        	Contacts.getContacts();
+        },
+        
+        getContacts: function (successfn, errfn)
+        {
+            var uri =  "/console/contacts/json/?pgStart="+Contacts.page_pos+"&pgSize="+Contacts.page_size;
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -67,18 +88,20 @@ var User =
                     $("#loading").css ("display", "none");
                     if (!successfn)
                     {
-                        User.users = response.users;
-                        User.version = response.version;
-                        User.renderUsers();
+                        Contacts.contacts = response.contacts;
+                        Contacts.version = response.version;
+                        Contacts.total = response.total;
+                        Contacts.renderContacts();
+                        
                     }
                     else
                         successfn(response);
                 },
                 error: function(xhr, reason, exception) 
-                { 
+                {             	
                     if (!errfn)
                     {
-                        alert("Get Users Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                        alert("Get Contacts Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                     }
                     else
                     {
@@ -89,7 +112,7 @@ var User =
             return false; 
         },
         
-        getUserDetails: function ()
+        getContactDetails: function ()
         {
             var uri = $(this).attr('href');
             $.ajax({
@@ -109,43 +132,44 @@ var User =
                         return;
                     }
 
-                    User.summary = response.summary;
+                    Contacts.summary = response.summary;
 
                     if (response.phones) 
-                        User.phones = response.phones;
+                        Contacts.phones = response.phones;
 
                     if (response.contacts)
-                        User.addresses = response.contacts;
+                        Contacts.addresses = response.contacts;
 
-                    User.version = response.version;
-                    User.renderUser();
+                    Contacts.version = response.version;
+                    Contacts.renderContact();
                 },
                 error: function(xhr, reason, exception) 
                 { 
-                    alert("Get User Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                    alert("Get Contacts Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
                 }
             });
             return false;
         },
         
-        refreshUsers: function ()
+        refreshContacts: function ()
         {
             //Set a timeout as the async xhr request often completes before the form submission
-            setTimeout("User.getUsers(User.checkResponseVersion, User.errResponseVersion)",
+            setTimeout("Contacts.getContacts(Contacts.checkResponseVersion, Contacts.errResponseVersion)",
                        1000);
         },
         
         checkResponseVersion: function (response)
         {
-            if (User.version == response.version)
+            if (Contacts.version == response.version)
             {
-                User.refreshUsers();
+                Contacts.refreshContacts();
             }
             else
             {
-                User.version = response.version; 
-                User.users = response.users; 
-                User.renderUsers();
+            	Contacts.total = response.total;
+                Contacts.version = response.version; 
+                Contacts.contacts = response.contacts; 
+                Contacts.renderContacts();
             }
         },
         
@@ -153,12 +177,12 @@ var User =
         {
             var agent = navigator.userAgent;
             if (agent.indexOf("Android") > 0) {
-                User.mobileBrowser = true;
+                Contacts.mobileBrowser = true;
             } else if (agent.indexOf("iPhone") > 0) {
-                User.mobileBrowser = true;
+                Contacts.mobileBrowser = true;
             }
             
-            if (User.mobileBrowser)
+            if (Contacts.mobileBrowser)
             {
                 $("#userinfo").attr("style", "float: none;");
             }
@@ -170,53 +194,53 @@ var User =
         
         errResponseVersion: function ()
         {
-            alert("Error getting updated user list");
+            alert("Error getting updated Contacts list");
         },
         
-        addUser: function ()
+        addContact: function ()
         {
-            User.summary.name = "";
-            User.summary.id = "";
-            User.summary.notes = "";
-            User.summary.starred = false;
-            User.summary.voicemail = false;
-            User.phones = [];
-            User.addresses = [];
-            User.renderUser();
+            Contacts.summary.name = "";
+            Contacts.summary.id = "";
+            Contacts.summary.notes = "";
+            Contacts.summary.starred = false;
+            Contacts.summary.voicemail = false;
+            Contacts.phones = [];
+            Contacts.addresses = [];
+            Contacts.renderContact();
         },
 
-        deleteUser: function ()
+        deleteContact: function ()
         {
             $.ajax (
                     {
                         type: 'POST',
-                        url: "/console/contacts/json/"+User.summary.id+"/?action="+User.action_del,
+                        url: "/console/contacts/json/"+Contacts.summary.id+"/?action="+Contacts.action_del,
                         dataType: 'json',
                         success: function (response)
                         {
                             if (response.status && response.status == "OK")
                             {
-                               //remove the user from the list
-                               for (var u in User.users)
+                               //remove the contact from the list
+                               for (var u in Contacts.contacts)
                                {
-                                   if (User.users[u].id == User.summary.id)
+                                   if (Contacts.contacts[u].id == Contacts.summary.id)
                                    {
-                                       delete User.users[u];
+                                       delete Contacts.contacts[u];
                                        break;
                                    }
                                }
 
-                               if (User.mobileBrowser)
+                               if (Contacts.mobileBrowser)
                                {
-                                   $("#content").html(""); //replace the content div with the list of users
-                                   User.renderUsers();
+                                   $("#content").html(""); //replace the content div with the list of contacts
+                                   Contacts.renderContacts();
                                }
                                else
                                {  
                                    //get rid of the userinfo div   
                                    $("#contacts").html("");
                                    $("#userinfo").remove();
-                                   User.renderUsers();
+                                   Contacts.renderContacts();
                                }
                             }
                             else
@@ -230,9 +254,9 @@ var User =
         },
      
         
-        saveUser: function ()
+        saveContact: function ()
         {     
-           User.refreshUsers();
+           Contacts.refreshContacts();
         },
         
      
@@ -240,11 +264,11 @@ var User =
         
         cancelEdit: function ()
         {
-            //Remove the editable user representation
-            if (User.mobileBrowser)
+            //Remove the editable contact representation
+            if (Contacts.mobileBrowser)
             {
-                $("#content").html(""); //replace the content div with the list of users
-                User.renderUsers();
+                $("#content").html(""); //replace the content div with the list of contacts
+                Contacts.renderContacts();
             }
             else
             {  
@@ -254,44 +278,47 @@ var User =
             return false;
         },
         
-        renderUser: function ()
+        renderContact: function ()
         {            
             $("#userinfo").remove();
             var html = "<div id='userinfo'>";
-            html += "<form id='uform' method='POST' action='/console/contacts/json/?action="+User.action_save+"' enctype='multipart/form-data' target='hidden-target' onSubmit='User.saveUser(); return true;'>";
-            html += "<input type='hidden' name='id' value='" + User.summary.id + "'>";
+            html += "<form id='uform' method='POST' action='/console/contacts/json/?action="+Contacts.action_save+"' enctype='multipart/form-data' target='hidden-target' onSubmit='Contacts.saveContact(); return true;'>";
+            html += "<input type='hidden' name='id' value='" + Contacts.summary.id + "'>";
             html += "<table><tr><td colspan='2'><h2>General</h2></td></tr>";
-            html += "<tr><td>Name: </td><td><input name='name' type='text' value='" + User.summary.name + "' /></td></tr>";
-            html += "<tr><td>Starred: </td><td ><input name='starred' type='checkbox' " + (User.summary.starred ? "checked='checked'" : "") + " /></td></tr>";
-            html += "<tr><td>Send to Voicemail: </td><td><input name='voicemail' type='checkbox' "+(User.summary.voicemail? "checked='checked'" : "") + " /></td></tr>";
-            html += "<tr><td>Notes: </td><td ><textarea name='notes'>" + (User.summary.notes != null ? User.summary.notes : "") + "</textarea></td></tr>";
-            html += "<tr><td><a href='/console/contacts/json/"+User.summary.id+"/photo'><img src='/console/contacts/json/"+User.summary.id+"/photo' width='64' height='64'/></a></td><td>Update photo:<br /><input type='file' name='new-pic' /></td></tr>";
+            html += "<tr><td>Name: </td><td><input name='name' type='text' value='" + Contacts.summary.name + "' /></td></tr>";
+            html += "<tr><td>Starred: </td><td ><input name='starred' type='checkbox' " + (Contacts.summary.starred ? "checked='checked'" : "") + " /></td></tr>";
+            html += "<tr><td>Send to Voicemail: </td><td><input name='voicemail' type='checkbox' "+(Contacts.summary.voicemail? "checked='checked'" : "") + " /></td></tr>";
+            html += "<tr><td>Notes: </td><td ><textarea name='notes'>" + (Contacts.summary.notes != null ? Contacts.summary.notes : "") + "</textarea></td></tr>";
+            html += "<tr><td><a href='/console/contacts/json/"+Contacts.summary.id+"/photo'><img src='/console/contacts/json/"+Contacts.summary.id+"/photo' width='64' height='64'/></a></td><td>Update photo:<br /><input type='file' name='new-pic' /></td></tr>";
             html += "<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>";
-            for (var p in User.phones)
+            for (var p in Contacts.phones)
             {
-                html += User.renderPhone(User.phones[p]);
+                html += Contacts.renderPhone(Contacts.phones[p]);
             }
             //add an extra blank for adding new number
-            html += User.renderPhone ({number: "", id: "x", label: "", type: ""});
+            html += Contacts.renderPhone ({number: "", id: "x", label: "", type: ""});
             html += "<tr><td colspan='2'><h2>Addresses</h2></td></tr>";
-            for (var a in User.addresses)
+            for (var a in Contacts.addresses)
             {
-                html += User.renderAddress(User.addresses[a]);
+                html += Contacts.renderAddress(Contacts.addresses[a]);
             }
             //add an extra blank for adding a new address
-            html += User.renderAddress({ id: "x", data: "", aux: "",  label: "", primary: false, kind: "", type:  ""});
+            html += Contacts.renderAddress({ id: "x", data: "", aux: "",  label: "", primary: false, kind: "", type:  ""});
             html += "</table>";
          
             html += "<br /><input type='submit' id='save' value='Save'/> ";  
             
-            if (User.summary.id)
-                html += "<button id='del' onclick='User.deleteUser(); return false;'>Delete</button>&nbsp;";
-            html += "<button id='cancel' onclick='User.cancelEdit(); return false;'>Cancel</button>&nbsp;";
+            if (Contacts.summary.id)
+                html += "<button id='del' onclick='Contacts.deleteContact(); return false;'>Delete</button>&nbsp;";
+            html += "<button id='cancel' onclick='Contacts.cancelEdit(); return false;'>Cancel</button>&nbsp;";
             html += "</form>";
+         
+
+
             var content = $("#content");
             //if a mobile browser, we want to change the div content,
             //otherwise we want to add the div for the user
-            if (User.mobileBrowser)
+            if (Contacts.mobileBrowser)
             {
                 content.html("");
                 content.append(html);
@@ -305,9 +332,9 @@ var User =
             var html = "<tr><td>"; 
             var selected = " selected='selected'";
             html += "<select name='phone-type-" + phone.id + "'>";
-            for (var l in User.labels)
+            for (var l in Contacts.labels)
             {     
-                html += "<option value='" + l + "'" + (phone.type == l ? selected : "") + ">" + User.labels[l] + "</option>";
+                html += "<option value='" + l + "'" + (phone.type == l ? selected : "") + ">" + Contacts.labels[l] + "</option>";
             }   
             html += "</select></td>";     
             html += "<td><input type='text' name='phone-number-" + phone.id + "' id='phone-number-" + phone.id + "' style='width: 120px;' length='12' value='" + phone.number + "' />";
@@ -335,16 +362,16 @@ var User =
             var html = "<tr><td>";
             
             var kindSelect = "<select name='contact-kind-"+address.id+"'>";
-            for (var k in User.kinds)
+            for (var k in Contacts.kinds)
             {
-                kindSelect += "<option value='"+k+"'"+(address.kind == k? " selected='selected'": "")+">"+User.kinds[k]+"</option>";
+                kindSelect += "<option value='"+k+"'"+(address.kind == k? " selected='selected'": "")+">"+Contacts.kinds[k]+"</option>";
             }
             kindSelect += "</select>";
             
-            var typeSelect = "<select id='contact-type-"+address.id+"' onChange='User.toggleLabel(\""+address.id+"\")'  name='contact-type-"+address.id+"'>";
-            for (t in User.types)
+            var typeSelect = "<select id='contact-type-"+address.id+"' onChange='Contacts.toggleLabel(\""+address.id+"\")'  name='contact-type-"+address.id+"'>";
+            for (t in Contacts.types)
             {
-                typeSelect += "<option value='"+t+"'"+(address.type == t? " selected='selected'": "")+">"+User.types[t]+"</option>";
+                typeSelect += "<option value='"+t+"'"+(address.type == t? " selected='selected'": "")+">"+Contacts.types[t]+"</option>";
             }
             typeSelect += "</select>";
             
@@ -360,9 +387,9 @@ var User =
        
         
         
-        renderUsers: function ()
+        renderContacts: function ()
         {
-            if (!User.mobileBrowser)
+            if (!Contacts.mobileBrowser)
             {
                 $("#userinfo").remove();
             }
@@ -371,7 +398,7 @@ var User =
                 $("#content").append("<div id='contacts'></div>");
             }
             $("#contacts").html("");
-            var data = User.users;
+            var data = Contacts.contacts;
             $("#pg-head").html("Contact List");
             $("#contacts").append("<table id='user'><thead><tr><th>Starred</th><th>Photo</th><th>Name</th></tr></thead><tbody id='ulist'></tbody></table>");
             var rows = "";
@@ -387,8 +414,17 @@ var User =
                 rows +="</tr>";
             }
             $("#ulist").append(rows);
-            $("#contacts").append("<br /><button id='add' onclick='User.addUser();'>Add</button>");
-            $('.userlink').click(User.getUserDetails);
+            $("#contacts").append("<br /><button id='add' onclick='Contacts.addContact();'>Add Contact</button>");
+            
+            
+            if (Contacts.page_pos > 0 && Contacts.contacts.length > 0)
+                $("#contacts").append("<button id='prev' onclick='Contacts.prev();'>Prev Page: "+(Contacts.page_pos - Contacts.page_size)+"</button>");
+  
+            
+            if (Contacts.total > (Contacts.page_pos + Contacts.page_size))
+             $("#contacts").append("<button id='next' onclick='Contacts.next();'>Next Page: "+(Contacts.page_pos + Contacts.page_size)+"</button>");
+            
+            $('.userlink').click(Contacts.getContactDetails);
             
             // make it sortable
             $("#user").tablesorter({sortList: [[2,0]]});
@@ -400,6 +436,6 @@ var User =
 
 
 $(document).ready (function () {
-    User.detectEnvironment();
-    User.getUsers();
+    Contacts.detectEnvironment();
+    Contacts.getContacts();
 }); 
