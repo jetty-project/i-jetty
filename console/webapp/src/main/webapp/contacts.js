@@ -418,11 +418,11 @@ var Contacts =
             
             
             if (Contacts.page_pos > 0 && Contacts.contacts.length > 0)
-                $("#contacts").append("<button id='prev' onclick='Contacts.prev();'>Prev Page: "+(Contacts.page_pos - Contacts.page_size)+"</button>");
+                $("#contacts").append("<button id='prev' onclick='Contacts.prev();'>Prev Page</button>");
   
             
             if (Contacts.total > (Contacts.page_pos + Contacts.page_size))
-             $("#contacts").append("<button id='next' onclick='Contacts.next();'>Next Page: "+(Contacts.page_pos + Contacts.page_size)+"</button>");
+             $("#contacts").append("<button id='next' onclick='Contacts.next();'>Next Page</button>");
             
             $('.userlink').click(Contacts.getContactDetails);
             
