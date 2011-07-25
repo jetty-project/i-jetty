@@ -230,18 +230,9 @@ var Contacts =
                                    }
                                }
 
-                               if (Contacts.mobileBrowser)
-                               {
-                                   $("#content").html(""); //replace the content div with the list of contacts
-                                   Contacts.renderContacts();
-                               }
-                               else
-                               {  
-                                   //get rid of the userinfo div   
-                                   $("#contacts").html("");
-                                   $("#userinfo").remove();
-                                   Contacts.renderContacts();
-                               }
+                               $("#userinfo").html(""); //get rid of the user info
+                               //replace page with the list of contacts
+                               Contacts.renderContacts();
                             }
                             else
                                alert(data);
@@ -265,23 +256,26 @@ var Contacts =
         cancelEdit: function ()
         {
             //Remove the editable contact representation
+        	$("#userinfo").html("");
+        	
+        	//If mobile browser, recreate the contacts page
             if (Contacts.mobileBrowser)
             {
-                $("#content").html(""); //replace the content div with the list of contacts
                 Contacts.renderContacts();
             }
-            else
-            {  
-                //get rid of the userinfo div
-                $("#userinfo").remove();
-            }
+            
             return false;
         },
         
         renderContact: function ()
-        {            
-            $("#userinfo").remove();
-            var html = "<div id='userinfo'>";
+        {     
+        	if (Contacts.mobileBrowser)
+        	{
+        		$("#contacts").html(""); //only show contacts OR user details not both
+        	}
+        	
+        	$("#userinfo").html(""); //get rid of any previous
+            var html = "";
             html += "<form id='uform' method='POST' action='/console/contacts/json/?action="+Contacts.action_save+"' enctype='multipart/form-data' target='hidden-target' onSubmit='Contacts.saveContact(); return true;'>";
             html += "<input type='hidden' name='id' value='" + Contacts.summary.id + "'>";
             html += "<table><tr><td colspan='2'><h2>General</h2></td></tr>";
@@ -313,18 +307,7 @@ var Contacts =
             html += "<button id='cancel' onclick='Contacts.cancelEdit(); return false;'>Cancel</button>&nbsp;";
             html += "</form>";
          
-
-
-            var content = $("#content");
-            //if a mobile browser, we want to change the div content,
-            //otherwise we want to add the div for the user
-            if (Contacts.mobileBrowser)
-            {
-                content.html("");
-                content.append(html);
-            }
-            else
-                content.append(html); 
+            $("#userinfo").html(html); 
         },
 
         renderPhone: function (phone)
@@ -389,15 +372,9 @@ var Contacts =
         
         renderContacts: function ()
         {
-            if (!Contacts.mobileBrowser)
-            {
-                $("#userinfo").remove();
-            }
-            else
-            {
-                $("#content").append("<div id='contacts'></div>");
-            }
-            $("#contacts").html("");
+        	$("#userinfo").html(""); //get rid of any previous user details
+        	$("#contacts").html(""); //get rid of any previous contacts
+    
             var data = Contacts.contacts;
             $("#pg-head").html("Contact List");
             $("#contacts").append("<table id='user'><thead><tr><th>Starred</th><th>Photo</th><th>Name</th></tr></thead><tbody id='ulist'></tbody></table>");
