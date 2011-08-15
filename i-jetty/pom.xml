@@ -39,4 +39,18 @@
     </pluginManagement>
   </build>
 
+  <repositories>
+    <repository>
+      <id>oss-jetty-snapshots</id>
+      <url>http://oss.sonatype.org/content/repositories/jetty-snapshots</url>
+      <name>Jetty Snapshots</name>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
 </project>
