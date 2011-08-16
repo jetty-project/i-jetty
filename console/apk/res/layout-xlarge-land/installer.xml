@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:padding="6dip"
+  android:gravity="center_horizontal"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+  <ImageView
+    android:src="@drawable/ijetty_logo"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:scaleType="fitXY" />
+  
+  <TextView
+    android:text="@string/webapp_name"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:id="@+id/heading"
+    android:gravity="center"
+    android:textAppearance="@style/H1"/>
+    
+  <TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textAppearance="@style/small"
+    android:gravity="center"
+    android:id="@+id/version"/>
+    
+  <TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textAppearance="@style/body"
+    android:text="@string/info"
+    android:id="@+id/info"/>
+    
+  <TextView
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:textAppearance="@style/H2"
+     android:textStyle="bold"
+     android:gravity="left"
+     android:paddingBottom="6dp"
+     android:paddingTop="6dp"
+     android:id="@+id/prereqsHeading"
+     android:text="@string/prerequisitesHeading"/>
+         
+  <TextView
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:textAppearance="@style/body"
+     android:gravity="left"
+     android:paddingBottom="6dp"
+     android:id="@+id/prereqs"
+     android:text="@string/prerequisites"/>
+     
+    
+  <Button 
+    android:id="@+id/install" 
+    android:text="@string/install" 
+    android:layout_height="wrap_content" 
+    android:layout_below="@+id/heading" 
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:layout_width="wrap_content"/>
+
+  
+</LinearLayout>

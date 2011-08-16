@@ -9,10 +9,11 @@
     android:minSdkVersion="4" />
 
   <application
-    android:label="I-Jetty Console Installer">
+    android:label="i-Jetty Console Installer">
 <!-- todo theme, icon -->
     <activity
       android:name=".InstallerActivity"
+      android:icon="@drawable/ijetty_console"
       android:label="@string/app_name"
       android:theme="@style/Theme.Console"
       android:screenOrientation="sensor"
