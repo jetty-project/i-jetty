@@ -7,11 +7,8 @@
 
   	<display-name>IJetty Console</display-name>
   	
+	
 	<servlet>
-		<servlet-name>ContactsHTMLServlet</servlet-name>
-		<servlet-class>org.mortbay.ijetty.console.ContactsHTMLServlet</servlet-class>
-	</servlet>
-		<servlet>
 		<servlet-name>ContactsJSONServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.ContactsJSONServlet</servlet-class>
 	</servlet>
@@ -38,10 +35,6 @@
 	</filter>
 	
 	<servlet-mapping>
-		<servlet-name>ContactsHTMLServlet</servlet-name>
-		<url-pattern>/contacts/html/*</url-pattern>
-	</servlet-mapping>	
-	<servlet-mapping>
 		<servlet-name>ContactsJSONServlet</servlet-name>
 		<url-pattern>/contacts/json/*</url-pattern>
 	</servlet-mapping>
@@ -64,7 +57,6 @@
 	<filter-mapping>
 	    <filter-name>MultiPart</filter-name>
 	    <url-pattern>/contacts/json/*</url-pattern>
-	    <url-pattern>/contacts/html/*</url-pattern>
 	    <url-pattern>/media/db/upload</url-pattern>
 	</filter-mapping>
 	

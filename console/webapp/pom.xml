@@ -36,11 +36,6 @@
       <version>${jetty.version}</version>
     </dependency>
   </dependencies>
-  <properties>
-     <android.version>1.6_r2</android.version>
-     <jetty.version>7.5.0-SNAPSHOT</jetty.version>
-     <servlet.version>2.5-20081211</servlet.version>
-  </properties>
   <build>
     <plugins>
       <plugin>

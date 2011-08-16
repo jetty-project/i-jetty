@@ -16,7 +16,7 @@
 
    <properties>
      <android.version>1.6_r2</android.version>
-     <jetty.version>7.5.0-SNAPSHOT</jetty.version>
+     <jetty.version>7.5.0.RC0</jetty.version>
      <servlet.version>2.5-20081211</servlet.version>
      <android.sdk.version>4</android.sdk.version>
      <android.platform>platforms/android-${android.sdk.version}</android.platform>
