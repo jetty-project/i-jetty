@@ -32,7 +32,7 @@
     android:id="@+id/scroller"
     android:paddingTop="6dp"
     android:layout_width="fill_parent"
-    android:layout_height="240dp"
+    android:layout_height="160dp"
     android:scrollbars="vertical"
     android:gravity="left"
     android:scrollbarAlwaysDrawVerticalTrack="true">  
@@ -70,16 +70,16 @@
        android:paddingBottom="6dp"
        android:id="@+id/prereqs"
        android:text="@string/prerequisites"/>
+    
+     <Button 
+      android:id="@+id/install" 
+      android:text="@string/install" 
+      android:layout_height="wrap_content" 
+      android:layout_below="@+id/heading" 
+      android:layout_gravity="center_vertical|center_horizontal"
+      android:layout_width="wrap_content"/>
     </LinearLayout>
   </ScrollView>
-    
-  <Button 
-    android:id="@+id/install" 
-    android:text="@string/install" 
-    android:layout_height="wrap_content" 
-    android:layout_below="@+id/heading" 
-    android:layout_gravity="center_vertical|center_horizontal"
-    android:layout_width="wrap_content"/>
 
   
 </LinearLayout>
