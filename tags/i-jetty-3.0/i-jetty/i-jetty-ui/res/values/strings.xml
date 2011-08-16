@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">i-Jetty</string>
+    <string name="jetty_started">Jetty started</string>
+    <string name="jetty_starting">Jetty starting</string>
+    <string name="jetty_stopping">Jetty stopping</string>
+    <string name="jetty_not_started">Jetty not started</string>
+    <string name="jetty_already_started">Jetty already running</string>
+    <string name="jetty_stopped">Jetty stopped</string>
+    <string name="jetty_not_stopped">Jetty not stopped</string>
+    <string name="jetty_not_running">Jetty not running</string>
+    <string name="manage_jetty">Manage Jetty</string>
+    <string name="jetty_controller">Start and Stop Jetty</string>
+    <string name="jetty_downloader">Enter URL</string>
+    <string name="start_jetty">Start Jetty</string>
+    <string name="stop_jetty">Stop Jetty</string>
+    <string name="config_jetty">Configure</string>
+    <string name="start_download">Download</string>
+    <string name="download_webapp">Download</string>
+    <string name="retry">Retry</string>
+    <string name="url">URL</string>
+    <string name="console">Console</string>
+    <string name="i_jetty_information">i-jetty</string>
+    <string name="non_ssl_category">HTTP Connector</string>
+    <string name="ssl_category">HTTPS Connector</string>
+    <string name="console_category">Console</string>
+    <string name="pref_nio_value">true</string>
+    <string name="pref_nio_title">Use NIO</string>
+    <string name="pref_nio_key">org.mortbay.ijetty.pref_nio</string>
+    <string name="pref_ssl_nio_key">org.mortbay.ijetty.pref_ssl_nio</string>
+    <string name="pref_ssl_nio_value">true</string>
+    <string name="pref_ssl_value">false</string>
+    <string name="pref_ssl_title">Use SSL</string>
+    <string name="pref_ssl_key">org.mortbay.ijetty.pref_ssl</string>
+    <string name="pref_ssl_port_title">Edit Port</string>
+    <string name="pref_ssl_port_value">8443</string>
+    <string name="pref_ssl_port_key">org.mortbay.ijetty.pref.sslport</string>
+    <string name="pref_ssl_port">Port</string>
+    <string name="pref_port_value">8080</string>
+    <string name="pref_port">Port</string>
+    <string name="pref_port_title">Edit Port</string>
+    <string name="pref_port_key">org.mortbay.ijetty.pref.port</string>
+
+    <string name="pref_keystore_pwd_key">org.mortbay.ijetty.pref.keystore.pwd</string>
+    <string name="pref_keystore_pwd">Keystore Password</string>
+    <string name="pref_keystore_pwd_title">Edit Password</string>
+    <string name="pref_keystore_pwd_value">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</string>
+
+    <string name="pref_keymgr_pwd_key">org.mortbay.ijetty.pref.keymgr.pwd</string>
+    <string name="pref_keymgr_pwd">KeyStoreManager Password</string>
+    <string name="pref_keymgr_pwd_title">Edit KeystoreManager Password</string>
+    <string name="pref_keymgr_pwd_value">OBF:1u2u1wml1z7s1z7a1wnl1u2g</string>
+
+    <string name="pref_keystore_file_key">org.mortbay.ijetty.pref.keystore.file</string>
+    <string name="pref_keystore_file">Keystore Filename</string>
+    <string name="pref_keystore_file_title">Edit Keystore Filename</string>
+    <string name="pref_keystore_file_value">/sdcard/jetty/etc/keystore</string>
+
+    <string name="pref_truststore_pwd_key">org.mortbay.ijetty.pref.truststore.pwd</string>
+    <string name="pref_truststore_pwd">Truststore Password</string>
+    <string name="pref_truststore_pwd_title">Edit Truststore Password</string>
+    <string name="pref_truststore_pwd_value">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</string>
+
+    <string name="pref_truststore_file_key">org.mortbay.ijetty.pref.truststore.file</string>
+    <string name="pref_truststore_file">Truststore Filename</string>
+    <string name="pref_truststore_file_title">Edit Truststore Filename</string>
+    <string name="pref_truststore_file_value">/sdcard/jetty/etc/keystore</string>
+
+    <string name="pref_console_pwd_value">admin</string>
+    <string name="pref_console_pwd">Console Password</string>
+    <string name="pref_console_pwd_title">Edit Console Password</string>
+    <string name="pref_console_pwd_key">org.mortbay.ijetty.pref.pwd</string>
+    <string name="edit_preferences">Edit IJetty Settings</string>
+    <string name="connector_settings">Connector settings</string>
+    <string name="webapp_exists">Already Exists</string>
+    <string name="download_fail">Download Failed.</string>
+    <string name="download_success">Web app installed.</string>
+    <string name="success">Success.</string>
+    <string name="failure">Failure</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="overwrite">Replace existing file?</string>
+    <string name="loading">Loading ... </string>
+    <string name="context_path">Context Path</string>
+    
+    <!-- External Storage State Messages -->
+    <string name="header_sd_media"><b>External Media Unavailable</b>\n\nThe SD Card is a required part of i-jetty, and needs to be present, formatted, mounted, <u>not</u> read-only, and with sufficient space to hold the temporary files that i-jetty needs.\n\nPlease correct your SD-Card state.</string>
+    <string name="sd_media_removed"><b>MEDIA_REMOVED</b>\n\nPlease replace the SD Card and try again.</string>
+    <string name="sd_media_unmounted"><b>MEDIA_UNMOUNTED</b>\n\nMedia is present, but not mounted.\nSee your System Settings &gt; SD Card screen for mounting instructions.</string>
+    <string name="sd_media_checking"><b>MEDIA_CHECKING</b>\n\nMedia is present, but is being disk-checked by the OS.\nPlease wait a few minutes for this process to finish and try again.</string>
+    <string name="sd_media_nofs"><b>MEDIA_NOFS</b>\n\nMedia is present, but is blank or is using a filesystem type that is unsupported by the Android OS.</string>
+    <string name="sd_media_mounted_read_only"><b>MEDIA_MOUNTED_READ_ONLY</b>\n\nMedia is present, and mounted, but is read-only.\nJetty requires a filesystem that it can write to.\n\nPlease correct and try again.</string>
+    <string name="sd_media_shared"><b>MEDIA_SHARED</b>\n\nMedia is present, but is unavailable to Jetty as it is currently involved in USB mass storage file sharing with a desktop.\nComplete your USB mass storage sharing and try again.</string>
+    <string name="sd_media_bad_removal"><b>MEDIA_BAD_REMOVAL</b>\n\nMedia is not present, and the Android OS reports that it was removed unsafely.\nPlease replace media, let Android check it, and try again.</string>
+    <string name="sd_media_unmountable"><b>MEDIA_UNMOUNTABLE</b>\n\nMedia is present, but the Android OS cannot mount it.\nThis typically happens if the filesystem or media is bad or corrupted.\nReplace media and try again.</string>
+    <string name="sd_unknown"><b>UNHANDLED ERROR</b>\n\nMedia state cannot be determined.\nState being reported by Android is <u>%s</u></string>
+    <string name="sd_not_available">SD Not (yet) Available</string>
+</resources>
