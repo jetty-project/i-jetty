@@ -2,7 +2,7 @@
 #labels Featured
 
 =Building i-jetty=
-_Updated for i-jetty-2.1_
+_Updated for i-jetty-3.0_
 
 ==From the Command Line==
 Building i-jetty at the command line is very straightforward.
@@ -18,48 +18,18 @@ You'll need these tools:
 To build:
 
  # Checkout the code from svn:  `svn co http://i-jetty.googlecode.com/svn/trunk/`
- # Edit your maven [http://maven.apache.org/settings.html settings.xml] file
-
-You should add the following lines to your [http://maven.apache.org/settings.html settings.xml] file, replacing the value of *android.home* with the location of your android sdk:
-
-{{{
-<settings>
-  <profiles>
-    <profile>
-      <id>android</id>
-      <properties>
-        <android.home>/usr/local/java/android-sdk-linux_86</android.home>
-      </properties>
-    </profile>
-  </profiles>
-  <activeProfiles>
-    <activeProfile>android</activeProfile>
-  </activeProfiles>
-</settings>
-}}}
-
+ 
 Then, assuming you checked out the code to $I_JETTY_HOME, and you have the android sdk installed at $ANDROID_HOME, you do:
 
 {{{
- cd $I_JETTY_HOME
+ cd $I_JETTY_HOME/i-jetty
  mvn clean install
 }}}
 
-Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/i-jetty-ui/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
+Voila! You will have an installable .apk bundle in your `$I_JETTY_HOME/i-jetty/i-jetty-ui/target` directory. Now follow the instructions over at the [http://developer.android.com/ Android Developers] site to upload it to your phone or emulator.
 
-=== Building on Windows ===
-Several users have reported memory problems when building on Windows. This can manifest itself as a mysterious and unhelpful error message from the build system.
-
-To avoid this problem, try increasing the amount of memory available to dex during compilation. To do that, edit the $I_JETTY_HOME/i-jetty-ui/pom.xml file and find the line that looks like:
-{{{
-  <executable>${android.home}/${android-platform}/tools/dx</executable>
-}}}
-
-Under that, as the first argument, add this line:
-
-{{{   
-<argument>-JXmx1024M</argument>
-}}}
+=== Tweaking the Build Process ===
+We use the [http://code.google.com/p/maven-android-plugin/ maven android plugin] to build i-jetty. If you need to tweak the default values used by the Android build tools, you will find the documentation for this plugin helpful.
 
 ===Making an SDCard Image===
 i-jetty requires an sd card. If you're running with the emulator, you'll need to use the [http://developer.android.com/guide/developing/tools/othertools.html#mksdcard mksdcard] utility from the [http://developer.android.com/ android sdk]. Here's an example of creating a file called "sdcard.img" which is a card with 60Mb storage:
@@ -75,7 +45,7 @@ emulator -avd avd1.6 -sdcard ./sdcard.img
 
 If you're using the emulator, you'll want to install the ijetty package:
 {{{
-adb install i-jetty-ui/target/i-jetty-debug-[ijetty.version].apk
+adb install i-jetty/i-jetty-ui/target/i-jetty-[ijetty.version]-aligned.apk
 }}}
 
 Where ijetty.version is the version number of i-jetty, eg 2.1-SNAPSHOT.
