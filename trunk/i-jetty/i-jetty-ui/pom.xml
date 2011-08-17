@@ -4,11 +4,11 @@
    <parent>
      <groupId>org.mortbay.ijetty</groupId>
      <artifactId>ijetty-parent</artifactId>
-     <version>3.0-SNAPSHOT</version>
+     <version>3.1</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <artifactId>i-jetty</artifactId>
-   <version>3.0-SNAPSHOT</version>
+   <version>3.1</version>
    <packaging>apk</packaging>
    <name>I-Jetty :: Android Application</name>
    <description>Jetty on Android</description>
@@ -80,4 +80,22 @@
          </plugin>
       </plugins>
    </build>
+   <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                        <artifactId>maven-android-plugin</artifactId>
+                        <configuration>
+                            <sign>
+                                <debug>false</debug>
+                            </sign>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

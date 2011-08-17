@@ -4,11 +4,11 @@
    <parent>
      <groupId>org.mortbay.ijetty</groupId>
      <artifactId>console-parent</artifactId>
-     <version>3.0-SNAPSHOT</version>
+     <version>3.1-SNAPSHOT</version>
    </parent>
    <modelVersion>4.0.0</modelVersion>
    <artifactId>i-jetty-console-installer</artifactId>
-   <version>3.0-SNAPSHOT</version>
+   <version>3.1-SNAPSHOT</version>
    <packaging>apk</packaging>
    <name>I-Jetty :: Console Android Installer</name>
    <description>Installer for I-Jetty Console on Android</description>
@@ -94,4 +94,23 @@
          </plugin>
       </plugins>
    </build>
+   <profiles>
+        <profile>
+            <id>sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+                        <artifactId>maven-android-plugin</artifactId>
+                        <configuration>
+                            <sign>
+                                <debug>false</debug>
+                            </sign>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
