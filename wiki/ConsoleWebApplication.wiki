@@ -1,6 +1,6 @@
 #summary The i-jetty Console WebApp
 
-= The i-jetty Console =
+= The i-jetty Console WebApp =
 
 This webapp is available packaged as an Android apk bundle from the Android Market. When run, this bundle will install the Console webapp into an existing i-jetty setup.
 
