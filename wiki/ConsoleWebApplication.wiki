@@ -26,4 +26,3 @@ You will need to supply the following authentication information:
      login:    admin
      password: admin
 }}}
-Note that you can use i-jetty's Configure button to change the password.
