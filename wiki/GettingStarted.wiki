@@ -30,21 +30,21 @@ Currently supported settings are:
 
 === Http Connector ===
 
- * *Edit Port [8080]*
+ * *Edit Port `[8080]`*
    The port on which i-jetty will listen for requests.
 
- * *Use NIO [true|false]*
+ * *Use NIO `[true|false]`*
    The default is true (since i-jetty-3.0). Select falseif you want i-jetty to use a blocking-style connector. 
 
 
 === Https Connector ===
- *  *Use SSL [false|true]*
+ *  *Use SSL `[false|true]`*
     The default is false.Select true if you want i-jetty to ALSO start an SSL connector.
 
- * *Use NIO [true|false]*
+ * *Use NIO `[true|false]`*
    The default is true (since i-jetty-3.0). Select false if you want i-jetty to use a blocking-style connector. 
 
- * *Edit Port [8443]*
+ * *Edit Port `[8443]`*
    The port on which the SSL connector will listen for requests.
 
  * *Edit Password*
@@ -59,11 +59,11 @@ Currently supported settings are:
     the SslSocketConnector
 
 
- * *Edit Keystore Filename [/sdcard/etc/keystore]*
+ * *Edit Keystore Filename `[/sdcard/etc/keystore]`*
    If you have a different keystore file, specify it here.
 
 
- * *Edit Truststore Filename [/sdcard/etc/keystore]*
+ * *Edit Truststore Filename `[/sdcard/etc/keystore]`*
    If you are not using the i-jetty default, then specify the
    location of your truststore here.
 
@@ -76,11 +76,11 @@ Its worth noting that Android uses the BCK (BouncyCastle) format for the keystor
 
 == Dynamic WebApp Download ==
 
-The Download button allows you to dynamically download webapps that have been [DownloadableWebApps prepared for Android]:
+The Download button allows you to dynamically download webapps that have been [DownloadableWebapps prepared for Android]:
 
 [https://i-jetty.googlecode.com/svn/trunk/images/ijetty-download-screenshot.png]
 
-Enter the *http url* of an android-enabled webapp. You can try this out using the "Hello World" webapp we supply at [https://i-jetty.googlecode.com/p/i-jetty/downloads] if you like. 
+Enter the *http url* of an android-enabled webapp. You can try this out using the "Hello World" webapp we supply at https://i-jetty.googlecode.com/p/i-jetty/downloads if you like. 
 
 Also enter the *context path* at which you want the web application to be deployed.  For example, for the "Hello World" webapp, you may want to deploy this at `/hello`. *Ensure that your context path starts with /*. 
 
