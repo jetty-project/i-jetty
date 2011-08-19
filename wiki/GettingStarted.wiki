@@ -5,7 +5,10 @@
 
 [https://i-jetty.googlecode.com/svn/trunk/images/ijetty-launcher.png]
 
-After installing the i-jetty apk onto the phone, select the i-jetty application icon and click on it to activate.
+After installing the i-jetty apk onto the phone, select the i-jetty application icon and click on it to activate:
+
+[https://i-jetty.googlecode.com/svn/trunk/images/ijetty-screenshot.png]
+
 
 There are a number of options:
 
@@ -72,4 +75,8 @@ The Download button allows you to dynamically download webapps that have been pr
 
 [https://i-jetty.googlecode.com/svn/trunk/images/ijetty-download-screenshot.png]
 
-Click on the Download button and then enter the http url of an android-enabled webapp, and enter the context path at which you want the web application to be deployed. The webapp will be downloaded and installed to i-jetty. If i-jetty is already running, you will need to stop and restart.
+Enter the *http url* of an android-enabled webapp. You can try this out using the "Hello World" webapp we supply at [https://i-jetty.googlecode.com/p/i-jetty/downloads] if you like. 
+
+Also enter the *context path* at which you want the web application to be deployed.  For example, for the "Hello World" webapp, you may want to deploy this at `/hello`. *Ensure that your context path starts with /*. 
+
+The webapp will be downloaded and installed to i-jetty. If i-jetty is already running, you will need to stop and restart in order to have the new webapp deployed.
