@@ -9,14 +9,16 @@ After installing the i-jetty apk onto the phone, select the i-jetty application 
 
 [https://i-jetty.googlecode.com/svn/trunk/images/ijetty-screenshot.png]
 
-
-There are a number of options:
-
-== Start Jetty ==
+== Stopping and Starting ==
+=== Start Jetty ===
 Clicking the Start button will start an i-jetty service. i-jetty will be available on the phone at the port that you selected with the Configure button. The default port is 8080.
 
-== Stop Jetty Button ==
+=== Stop Jetty Button ===
 The Stop Jetty button kills the i-jetty service. You will need to stop and then restart i-jetty for newly downloaded webapps to be deployed.
+
+i-jetty will continue to run as a Service in the background once it is started. If you move away from the i-jetty application, you can always quickly return to it by selecting the i-jetty item in the status bar:
+
+[https://i-jetty.googlecode.com/svn/trunk/images/ijetty-notification-screenshot.png]
 
 == Configure ==
 
