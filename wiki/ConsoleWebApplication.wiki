@@ -1,12 +1,12 @@
 #summary The i-jetty Console WebApp
 
-= The i-jetty Console WebApp =
+=The i-jetty Console WebApp=
 
 This webapp is available packaged as an Android apk bundle from the Android Market. When run, this bundle will install the Console webapp into an existing i-jetty setup.
 
 The webapp makes available the on-phone content such as Contacts, Call Logs, Music, Images, Video, System Settings. 
 
-=== To Install ===
+==To Install==
 
 Download the i-Jetty Console Installer app from the Android Market. Click it to install. You will only need to do this once:
 
