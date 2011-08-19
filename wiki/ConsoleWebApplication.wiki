@@ -1,4 +1,5 @@
 #summary The i-jetty Console WebApp
+#labels Featured
 
 =The i-jetty Console WebApp=
 
