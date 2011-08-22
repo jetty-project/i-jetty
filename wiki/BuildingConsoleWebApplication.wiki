@@ -16,9 +16,9 @@ The former is the web application itself, specially built for Android. The latte
 
 Are similar for core i-jetty:
 
-  # java
-  # maven
-  # Android SDK 1.6 or higher
+  # [http://java.sun.com/javase java]
+  # [http://maven.apache.org maven]
+  # [http://http://developer.android.com/sdk/index.html Android SDK] 1.6 or higher
 
 However, in addition you must set an environment variable which indicates where the Android SDK is installed on your machine. For example, if I have installed the SDK at `/opt/android/android-sdk-linux_86` then I would set:
 
