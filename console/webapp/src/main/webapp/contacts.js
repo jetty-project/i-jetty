@@ -80,7 +80,6 @@ var Contacts =
                 beforeSend: function(xhr)
                 {
                     $("#loading").css ("display", "block");
-                    xhr.setRequestHeader('Connection', 'Keep-Alive');
                     return true;
                 },
                 success: function(response) 
@@ -121,7 +120,6 @@ var Contacts =
                 dataType: 'json',
                 beforeSend: function(xhr)
                 {
-                    xhr.setRequestHeader('Connection', 'Keep-Alive');
                     return true;
                 },
                 success: function(response) 
