@@ -1,8 +1,11 @@
-#summary How to build i-jetty
+#summary How to build core i-jetty
 #labels Featured
 
-=Building i-jetty=
+=Building Core i-jetty=
+
 _Updated for i-jetty-3.0_
+
+You might also be interested in info on [BuildingConsoleWebApplication Building the Console Web Application].
 
 ==From the Command Line==
 Building i-jetty at the command line is very straightforward.
