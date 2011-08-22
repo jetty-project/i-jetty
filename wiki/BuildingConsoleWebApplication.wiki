@@ -1,4 +1,5 @@
 #summary Building the console web application.
+#labels Featured
 
 = Build the Console Web Application =
 
