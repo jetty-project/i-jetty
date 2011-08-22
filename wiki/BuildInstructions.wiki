@@ -5,7 +5,7 @@
 
 _Updated for i-jetty-3.0_
 
-You might also be interested in info on [BuildingConsoleWebApplication Building the Console Web Application].
+You might also be interested in info on [BuildingConsoleWebApplication Building] the [ConsoleWebApplication Console Web Application].
 
 ==From the Command Line==
 Building i-jetty at the command line is very straightforward.
