@@ -3,7 +3,7 @@
 
 = Build the Console Web Application =
 
-After checking out the i-jetty source, you will have the console application in $IJETTY_HOME/console, assuming $IJETTY_HOME represents where you checked out the code. 
+After [http://code.google.com/p/i-jetty/source/checkout checking out] the i-jetty source, you will have the console application in $IJETTY_HOME/console, assuming $IJETTY_HOME represents where you checked out the code. 
 
 The console application consists of 2 maven subprojects:
 
