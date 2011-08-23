@@ -79,8 +79,8 @@
     <div id="page">
         <h1 class="pageheader">Media</h1>
         <div id="content">
-            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('images');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Images</h2>
-            <div id="images">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('image');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Images</h2>
+            <div id="image">Loading...</div>
             <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('audio');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Audio</h2>
             <div id="audio">Loading...</div>
             <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('video');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Video</h2>
@@ -89,7 +89,7 @@
             <div style="text-align:center;">
             <h2>Upload</h2>
             <div id="upload">
-                <form method="post" id="uploadform" enctype="multipart/form-data" action="/console/media/db/upload" target="upload_target">
+                <form method="post" id="uploadform" enctype="multipart/form-data" action="/console/browse/media/?action=upload" target="upload_target">
                     <input type="file" name="fileupload" id="fileupload" /><br /><br />
                     <input type="submit" value="Upload" />
                 </form>

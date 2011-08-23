@@ -16,27 +16,216 @@
 
 package org.mortbay.ijetty.console;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.util.IO;
+import org.eclipse.jetty.util.URIUtil;
+
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.net.Uri;
 import android.provider.Contacts;
+import android.util.Log;
 
 /**
  * ContactsJSONServlet
  *
  * A servlet to support restful style requests for Android Contacts.
+ * Restful request uri structure:
+ * 
+ *  /rest/contacts/photo/[who]
+ *  A request to obtain the photo corresponding to contact [who]
+ *  eg
+ *  /rest/contacts/photo/123
+ *
+ *  /rest/contacts/[who]/[what][?action=0|1|2|3|4][&id=x]
+ *  
+ *  who = contact db id
+ *  
+ *  eg request to retrieve Contact information about Contact 123:
+ *  
+ *   /rest/contacts/123
+ *   
+ * eg request to delete Contact 123:
+ * 
+ *   /rest/contacts/123?action=3
+ *   
+ * eg request to save a new Contact:
+ *   /rest/contacts/?action=4
+ *   
+ *   
+ * eg request to saved updated Contact:
+ *   /rest/contacts?action=1&id=123
+ *   
+ * eg request to retrieve 10 contacts starting at Contact 25:
+ *   /rest/contacts?start=25&pg=10
+ *   
+ * eg request to retrieve all contacts:
+ *   /rest/contacts/
+ *   
  * 
  */
-public class ContactsJSONServlet extends AbstractContactsServlet
-{
+public class ContactsJSONServlet extends HttpServlet
+{  
+    private static final String TAG = "ContactsSrvlt";
     private static final long serialVersionUID = 1L;
+    public static int __VERSION = 0;
+    
+    
+    public static final int __ACTION_NONE = -1;
+    public static final int __ACTION_CALL = 0;
+    public static final int __ACTION_DEL = 3;
+    public static final int __ACTION_SAVE = 4;
+    
+    public static final int __DEFAULT_PG_START = 0;
+    public static final int __DEFAULT_PG_SIZE = 10;
+    
+    
+    public static final String __ACTION_PARAM = "action";
+    public static final String __PG_START_PARAM = "pgStart";
+    public static final String __PG_SIZE_PARAM = "pgSize";
+    
+    private ContentResolver resolver;
+    
+    
+    @Override
+    public void init(ServletConfig config) throws ServletException
+    {
+        super.init(config);
+        resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
+    }
 
     
+    public ContentResolver getContentResolver()
+    {
+        return resolver;
+    }
+    
+    
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        doGet(request,response);
+    }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    {
+        String pathInfo = request.getPathInfo();
+        String servletPath = request.getServletPath();
+      
+        String pathInContext = URIUtil.addPaths(servletPath,pathInfo);
+
+        if (pathInfo == null)
+        {
+            //redirect any requests for /console/contacts to be /console/contacts/
+            RequestDispatcher dispatcher = request.getRequestDispatcher(pathInContext + "/");
+            dispatcher.forward(request,response);
+        }
+        else
+        {
+            StringTokenizer strtok = new StringTokenizer(pathInfo,"/");
+            
+            String who = null;
+            boolean isPhoto = false;
+            int action = __ACTION_NONE;
+            
+            if (strtok.hasMoreElements())
+            {
+                String tmp = strtok.nextToken();
+                
+                if ("photo".equalsIgnoreCase(tmp))
+                    isPhoto = true;
+                else
+                    who = tmp;
+            }
+            
+            if (who == null && strtok.hasMoreElements())
+            {
+                who = strtok.nextToken();
+            }
+
+            String tmp = request.getParameter(__ACTION_PARAM);
+            action = (tmp == null?__ACTION_NONE:Integer.parseInt(tmp.trim()));
+          
+            switch (action)
+            {
+                case __ACTION_NONE:
+                {
+                    if (who != null)
+                    {
+                        //a specific contact is being requested
+                        if (isPhoto)
+                            handleGetImage(request,response,who);
+                        else
+                            handleGetContact(request,response,who);
+                    }
+                    else
+                    {
+                        //Get all contacts
+                        String str = request.getParameter(__PG_START_PARAM);
+                        int pgStart = (str == null ? -1 : Integer.parseInt(str.trim()));
+                        str = request.getParameter(__PG_SIZE_PARAM);
+                        int pgSize = (str == null ? -1 : Integer.parseInt(str.trim()));
+                        
+                        handleGetContacts(request,response, pgStart, pgSize);
+                    }
+                    break;
+                }
+                case __ACTION_CALL:
+                {
+                    //
+                    // Call a Contact
+                    // TODO not implemented
+                    //
+
+                    break;
+                }
+                case __ACTION_SAVE:
+                {
+                    //
+                    // Save a Contact, either new or edited
+                    //
+                    who = request.getParameter("id");
+                    handleSaveContact(request,response,who);
+
+                    break;
+                }
+                case __ACTION_DEL:
+                {
+                    //
+                    // Delete a contact
+                    //
+                    handleDeleteContact(request,response,who);
+
+                    break;
+                }
+                default:
+                {
+                    handleDefault(request,response);
+                }
+            }
+        }
+        
+        
+    }
     
     
     protected void deleteUser(PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
@@ -244,21 +433,16 @@ public class ContactsJSONServlet extends AbstractContactsServlet
         writer.println("}");
     }
 
-    @Override
-    public void handleAddContact(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException
-    {
-        //No-op for JSON as putting up a form to add a user is handled by the front end
-    }
+  
 
-    @Override
+
     public void handleDefault(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException
     {
         handleGetContacts(request,response, __DEFAULT_PG_START, __DEFAULT_PG_SIZE);
     }
 
-    @Override
+
     public void handleDeleteContact(HttpServletRequest request, HttpServletResponse response, String who)
     throws ServletException, IOException
     {
@@ -267,14 +451,8 @@ public class ContactsJSONServlet extends AbstractContactsServlet
         deleteUser(writer,request,response,who);
     }
 
-    @Override
-    public void handleEditContact(HttpServletRequest request, HttpServletResponse response, String who)
-    throws ServletException, IOException
-    {
-        //No-op for JSON as putting up a form to add a user is handled by the front end
-    }
 
-    @Override
+  
     public void handleGetContact(HttpServletRequest request, HttpServletResponse response, String who)
     throws ServletException, IOException
     {
@@ -286,7 +464,7 @@ public class ContactsJSONServlet extends AbstractContactsServlet
         writer.close();
     }
 
-    @Override
+ 
     public void handleGetContacts(HttpServletRequest request, HttpServletResponse response,
                                   int pgStart, int pgSize)
     throws ServletException, IOException
@@ -300,7 +478,7 @@ public class ContactsJSONServlet extends AbstractContactsServlet
         users.close();
     }
 
-    @Override
+ 
     public void handleSaveContact(HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {
         //Do NOT return any data. This is because the json form submission is
@@ -308,5 +486,176 @@ public class ContactsJSONServlet extends AbstractContactsServlet
         //form would cause the browser to replace the whole content of the page
         //with the response.
         saveContactFormData(request,response,request.getParameter("id"));
+    }
+    
+    public void handleGetImage(HttpServletRequest request, HttpServletResponse response, String who) throws IOException
+    {
+        Uri personUri = ContentUris.withAppendedId(Contacts.People.CONTENT_URI,Long.valueOf(who.trim()).longValue());
+        InputStream is = Contacts.People.openContactPhotoInputStream(getContentResolver(),personUri);
+        if (is == null)
+        {
+            response.setContentType("image/jpeg");
+            OutputStream os = response.getOutputStream();
+            is = getServletContext().getResourceAsStream("/android.jpg");
+            IO.copy(is,os);
+        }
+        else
+        {
+            response.setContentType("image/png");
+            OutputStream os = response.getOutputStream();
+            IO.copy(is,os);
+        }
+    }
+    
+    
+    public void saveContactFormData(HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
+    {
+        ContentValues person = new ContentValues();
+        person.put(Contacts.People.NAME,request.getParameter("name"));
+        person.put(Contacts.People.NOTES,request.getParameter("notes"));
+        person.put(Contacts.People.STARRED,request.getParameter("starred") != null?1:0);
+        person.put(Contacts.People.SEND_TO_VOICEMAIL,request.getParameter("voicemail") != null?1:0);
+
+        id = (id == null?id:id.trim());
+        id = (id == null?id:("".equals(id)?null:id));
+
+        Log.i(TAG,"Saving: name=" + request.getParameter("name") + " notes=" + request.getParameter("notes") + " id=" + id + " starred="
+                + request.getParameter("starred"));
+
+        if (id == null)
+        {
+            // Create it first if necessary (so we can save phone data)
+            id = Contact.create(getContentResolver(),person);
+            Log.d(TAG,"Inserted new Contact id " + id);
+        }
+
+        File photo = (File)request.getAttribute("new-pic");
+        if (photo != null)
+        {
+            //a new picture for the Contact has been uploaded
+            Contact.savePhoto(getContentResolver(),id,photo);
+        }
+        List<String> deletedPhones = new ArrayList<String>();
+        Map<String, ContentValues> modifiedPhones = new HashMap<String, ContentValues>();
+        List<String> deletedContacts = new ArrayList<String>();
+        Map<String, ContentValues> modifiedContacts = new HashMap<String, ContentValues>();
+        Enumeration<?> enumeration = request.getParameterNames();
+        while (enumeration.hasMoreElements())
+        {
+            String name = (String)enumeration.nextElement();
+            if (name.startsWith("phone-del-"))
+            {
+                //a phone to delete
+                String phId = name.substring(10);
+                Log.d(TAG,"Phone to delete: " + phId + " from " + name);
+                String val = request.getParameter(name);
+                if ("del".equals(val))
+                {
+                    deletedPhones.add(phId);
+                }
+            }
+            else if (name.startsWith("contact-del-"))
+            {
+                String methodId = name.substring(12);
+                Log.d(TAG,"Contact method to delete: " + methodId + " from " + name);
+                String val = request.getParameter(name);
+                if ("del".equals(val))
+                {
+                    deletedContacts.add(methodId);
+                }
+            }
+            else if (name.startsWith("phone-type-"))
+            {
+                String phId = name.substring(11);
+                if (request.getParameter("phone-del-" + phId) == null)
+                {
+                    Log.d(TAG,"Modified phone " + phId + " from " + name);
+                    String typeStr = request.getParameter(name);
+                    String number = request.getParameter("phone-number-" + phId);
+                    ContentValues phone = new ContentValues();
+                    phone.put(Contacts.Phones.NUMBER,number);
+                    phone.put(Contacts.Phones.TYPE,typeStr);
+                    modifiedPhones.put(phId,phone);
+                }
+            }
+            else if (name.startsWith("contact-kind-"))
+            {
+                String methodId = name.substring(13);
+                Log.d(TAG,"Possible contact modification: " + methodId);
+                if (request.getParameter("contact-del-" + methodId) == null)
+                {
+                    String kind = request.getParameter(name);
+                    String type = request.getParameter("contact-type-" + methodId);
+                    String val = request.getParameter("contact-val-" + methodId);
+                    ContentValues contactMethod = new ContentValues();
+                    contactMethod.put(Contacts.ContactMethodsColumns.KIND,kind);
+                    contactMethod.put(Contacts.ContactMethodsColumns.TYPE,type);
+                    contactMethod.put(Contacts.ContactMethodsColumns.DATA,val);
+                    Log.d(TAG,"Modified contact " + methodId + " kind=" + kind + " type=" + type + " val=" + val);
+                    modifiedContacts.put(methodId,contactMethod);
+                }
+            }
+        }
+
+        //Handle addition and modifications to phones
+        for (String key : modifiedPhones.keySet())
+        {
+            ContentValues phone = modifiedPhones.get(key);
+            if ("x".equals(key))
+            {
+                //new phone, check a number has been given
+                String number = phone.getAsString(Contacts.Phones.NUMBER);
+                if ((number != null) && !"".equals(number))
+                {
+                    Log.d(TAG,"Adding new phone with number " + number);
+                    Phone.addPhone(getContentResolver(),phone,id);
+                }
+            }
+            else
+            {
+                //possibly modified phone, save anyway
+                Log.d(TAG,"Saving phone id=" + key);
+                Phone.savePhone(getContentResolver(),phone,key,id);
+            }
+        }
+        //Get rid of the deleted phones
+        for (String phId : deletedPhones)
+        {
+            Phone.deletePhone(getContentResolver(),phId,id);
+            Log.d(TAG,"Deleted phone " + phId);
+        }
+
+        //Handle addition and modifications to contacts
+        for (String key : modifiedContacts.keySet())
+        {
+            ContentValues contactMethod = modifiedContacts.get(key);
+            if ("x".equals(key))
+            {
+                //could be a new contact method, check if any data has been provided
+                String data = contactMethod.getAsString(Contacts.ContactMethodsColumns.DATA);
+                Log.d(TAG,"Data for new contact method : " + data);
+                if ((data != null) && !"".equals(data))
+                {
+                    Log.d(TAG,"Adding new contact method with data " + data);
+                    ContactMethod.addContactMethod(getContentResolver(),contactMethod,id);
+                }
+            }
+            else
+            {
+                //modified contact method, save it
+                Log.d(TAG,"Saving contact method " + key);
+                ContactMethod.saveContactMethod(getContentResolver(),contactMethod,key,id);
+            }
+        }
+
+        //Get rid of deleted contacts
+        for (String methodId : deletedContacts)
+        {
+            ContactMethod.deleteContactMethod(getContentResolver(),methodId,id);
+        }
+
+        Contact.save(getContentResolver(),person,id);
+        __VERSION++;
+        Log.d(TAG,"Updating Contact id " + id);
     }
 }

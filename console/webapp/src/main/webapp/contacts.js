@@ -72,7 +72,7 @@ var Contacts =
         
         getContacts: function (successfn, errfn)
         {
-            var uri =  "/console/contacts/json/?pgStart="+Contacts.page_pos+"&pgSize="+Contacts.page_size;
+            var uri =  "/console/rest/contacts/?pgStart="+Contacts.page_pos+"&pgSize="+Contacts.page_size;
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -212,7 +212,7 @@ var Contacts =
             $.ajax (
                     {
                         type: 'POST',
-                        url: "/console/contacts/json/"+Contacts.summary.id+"/?action="+Contacts.action_del,
+                        url: "/console/rest/contacts/"+Contacts.summary.id+"/?action="+Contacts.action_del,
                         dataType: 'json',
                         success: function (response)
                         {
@@ -274,14 +274,14 @@ var Contacts =
         	
         	$("#userinfo").html(""); //get rid of any previous
             var html = "";
-            html += "<form id='uform' method='POST' action='/console/contacts/json/?action="+Contacts.action_save+"' enctype='multipart/form-data' target='hidden-target' onSubmit='Contacts.saveContact(); return true;'>";
+            html += "<form id='uform' method='POST' action='/console/rest/contacts/?action="+Contacts.action_save+"' enctype='multipart/form-data' target='hidden-target' onSubmit='Contacts.saveContact(); return true;'>";
             html += "<input type='hidden' name='id' value='" + Contacts.summary.id + "'>";
             html += "<table><tr><td colspan='2'><h2>General</h2></td></tr>";
             html += "<tr><td>Name: </td><td><input name='name' type='text' value='" + Contacts.summary.name + "' /></td></tr>";
             html += "<tr><td>Starred: </td><td ><input name='starred' type='checkbox' " + (Contacts.summary.starred ? "checked='checked'" : "") + " /></td></tr>";
             html += "<tr><td>Send to Voicemail: </td><td><input name='voicemail' type='checkbox' "+(Contacts.summary.voicemail? "checked='checked'" : "") + " /></td></tr>";
             html += "<tr><td>Notes: </td><td ><textarea name='notes'>" + (Contacts.summary.notes != null ? Contacts.summary.notes : "") + "</textarea></td></tr>";
-            html += "<tr><td><a href='/console/contacts/json/"+Contacts.summary.id+"/photo'><img src='/console/contacts/json/"+Contacts.summary.id+"/photo' width='64' height='64'/></a></td><td>Update photo:<br /><input type='file' name='new-pic' /></td></tr>";
+            html += "<tr><td><a href='/console/rest/contacts/photo/"+Contacts.summary.id+"'><img src='/console/rest/contacts/photo/"+Contacts.summary.id+"' width='64' height='64'/></a></td><td>Update photo:<br /><input type='file' name='new-pic' /></td></tr>";
             html += "<tr><td colspan='2'><h2>Phone numbers</h2></td></tr>";
             for (var p in Contacts.phones)
             {
@@ -384,8 +384,8 @@ var Contacts =
                     rows += "<td><span class='big'>*</span></td>";
                 else
                     rows += "<td>&nbsp;</td>";
-                rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'><img width='64' height='64' src='/console/contacts/json/"+data[d].id+"/photo'/></a></td>";
-                rows += "<td><a class='userlink' href='/console/contacts/json/"+data[d].id+"'>"+data[d].name+"</a></td>";
+                rows += "<td><a class='userlink' href='/console/rest/contacts/"+data[d].id+"'><img width='64' height='64' src='/console/rest/contacts/photo/"+data[d].id+"'/></a></td>";
+                rows += "<td><a class='userlink' href='/console/rest/contacts/"+data[d].id+"'>"+data[d].name+"</a></td>";
                 rows +="</tr>";
             }
             $("#ulist").append(rows);

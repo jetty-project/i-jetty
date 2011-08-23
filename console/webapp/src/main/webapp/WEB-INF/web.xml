@@ -28,15 +28,23 @@
 		<servlet-name>MediaBrowserServlet</servlet-name>
 		<servlet-class>org.mortbay.ijetty.console.MediaBrowserServlet</servlet-class>
 	</servlet>
+	<servlet>
+	  <servlet-name>MediaRestServlet</servlet-name>
+	  <servlet-class>org.mortbay.ijetty.console.MediaRestServlet</servlet-class>
+	</servlet>
 	
 	<filter>
 	    <filter-name>MultiPart</filter-name>
 	    <filter-class>org.eclipse.jetty.servlets.MultiPartFilter</filter-class>
 	</filter>
+	<filter>
+	    <filter-name>CacheFilter</filter-name>
+	    <filter-class>org.mortbay.ijetty.console.CacheFilter</filter-class>
+	</filter>
 	
 	<servlet-mapping>
 		<servlet-name>ContactsJSONServlet</servlet-name>
-		<url-pattern>/contacts/json/*</url-pattern>
+		<url-pattern>/rest/contacts/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>CallLogServlet</servlet-name>
@@ -52,22 +60,32 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>MediaBrowserServlet</servlet-name>
-		<url-pattern>/media/db/*</url-pattern>
+		<url-pattern>/browse/media/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+	    <servlet-name>MediaRestServlet</servlet-name>
+	    <url-pattern>/rest/media/*</url-pattern>
 	</servlet-mapping>
 	<filter-mapping>
 	    <filter-name>MultiPart</filter-name>
-	    <url-pattern>/contacts/json/*</url-pattern>
-	    <url-pattern>/media/db/upload</url-pattern>
+	    <url-pattern>/rest/contacts/*</url-pattern>
+	    <url-pattern>/browse/media/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+	  <filter-name>CacheFilter</filter-name>
+	  <url-pattern>/rest/*</url-pattern>
 	</filter-mapping>
 	
     <security-constraint>
       <web-resource-collection>
         <web-resource-name>I-Jetty Console</web-resource-name>
         <url-pattern>/contacts/*</url-pattern>
+        <url-pattern>/media/*</url-pattern>
+        <url-pattern>/rest/*</url-pattern>
         <url-pattern>/calls/*</url-pattern>
         <url-pattern>/settings/*</url-pattern>
         <url-pattern>/network/*</url-pattern>
-        <url-pattern>/media/*</url-pattern>
+        <url-pattern>/browse/*</url-pattern>
       </web-resource-collection>
       <auth-constraint>
         <role-name>admin</role-name>
