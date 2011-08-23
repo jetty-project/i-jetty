@@ -50,6 +50,28 @@ import android.provider.MediaStore;
 import android.util.Config;
 import android.util.Log;
 
+/**
+ * MediaBrowserServlet
+ *
+ *  /console/browse/media/[type]/[location]/[thumb]/[id][?action=x]
+ *  
+ *  type: image, audio, video
+ *  location: internal, external
+ *  action: embed, upload
+ *  
+ *  
+ *  /console/browse/media/image/internal/3
+ *  Retrieves image 3 from internal storage
+ *  
+ *  /console/browse/media/image/internal/thumb/3
+ *  Retrieves the thumbnail for image 3 from internal storage
+
+ *  
+ *  /console/browse/media/?action=upload
+ *  Submits a new file to upload to the Android device
+ *  
+ *  
+ */
 public class MediaBrowserServlet extends HttpServlet
 {
     public class MyMediaConnectorClient implements MediaScannerConnectionClient
@@ -78,68 +100,25 @@ public class MediaBrowserServlet extends HttpServlet
             _scanner = scanner;
         }
     }
-    class PathTokenizer
-    {
-        private StringTokenizer tok;
-        private String pathinfo;
-        private int location;
-
-        public PathTokenizer(String pathinfo)
-        {
-            this.pathinfo = pathinfo;
-            this.tok = new StringTokenizer(pathinfo,"/");
-            this.location = 0;
-        }
-
-        public String getPathinfo()
-        {
-            return pathinfo;
-        }
-
-        public String nextOptPathSegment() throws ParseException
-        {
-            if (tok.hasMoreTokens())
-            {
-                location++;
-                String ret = tok.nextToken();
-                if (ret == null)
-                {
-                    return null;
-                }
-                return ret.trim();
-            }
-            return null;
-        }
-
-        public String nextPathSegment() throws ParseException
-        {
-            if (tok.hasMoreTokens())
-            {
-                location++;
-                String ret = tok.nextToken();
-                if (ret == null)
-                {
-                    return null;
-                }
-                return ret.trim();
-            }
-            throw new ParseException("Missing required path segment",location);
-        }
-    }
+   
 
     private static final long serialVersionUID = 1L;
     private static final String TAG = "MediaBrowserServlet";
 
-    private static final String TYPE_VIDEO = "video";
-    private static final String TYPE_AUDIO = "audio";
-    private static final String TYPE_IMAGES = "images";
-    private static final String LOCATION_EXTERNAL = "external";
-    private static final String LOCATION_INTERNAL = "internal";
 
     private int __THUMB_WIDTH = 120;
     private int __THUMB_HEIGHT = 120;
     private ContentResolver resolver;
     private Context context;
+
+    
+    @Override
+    public void init(ServletConfig config) throws ServletException
+    {
+        super.init(config);
+        resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
+        context = (Context)getServletContext().getAttribute("org.mortbay.ijetty.context");
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -158,93 +137,77 @@ public class MediaBrowserServlet extends HttpServlet
             Log.d(TAG,"PathInfo: " + pathInfo);
         }
 
-        PathTokenizer pathtok = new PathTokenizer(pathInfo);
-        try
-        {
-            String action = pathtok.nextPathSegment(); // 'json', 'fetch', or 'embed'
+        String type = null;
+        String location = null;
+        String id = null;
+        boolean isThumb = false;
 
-            if ("fetch".equals(action))
-            {
-                String type = pathtok.nextPathSegment();
-                String location = pathtok.nextPathSegment();
-                String item = pathtok.nextPathSegment();
-                String thumb = pathtok.nextOptPathSegment();
-                Uri contenturi = getContentUriByType(type,location);
-                if (contenturi == null)
-                {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-                boolean asThumb = "thumb".equals(thumb);
-                doGetFetchMedia(request,response,contenturi,item,asThumb);
-            }
-            else if ("json".equals(action.trim()))
-            {
-                String type = pathtok.nextPathSegment();
-                doGetJson(request,response,type);
-            }
-            else if ("embed".equals(action.trim()))
-            {
-                String type = pathtok.nextPathSegment();
-                String location = pathtok.nextPathSegment();
-                String item = pathtok.nextPathSegment();
-                doGetEmbedHtml(request,response,type,location,item);
-            }
+        StringTokenizer strtok = new StringTokenizer(pathInfo,"/");
+        if (strtok.hasMoreElements())
+        {
+            type = strtok.nextToken();
+        }
+
+        if (strtok.hasMoreElements())
+        {
+            location = strtok.nextToken();
+        }
+
+        if (strtok.hasMoreElements())
+        {
+            String tmp = strtok.nextToken();
+            if ("thumb".equalsIgnoreCase(tmp.trim()))
+                isThumb = true;
             else
-            {
-                Log.w(TAG,"invalid action - '" + action + "', returning 404");
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
+                id = tmp;
         }
-        catch (ParseException e)
+        
+        if (strtok.hasMoreElements())
         {
-            Log.w(TAG,"Invalid request path: " + pathInfo,e);
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            id = strtok.nextToken();
         }
-    }
 
+        String action = request.getParameter("action");
+
+        if (action !=null && "embed".equals(action.trim()))
+        {
+            doGetEmbedHtml(request,response,type,location,id);
+        }
+        else
+            doGetFetchMedia(request, response, type, location, id, isThumb);       
+    }
+    
+    
+    
     /**
-     * Get the HTML snippet for embedding the media content in a way suitable for the browser to view the content as
-     *
+     * Get the content.
+     * 
      * @param request
-     *            the incoming servlet request
      * @param response
-     *            the outgoing servlet response
-     * @param type
-     *            the type of media interested in (<code>images</code>, <code>audio</code>, or <code>video</code>)
-     * @param location
-     *            the location of media interested in (<code>internal</code>, or <code>external</code>)
+     * @param contenturi
      * @param item
-     *            the item reference
+     * @param asThumb
      * @throws ServletException
      * @throws IOException
      */
-    public void doGetEmbedHtml(HttpServletRequest request, HttpServletResponse response, String type, String location, String item) throws ServletException,
-            IOException
-    {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("text/html");
-        PrintWriter writer = response.getWriter();
-
-        String path = "/console/media/db/fetch/" + type + "/" + location + "/" + item;
-
-        writer.print("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26'");
-        writer.println(" CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95'");
-        writer.println(" STANDBY='Loading...' TYPE='application/x-oleobject'>");
-        writer.printf("  <PARAM NAME='FileName' VALUE='%s'>%n",path);
-        writer.printf("  <EMBED TYPE='application/x-mplayer2' SRC='%s' NAME='MediaPlayer' WIDTH='320' HEIGHT='26' autostart='1'></EMBED>%n",path);
-        writer.println("</OBJECT>");
-    }
-
-    public void doGetFetchMedia(HttpServletRequest request, HttpServletResponse response, Uri contenturi, String item, boolean asThumb)
+    public void doGetFetchMedia(HttpServletRequest request, HttpServletResponse response, String type, String location, String item, boolean asThumb)
             throws ServletException, IOException
     {
+        if (item == null)
+        {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No id");
+            return;
+        }
+        
+        
         try
         {
-            Uri content = Uri.withAppendedPath(contenturi,item);
+            Uri uri = MediaType.getContentUriByType(type, location);
+            Uri content = Uri.withAppendedPath(uri,item);
 
             if (asThumb)
             {
+                //Get a thumbnail                
                 Bitmap bitmap_orig = MediaStore.Images.Media.getBitmap(resolver,content);
                 if (bitmap_orig != null)
                 {
@@ -342,7 +305,16 @@ public class MediaBrowserServlet extends HttpServlet
                             bitmap.compress(Bitmap.CompressFormat.PNG,100,bytes);
                         }
 
-                        stream = new ByteArrayInputStream(bytes.toByteArray());
+                        try
+                        {
+                            stream = new ByteArrayInputStream(bytes.toByteArray());
+                            IO.copy(stream,os);
+                        }
+                        finally
+                        {
+                            bitmap.recycle();
+                            bitmap = null;
+                        }
                     }
                     else
                     {
@@ -357,20 +329,27 @@ public class MediaBrowserServlet extends HttpServlet
                         // just return the original data from the DB
                         response.setContentType(resolver.getType(content));
                         stream = resolver.openInputStream(content);
+                        IO.copy(stream,os);
                     }
-
-                    IO.copy(stream,os);
                 }
             }
             else
             {
                 Log.i(TAG,"Exporting original media");
-                response.setContentType(resolver.getType(content));
-                InputStream stream = resolver.openInputStream(content);
-                OutputStream os = response.getOutputStream();
-
-                response.setStatus(HttpServletResponse.SC_OK);
-                IO.copy(stream,os);
+                InputStream stream = null;
+                try
+                {
+                    response.setContentType(resolver.getType(content));
+                    stream = resolver.openInputStream(content);
+                    OutputStream os = response.getOutputStream();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    IO.copy(stream,os);
+                }
+                finally
+                {
+                    if (stream != null)
+                        stream.close();
+                }
             }
         }
         catch (Exception e)
@@ -381,104 +360,50 @@ public class MediaBrowserServlet extends HttpServlet
     }
 
     /**
-     * A request from the Javascript asking for some JSON describing the type of media being requested.
+     * Get the HTML snippet for embedding the media content in a way suitable for the browser to view the content as
      *
      * @param request
      *            the incoming servlet request
      * @param response
      *            the outgoing servlet response
-     * @param mediatype
+     * @param type
      *            the type of media interested in (<code>images</code>, <code>audio</code>, or <code>video</code>)
+     * @param location
+     *            the location of media interested in (<code>internal</code>, or <code>external</code>)
+     * @param item
+     *            the item reference
      * @throws ServletException
      * @throws IOException
      */
-    public void doGetJson(HttpServletRequest request, HttpServletResponse response, String mediatype) throws ServletException, IOException
+    public void doGetEmbedHtml(HttpServletRequest request, HttpServletResponse response, String type, String location, String item) throws ServletException,
+    IOException
     {
-        response.setContentType("application/json; charset=utf-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html");
         PrintWriter writer = response.getWriter();
 
-        Uri[] mediaUris = getContentUrisByType(mediatype);
+        String path = "/console/browse/media/" + type + "/" + location + "/" + item;
 
-        writer.print("[ ");
-
-        StringBuilder entry = new StringBuilder();
-
-        int length = mediaUris.length;
-        for (int iuri = 0; iuri < length; iuri++)
-        {
-            Uri contenturi = mediaUris[iuri];
-            Log.d(TAG,"Using contenturi: " + contenturi);
-            Cursor cur = resolver.query(contenturi,null,null,null,null);
-            
-            if (cur == null)
-                continue; //skip - no results?
-            
-            String location = "";
-            if (contenturi.toString().contains("/internal/"))
-            {
-                location = LOCATION_INTERNAL;
-            }
-            else if (contenturi.toString().contains("/external/"))
-            {
-                location = LOCATION_EXTERNAL;
-            }
-            else
-            {
-                Log.w(TAG,"Unknown content uri location (not internal or external?): " + contenturi);
-                continue; // skip (don't know how to handle)
-            }
-
-            while (cur.moveToNext())
-            {
-                Long rowid = cur.getLong(cur.getColumnIndexOrThrow(BaseColumns._ID));
-                String title = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
-                String displayname = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
-                String mimetype = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
-                String size = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE));
-
-                entry.setLength(0); // clear buffer.
-
-                entry.append("{");
-                entry.append(" 'type':").append(safeJson(mediatype));
-                entry.append(",'location':").append(safeJson(location));
-                entry.append(",'id':").append(safeJson(rowid));
-                entry.append(",'title':").append(safeJson(title));
-                entry.append(",'displayname':").append(safeJson(displayname));
-                entry.append(",'mimetype':").append(safeJson(mimetype));
-                entry.append(",'size':").append(safeJson(size));
-
-                if ((contenturi == MediaStore.Audio.Media.EXTERNAL_CONTENT_URI) || (contenturi == MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
-                {
-                    int music = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.IS_MUSIC));
-                    if (music != 0)
-                    {
-                        String artist = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-                        String album = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
-
-                        entry.append(",'artist':").append(safeJson(artist));
-                        entry.append(",'album':").append(safeJson(album));
-                    }
-                }
-
-                entry.append("}");
-                Log.d(TAG,entry.toString());
-                writer.print(entry.toString());
-
-                if (!cur.isLast())
-                {
-                    writer.print(",");
-                }
-            }
-            
-            cur.close();
-        }
-
-        writer.print(" ]");
+        writer.print("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26'");
+        writer.println(" CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95'");
+        writer.println(" STANDBY='Loading...' TYPE='application/x-oleobject'>");
+        writer.printf("  <PARAM NAME='FileName' VALUE='%s'>%n",path);
+        writer.printf("  <EMBED TYPE='application/x-mplayer2' SRC='%s' NAME='MediaPlayer' WIDTH='320' HEIGHT='26' autostart='1'></EMBED>%n",path);
+        writer.println("</OBJECT>");
     }
-
+    
+    
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        String action = request.getParameter("action");
+        if (action == null || !"upload".equalsIgnoreCase(action))
+        {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unrecognized action");
+            return;
+        }
+      
+        //Upload new media content
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();
@@ -489,9 +414,7 @@ public class MediaBrowserServlet extends HttpServlet
 
         // Create file upload directory if it doesn't exist
         if (!sdcarddir.exists())
-        {
             sdcarddir.mkdir();
-        }
 
         File output = null;
 
@@ -535,86 +458,8 @@ public class MediaBrowserServlet extends HttpServlet
         return resolver;
     }
 
-    private Uri getContentUriByType(String mediatype, String location)
-    {
-        // Try by name
-        if (TYPE_IMAGES.equals(mediatype))
-        {
-            if(LOCATION_INTERNAL.equals(location)) {
-                return MediaStore.Images.Media.INTERNAL_CONTENT_URI;
-            } else if(LOCATION_EXTERNAL.equals(location)) {
-                return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            } else {
-                Log.w(TAG,"Unknown location [" + location + "] for type [" + mediatype + "]");
-                return null;
-            }
-        }
-        else if (TYPE_AUDIO.equals(mediatype))
-        {
-            if(LOCATION_INTERNAL.equals(location)) {
-                return MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
-            } else if(LOCATION_EXTERNAL.equals(location)) {
-                return MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-            } else {
-                Log.w(TAG,"Unknown location [" + location + "] for type [" + mediatype + "]");
-                return null;
-            }
-        }
-        else if (TYPE_VIDEO.equals(mediatype))
-        {
-            if(LOCATION_INTERNAL.equals(location)) {
-                return MediaStore.Video.Media.INTERNAL_CONTENT_URI;
-            } else if(LOCATION_EXTERNAL.equals(location)) {
-                return MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-            } else {
-                Log.w(TAG,"Unknown location [" + location + "] for type [" + mediatype + "]");
-                return null;
-            }
-        }
 
-        // Not a known name either. fail.
-        Log.w(TAG,"Type String [" + mediatype + "] not a known ContentUri reference");
-        return null;
-    }
-
-    /**
-     * Fetch the list of content uris representing the basic media type.
-     *
-     * @param mediatype
-     *            the basic media type to fetch
-     * @return 2 Uri's representing the Content URIs for the [external, internal] content.
-     */
-    private Uri[] getContentUrisByType(String mediatype)
-    {
-        // Try by name
-        if (TYPE_IMAGES.equals(mediatype))
-        {
-            return new Uri[]
-            { MediaStore.Images.Media.EXTERNAL_CONTENT_URI, MediaStore.Images.Media.INTERNAL_CONTENT_URI };
-        }
-        else if (TYPE_AUDIO.equals(mediatype))
-        {
-            return new Uri[]
-            { MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MediaStore.Audio.Media.INTERNAL_CONTENT_URI };
-        }
-        else if (TYPE_VIDEO.equals(mediatype))
-        {
-            return new Uri[]
-            { MediaStore.Video.Media.EXTERNAL_CONTENT_URI, MediaStore.Video.Media.INTERNAL_CONTENT_URI };
-        }
-
-        // Not a known name either. fail.
-        Log.w(TAG,"Type String [" + mediatype + "] not a known ContentUri reference");
-        return null;
-    }
-
-    @Override
-    public void init(ServletConfig config) throws ServletException
-    {
-        super.init(config);
-        resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
-        context = (Context)getServletContext().getAttribute("org.mortbay.ijetty.context");
-    }
+    
 
     private void printResponse(PrintWriter writer, int resp, String msg, int filetype)
     {
@@ -623,22 +468,6 @@ public class MediaBrowserServlet extends HttpServlet
         writer.println("if (top.Media) { top.Media.uploadComplete(json); }");
         writer.println("</script>");
     }
-
-    private String safeJson(Number num)
-    {
-        if (num == null)
-        {
-            return "''";
-        }
-        return num.toString();
-    }
-
-    private String safeJson(String str)
-    {
-        if (str == null)
-        {
-            return "''";
-        }
-        return "'" + str.replaceAll("'","\\'") + "'";
-    }
+   
+   
 }
