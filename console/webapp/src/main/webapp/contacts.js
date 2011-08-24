@@ -402,7 +402,7 @@ var Contacts =
             $('.userlink').click(Contacts.getContactDetails);
             
             // make it sortable
-            $("#user").tablesorter({sortList: [[2,0]]});
+            $("#user").tablesorter({sortList: [[2,0]],  headers: { 0: { sorter: false}, 1: {sorter: false}}});
         }
   
 };
