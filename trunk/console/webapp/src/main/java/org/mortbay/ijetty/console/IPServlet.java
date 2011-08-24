@@ -43,6 +43,9 @@ public class IPServlet extends HttpServlet
         try
         {
             writer.println("<table cellspacing='0' cellpadding='2' border='1'>");
+            
+            writer.println("<thead><th>Interface</th><th>IP</th></thead>");
+            writer.println("<tbody>");
             Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
             for (NetworkInterface ni : Collections.list(nis))
             {
@@ -57,6 +60,7 @@ public class IPServlet extends HttpServlet
                 writer.println("</td>");
                 writer.println("</tr>");
             }
+            writer.println("</tbody>");
             writer.println("</table>");
         }
         catch (SocketException e)

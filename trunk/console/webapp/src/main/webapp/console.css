@@ -1,21 +1,18 @@
 body {
     margin: 0;
     padding: 0;
-    font: 1em Verdana, sans-serif;
-    /*background-color: #eeeeec;*/
+    font-family: Verdana, sans-serif;
+    font-size: 1em;
 }
 
 #navigation {
-    /*padding-top: 1px;*/
     margin: 0;
-    background-color: #4b84c2;
+    background-color: #92d109;
     color: white;
     background-image: url(navbar.png);
     background-repeat: repeat-x;
-    
-    font-size: 12px;
+    font-size: 1em;
     letter-spacing: -0.2pt;
-    font-family: verdana,sans-serif;
 }
 
 #navigation ul {
@@ -28,13 +25,8 @@ body {
 
 #navigation li {
     display: inline;
-    /*position: relative;
-    top: -0.5em;*/
-    
     list-style-type: none;
-    
     padding-right: 0.5em;
-    
     margin: 0;
 }
 
@@ -42,41 +34,44 @@ body {
     margin-left: 1.5em;
 }
 
-h1, h2 {font: 2em Georgia, "Times New Roman", serif; letter-spacing: 1px;}
-h2 {font-size: 1.5em; }
-h3 {font: bold 1em Verdana, Arial, sans-serif; letter-spacing: 2px;
-  text-transform: uppercase;}
-h4 {font: bold 1.1em Georgia, "Times New Roman", serif; letter-spacing: 1px;}
+h1, h2 {font-size: 1.2em; letter-spacing: 1px; font-weight: bold;}
+h2 {font-size: 1.1em; font-weight: bold;}
+h3 {font-size: 1em; }
+h4 {font-variant: small-caps; }
 
 a {
     text-decoration: none;
     color: #4e9a06;
 }
+a:hover,
+a.selected {
+    color: #ec2c07;
+}
 
 #navigation a {
-    color: #eeeeec;
+    color: #ffffff;
     padding: 5px;
 }
 
 #navigation a:hover,
 #navigation a.selected {
     color: #fff;
-    background-color: #72b2cf;
-    border: 1px solid #4b84c2;
+    background-color: #df5538;
+    border: 1px solid #ec2c07;
     padding: 4px;
 }
 
 h1.pageheader {
     margin: 0;
+    color: #2f2d29;
     background-image: url(titlebar.png);
     background-repeat: repeat-x;
-    background-color: #cccccc;
     padding: 0.25em;
-    
     position: relative;
     top: -1px;
     text-align: center;
-    border-bottom: 1px solid #babdb6;
+    border-top: 1px solid #babdb6;
+    border-bottom: 2px outset #babdb6;
 }
 
 hr {
@@ -107,17 +102,15 @@ table {
 }
 
 th {
-    /*font: bold 11px Georgia, "Times New Roman", serif;*/
     font-weight: bold;
     font-size: 11px;
     letter-spacing: -1px;
-	color: #6D929B;
-	
+	color: #2f2d29;
 	border: 1px solid #babdb6;
 	letter-spacing: 2px;
 	text-align: center;
 	padding: 6px 6px 6px 12px;
-    background: #4b84c2 url(table.png) repeat-x;
+    background: #ffffff url(table.png) repeat-x;
 }
 
 th.nobg {
@@ -129,12 +122,12 @@ td {
 	border-bottom: 1px solid #babdb6;
 	background: #fff;
 	padding: 6px 6px 6px 12px;
-	color: #4f6b72;
+	color: #797268;
 
 }
 
 td.odd {
-	background: #f2f6fb;
+	/*background: #eeeeee;*/
 	color: #797268;
 }
 
@@ -151,8 +144,7 @@ th.headerSortDown {
 th.header {
     cursor: pointer;
     background-position: right center;
-    background-color: #E6EEEE;
-    
+    background-color: #ffffff;
     padding-right: 18px;
 }
 
