@@ -564,17 +564,20 @@ public class ContactsJSONServlet extends HttpServlet
                     deletedContacts.add(methodId);
                 }
             }
-            else if (name.startsWith("phone-type-"))
+            else if (name.startsWith("phone-number-"))
             {
-                String phId = name.substring(11);
+                String phId = name.substring("phone-number-".length());
                 if (request.getParameter("phone-del-" + phId) == null)
                 {
-                    Log.d(TAG,"Modified phone " + phId + " from " + name);
-                    String typeStr = request.getParameter(name);
+                    String typeStr = request.getParameter("phone-type-"+phId);
                     String number = request.getParameter("phone-number-" + phId);
+                    String label = request.getParameter("phone-type-label-"+phId);
+                    Log.d(TAG, "Modified phone type="+typeStr+" number="+number+" label="+label);
                     ContentValues phone = new ContentValues();
                     phone.put(Contacts.Phones.NUMBER,number);
                     phone.put(Contacts.Phones.TYPE,typeStr);
+                    if (label != null && !"".equals(label))
+                        phone.put(Contacts.Phones.LABEL, label);
                     modifiedPhones.put(phId,phone);
                 }
             }
@@ -587,11 +590,14 @@ public class ContactsJSONServlet extends HttpServlet
                     String kind = request.getParameter(name);
                     String type = request.getParameter("contact-type-" + methodId);
                     String val = request.getParameter("contact-val-" + methodId);
+                    String label = request.getParameter("contact-type-label-"+methodId);
                     ContentValues contactMethod = new ContentValues();
                     contactMethod.put(Contacts.ContactMethodsColumns.KIND,kind);
                     contactMethod.put(Contacts.ContactMethodsColumns.TYPE,type);
                     contactMethod.put(Contacts.ContactMethodsColumns.DATA,val);
-                    Log.d(TAG,"Modified contact " + methodId + " kind=" + kind + " type=" + type + " val=" + val);
+                    if (label != null && !"".equals(label))
+                        contactMethod.put(Contacts.ContactMethodsColumns.LABEL, label);
+                    Log.d(TAG,"Modified contact " + methodId + " kind=" + kind + " type=" + type + " val=" + val+" label="+label);
                     modifiedContacts.put(methodId,contactMethod);
                 }
             }
@@ -607,7 +613,7 @@ public class ContactsJSONServlet extends HttpServlet
                 String number = phone.getAsString(Contacts.Phones.NUMBER);
                 if ((number != null) && !"".equals(number))
                 {
-                    Log.d(TAG,"Adding new phone with number " + number);
+                    Log.d(TAG,"Adding new phone with number=" + number);
                     Phone.addPhone(getContentResolver(),phone,id);
                 }
             }

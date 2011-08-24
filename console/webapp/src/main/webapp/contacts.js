@@ -11,14 +11,14 @@ var Contacts =
          
         labels: 
         { 
+        	0 : "Custom",
             1 : "Home",
             2 : "Mobile",
             3 : "Work",
             4 : "Work Fax",
             5 : "Home Fax",
             6 : "Pager",
-            7 : "Other",
-            8 : "Custom..."
+            7 : "Other"
         },
         
         kinds:
@@ -288,14 +288,14 @@ var Contacts =
                 html += Contacts.renderPhone(Contacts.phones[p]);
             }
             //add an extra blank for adding new number
-            html += Contacts.renderPhone ({number: "", id: "x", label: "", type: ""});
+            html += Contacts.renderPhone ({number: "", id: "x", label: "", type: "0"});
             html += "<tr><td colspan='2'><h2>Addresses</h2></td></tr>";
             for (var a in Contacts.addresses)
             {
                 html += Contacts.renderAddress(Contacts.addresses[a]);
             }
             //add an extra blank for adding a new address
-            html += Contacts.renderAddress({ id: "x", data: "", aux: "",  label: "", primary: false, kind: "", type:  ""});
+            html += Contacts.renderAddress({ id: "x", data: "", aux: "",  label: "", primary: false, kind: "", type:  "0"});
             html += "</table>";
          
             html += "<br /><input type='submit' id='save' value='Save'/> ";  
@@ -307,17 +307,36 @@ var Contacts =
          
             $("#userinfo").html(html); 
         },
-
+        
+        
+        toggleLabel: function (entity, option, id)
+        {
+        	//entity is what has changed: phone or contact
+        	//option is the select option
+            //id is which has been changed
+            //If option 0 is selected, this is type[0], which is Custom then
+            //make the hidden text box visible
+        	var selector = "#"+entity+"-type-"+id;
+        	var sel = $(selector)[0].selectedIndex;
+            if (sel == option)
+                $("#"+entity+"-type-label-"+id).css("visibility", "visible");
+            else
+                $("#"+entity+"-type-label-"+id).css("visibility", "hidden");
+        },
+        
         renderPhone: function (phone)
         {
             var html = "<tr><td>"; 
             var selected = " selected='selected'";
-            html += "<select name='phone-type-" + phone.id + "'>";
+            html += "<select id='phone-type-"+phone.id+"' name='phone-type-" + phone.id + "' onChange='Contacts.toggleLabel(\"phone\", 0, \""+phone.id+"\")'>";
             for (var l in Contacts.labels)
             {     
-                html += "<option value='" + l + "'" + (phone.type == l ? selected : "") + ">" + Contacts.labels[l] + "</option>";
+                html += "<option value='" + l + "'" + (phone.type == l ? selected : "") +">" + Contacts.labels[l] + "</option>";
             }   
-            html += "</select></td>";     
+            html += "</select>";
+            html += "<input type='txt' id='phone-type-label-"+phone.id+"' name='phone-type-label-"+phone.id+"' value='"+phone.label+"' style='visibility: "+(phone.type=="0"?"visible":"hidden")+";' length='12'/>";
+            
+            html += "</td>";     
             html += "<td><input type='text' name='phone-number-" + phone.id + "' id='phone-number-" + phone.id + "' style='width: 120px;' length='12' value='" + phone.number + "' />";
             if (phone.id != "x")
                 html += "&nbsp;<input type='checkbox' name='phone-del-"+phone.id+"' value='del'>Delete</input>";  
@@ -326,17 +345,7 @@ var Contacts =
             return html;
         },
         
-        toggleLabel: function (addrId)
-        {
-            //addrId is which address has been changed
-            //If option 0 is selected, this is type[0], which is Custom then
-            //make the hidden text box visible
-   
-            if ($("#contact-type-"+addrId).selectedIndex == 0)
-                $("#contact-type-label-"+addrId).css("visibility", "visible");
-            else
-                $("#contact-type-label-"+addrId).css("visibility", "hidden");
-        },
+
       
         renderAddress: function (address)
         {
@@ -349,14 +358,14 @@ var Contacts =
             }
             kindSelect += "</select>";
             
-            var typeSelect = "<select id='contact-type-"+address.id+"' onChange='Contacts.toggleLabel(\""+address.id+"\")'  name='contact-type-"+address.id+"'>";
+            var typeSelect = "<select id='contact-type-"+address.id+"' onChange='Contacts.toggleLabel(\"contact\", 0, \""+address.id+"\")'  name='contact-type-"+address.id+"'>";
             for (t in Contacts.types)
             {
                 typeSelect += "<option value='"+t+"'"+(address.type == t? " selected='selected'": "")+">"+Contacts.types[t]+"</option>";
             }
             typeSelect += "</select>";
             
-            var typeLabel = "<input type='txt' id='contact-type-label-"+address.id+"' name='contact-type-label-"+address.id+"' value='"+address.label+"' style='visibility: "+(address.type==0?"visible":"hidden")+";' length='12'/>";
+            var typeLabel = "<input type='txt' id='contact-type-label-"+address.id+"' name='contact-type-label-"+address.id+"' value='"+address.label+"' style='visibility: "+(address.type=="0"?"visible":"hidden")+";' length='12'/>";
         
             html +=kindSelect+typeSelect+typeLabel+"</td><td><input type='text' name='contact-val-"+address.id+"' style='width: 120px;' length='12' value='"+address.data+"'/>";
             if ("x" != address.id)
