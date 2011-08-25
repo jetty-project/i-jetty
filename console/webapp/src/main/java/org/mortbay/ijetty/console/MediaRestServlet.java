@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -43,14 +44,76 @@ import android.util.Log;
 public class MediaRestServlet extends HttpServlet
 {
     private static final String TAG = "MediaRstSrvlt";
-    
-
-    
-   
-    
+    public static final String __PG_START_PARAM = "pgStart";
+    public static final String __PG_SIZE_PARAM = "pgSize";
+    public static final int __DEFAULT_PG_START = 0;
+    public static final int __DEFAULT_PG_SIZE = 10;
     private ContentResolver resolver;
     private Context context;
     
+    
+    
+    public class MediaCollection extends DatabaseCollection
+    {
+        public MediaCollection(Cursor cursor)
+        {
+            super(cursor);
+        }
+        
+        /**
+         * @param cursor
+         * @param startPos number of rows to skip
+         * @param limit number of rows to return
+         */
+        public MediaCollection(Cursor cursor, int startPos, int limit)
+        {
+            super(cursor, startPos, limit);
+        }
+        
+
+        @Override
+        public ContentValues cursorToValues(Cursor cursor)
+        {
+            ContentValues values = new ContentValues();
+            String val;
+            val = cursor.getString(cursor.getColumnIndex(android.provider.BaseColumns._ID));
+            values.put(android.provider.BaseColumns._ID,val);
+
+            int idx = -1;
+            idx = cursor.getColumnIndex(MediaStore.MediaColumns.TITLE);
+            if (idx > -1)
+                values.put(MediaStore.MediaColumns.TITLE, cursor.getString(idx));
+
+            idx = cursor.getColumnIndex(MediaStore.MediaColumns.DISPLAY_NAME);
+            if (idx > -1)
+                values.put(MediaStore.MediaColumns.DISPLAY_NAME, cursor.getString(idx));
+
+            idx = cursor.getColumnIndex(MediaStore.MediaColumns.MIME_TYPE);
+            if (idx > -1)
+                values.put(MediaStore.MediaColumns.MIME_TYPE, cursor.getString(idx));
+
+            idx = cursor.getColumnIndex(MediaStore.MediaColumns.SIZE);
+            if (idx > -1)
+                values.put(MediaStore.MediaColumns.SIZE, cursor.getString(idx));
+
+            idx = cursor.getColumnIndex(MediaStore.Audio.AudioColumns.IS_MUSIC);
+            if (idx > -1)
+            {
+                int music = cursor.getInt(idx);
+                if (music > 0)
+                {
+                    idx = cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ARTIST);
+                    if (idx > -1)
+                        values.put(MediaStore.Audio.AudioColumns.ARTIST,cursor.getString(idx));
+                    idx = cursor.getColumnIndex(MediaStore.Audio.AudioColumns.ALBUM);
+                    if (idx > -1)
+                        values.put(MediaStore.Audio.AudioColumns.ALBUM, cursor.getString(idx));
+                }
+            }
+
+            return values;
+        }
+    }
     
     
     @Override
@@ -128,6 +191,7 @@ public class MediaRestServlet extends HttpServlet
         if (id != null)
         {
             //Get metadata about a specific media item
+            /*
             Uri uri = MediaType.getContentUriByType(type, location);
             Uri content = Uri.withAppendedPath(uri,id);
             Cursor cur = null;
@@ -146,93 +210,83 @@ public class MediaRestServlet extends HttpServlet
                 if (cur != null)
                     cur.close();
             }
+            */
         }
         else
         {
-            //Get metadata about all media items of a certain type
-            Uri[] mediaUris = MediaType.getContentUrisByType(type);
-
-            writer.print("[ ");
-
+            //Get (a page of) media items of a certain type and location
+            String tmp = request.getParameter(__PG_START_PARAM);
+            int pgStart = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
+            tmp = request.getParameter(__PG_SIZE_PARAM);
+            int pgSize = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
+            
+            
+            Uri mediaUri = MediaType.getContentUriByType(type, location);
+            
             StringBuilder builder = new StringBuilder();
 
-            int length = mediaUris.length;
-            for (int iuri = 0; iuri < length; iuri++)
+            int total = 0;
+            //Get all of the applicable collections (ie both internal and external for a given type)
+            
+            MediaCollection collection = null;
+            
+            writer.println ("{");
+            try
             {
-                Uri contenturi = mediaUris[iuri];
-                Log.d(TAG,"Using contenturi: " + contenturi);
+                collection = new MediaCollection (resolver.query(mediaUri,null,null,null, MediaStore.MediaColumns.TITLE+" ASC"), pgStart, pgSize);
+                writer.println("\"total\": "+collection.getTotal()+", ");
+                writer.println("\"media\": ");
+                writer.print("[ ");
 
-                Cursor cur = null;
 
-                try
+                ContentValues media = null;
+                int count = pgSize;
+
+
+                while ((pgSize <= 0 || count-- > 0) && (media = collection.next()) != null)
                 {
-                    cur = resolver.query(contenturi,null,null,null, MediaStore.MediaColumns.TITLE+" ASC");
+                    builder.setLength(0); // clear buffer
+                    toJson(media, mediaUri, builder, type, location);
+                    Log.d(TAG,builder.toString());
+                    writer.print(builder.toString());
 
-                    if (cur == null)
-                        continue; //skip - no results?
-
-                    while (cur.moveToNext())
-                    {  
-                        builder.setLength(0); // clear buffer
-                        String str = contenturi.toString();
-                        location = null;
-                        if (str.contains("/internal/"))
-                            location = MediaType.LOCATION_INTERNAL;
-                        else if (str.contains("/external/"))                      
-                            location = MediaType.LOCATION_EXTERNAL;
-
-                        toJson(cur, contenturi, builder, type, location);
-                        Log.d(TAG,builder.toString());
-                        writer.print(builder.toString());
-
-                        if (!cur.isLast())
-                        {
-                            writer.print(",");
-                        }
+                    if (collection.hasNext())
+                    {
+                        writer.print(",");
                     }
                 }
-                finally
-                {
-                    if (cur != null)
-                        cur.close();
-                }
+                writer.print(" ]");
             }
-
-            writer.print(" ]");
+            finally
+            {
+                writer.println("}");
+                collection.close();
+            }
         }
     }
 
 
 
-    private void toJson(Cursor cur, Uri contenturi, StringBuilder builder, String type, String location)
+    private void toJson(ContentValues media, Uri contenturi, StringBuilder builder, String type, String location)
     {
-        Long rowid = cur.getLong(cur.getColumnIndexOrThrow(BaseColumns._ID));
-        String title = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.TITLE));
-        String displayname = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME));
-        String mimetype = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE));
-        String size = cur.getString(cur.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE));
-
-
         builder.append("{");
         builder.append(" 'type':").append(safeJson(type));
         builder.append(",'location':").append(safeJson(location));
-        builder.append(",'id':").append(safeJson(rowid));
-        builder.append(",'title':").append(safeJson(title));
-        builder.append(",'displayname':").append(safeJson(displayname));
-        builder.append(",'mimetype':").append(safeJson(mimetype));
-        builder.append(",'size':").append(safeJson(size));
+        builder.append(",'id':").append(safeJson(media.getAsInteger(BaseColumns._ID)));
+        builder.append(",'title':").append(safeJson(media.getAsString(MediaStore.MediaColumns.TITLE)));
+        builder.append(",'displayname':").append(safeJson(media.getAsString(MediaStore.MediaColumns.DISPLAY_NAME)));
+        builder.append(",'mimetype':").append(safeJson(media.getAsString(MediaStore.MediaColumns.MIME_TYPE)));
+        builder.append(",'size':").append(safeJson(media.getAsString(MediaStore.MediaColumns.SIZE)));
 
         if ((contenturi == MediaStore.Audio.Media.EXTERNAL_CONTENT_URI) || (contenturi == MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
         {
-            int music = cur.getInt(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.IS_MUSIC));
-            if (music != 0)
-            {
-                String artist = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ARTIST));
-                String album = cur.getString(cur.getColumnIndexOrThrow(MediaStore.Audio.AudioColumns.ALBUM));
+            String tmp = media.getAsString(MediaStore.Audio.AudioColumns.ARTIST);
+            if (tmp != null)
+                builder.append(",'artist':").append(safeJson(tmp));
 
-                builder.append(",'artist':").append(safeJson(artist));
-                builder.append(",'album':").append(safeJson(album));
-            }
+            tmp = media.getAsString(MediaStore.Audio.AudioColumns.ALBUM);
+            if (tmp != null)
+                builder.append(",'album':").append(safeJson(tmp));
         }
 
         builder.append("}");

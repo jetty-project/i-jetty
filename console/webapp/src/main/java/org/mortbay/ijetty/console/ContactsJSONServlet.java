@@ -490,23 +490,33 @@ public class ContactsJSONServlet extends HttpServlet
     
     public void handleGetImage(HttpServletRequest request, HttpServletResponse response, String who) throws IOException
     {
-        Uri personUri = ContentUris.withAppendedId(Contacts.People.CONTENT_URI,Long.valueOf(who.trim()).longValue());
-        InputStream is = Contacts.People.openContactPhotoInputStream(getContentResolver(),personUri);
-        if (is == null)
+        InputStream is = null;
+
+        try
         {
-            response.setContentType("image/jpeg");
-            OutputStream os = response.getOutputStream();
-            is = getServletContext().getResourceAsStream("/android.jpg");
-            IO.copy(is,os);
+            Uri personUri = ContentUris.withAppendedId(Contacts.People.CONTENT_URI,Long.valueOf(who.trim()).longValue());
+            is = Contacts.People.openContactPhotoInputStream(getContentResolver(),personUri);
+            if (is == null)
+            {
+                response.setContentType("image/jpeg");
+                OutputStream os = response.getOutputStream();
+                is = getServletContext().getResourceAsStream("/android.jpg");
+                IO.copy(is,os);
+            }
+            else
+            {
+                response.setContentType("image/png");
+                OutputStream os = response.getOutputStream();
+                IO.copy(is,os);
+            }
         }
-        else
+        finally
         {
-            response.setContentType("image/png");
-            OutputStream os = response.getOutputStream();
-            IO.copy(is,os);
+            if (is != null)
+                is.close();
         }
     }
-    
+
     
     public void saveContactFormData(HttpServletRequest request, HttpServletResponse response, String id) throws ServletException, IOException
     {
