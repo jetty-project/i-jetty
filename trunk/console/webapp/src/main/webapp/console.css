@@ -34,8 +34,8 @@ body {
     margin-left: 1.5em;
 }
 
-h1, h2 {font-size: 1.2em; letter-spacing: 1px; font-weight: bold;}
-h2 {font-size: 1.1em; font-weight: bold;}
+h1 {font-size: 1.2em; letter-spacing: 1px; font-weight: bold;}
+h2 {font-size: 1.1em; font-weight: bold; margin-top: 3em;}
 h3 {font-size: 1em; }
 h4 {font-variant: small-caps; }
 
@@ -209,6 +209,10 @@ img {
 .star:focus {
     background-position: 0 -32px !important;
     text-decoration: none;
+}
+
+div.buttons {
+	clear:left;
 }
 
 div.star.starred {
