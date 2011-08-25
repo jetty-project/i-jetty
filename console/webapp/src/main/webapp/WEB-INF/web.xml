@@ -101,4 +101,8 @@
          <form-error-page>/loginError.html</form-error-page>
       </form-login-config>
     </login-config>
+    
+  <session-config>
+    <session-timeout>0</session-timeout>
+  </session-config>
 </web-app>

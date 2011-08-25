@@ -111,9 +111,9 @@ var Contacts =
             return false; 
         },
         
-        getContactDetails: function ()
+        getContactDetails: function (id)
         {
-            var uri = $(this).attr('href');
+            var uri = "/console/rest/contacts/"+id;
             $.ajax({
                 type: 'GET',
                 url: uri,
@@ -124,12 +124,12 @@ var Contacts =
                 },
                 success: function(response) 
                 { 
-                    if (!response.summary) 
+                	if (response.error)
                     {
-                        alert ('Server returned bad data.');
-                        return;
+                	    alert(response.error+" contact id="+id);
+                	    return;
                     }
-
+                
                     Contacts.summary = response.summary;
 
                     if (response.phones) 
@@ -393,8 +393,8 @@ var Contacts =
                     rows += "<td><span class='big'>*</span></td>";
                 else
                     rows += "<td>&nbsp;</td>";
-                rows += "<td><a class='userlink' href='/console/rest/contacts/"+data[d].id+"'><img width='64' height='64' src='/console/rest/contacts/photo/"+data[d].id+"'/></a></td>";
-                rows += "<td><a class='userlink' href='/console/rest/contacts/"+data[d].id+"'>"+data[d].name+"</a></td>";
+                rows += "<td><a class='userlink'  onClick='Contacts.getContactDetails(\""+data[d].id+"\");'><img width='64' height='64' src='/console/rest/contacts/photo/"+data[d].id+"'/></a></td>";
+                rows += "<td><a class='userlink'  onClick='Contacts.getContactDetails(\""+data[d].id+"\");'>"+data[d].name+"</a></td>";
                 rows +="</tr>";
             }
             $("#ulist").append(rows);
@@ -408,7 +408,7 @@ var Contacts =
             if (Contacts.total > (Contacts.page_pos + Contacts.page_size))
              $("#contacts").append("<button id='next' onclick='Contacts.next();'>Next Page</button>");
             
-            $('.userlink').click(Contacts.getContactDetails);
+            //$('.userlink').click(Contacts.getContactDetails);
             
             // make it sortable
             $("#user").tablesorter({sortList: [[2,0]],  headers: { 0: { sorter: false}, 1: {sorter: false}}});
@@ -422,4 +422,12 @@ var Contacts =
 $(document).ready (function () {
     Contacts.detectEnvironment();
     Contacts.getContacts();
+    var idx = document.URL.indexOf("?id=");
+    if (idx >=0)
+    {
+    	var id = document.URL.substring(idx+4);
+    	Contacts.getContactDetails(id);
+    }
+    	
+
 }); 

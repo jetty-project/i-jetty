@@ -90,9 +90,7 @@ public class Phone
     public static PhoneCollection getPhones(ContentResolver resolver, String userId)
     {
         if (userId == null)
-        {
             return null;
-        }
 
         String[] whereArgs = new String[]{ userId };
         StringBuilder where = new StringBuilder();
@@ -100,12 +98,20 @@ public class Phone
         where.append(Contacts.Phones.PERSON_ID);
         where.append(" = ?");
         Log.i("Jetty", "getPhones where="+where.toString());
-        return new PhoneCollection(resolver.query(Contacts.Phones.CONTENT_URI,phonesProjection,where.toString(),whereArgs,Contacts.PhonesColumns.TYPE + " ASC"));
+        try
+        {
+            return new PhoneCollection(resolver.query(Contacts.Phones.CONTENT_URI,phonesProjection,where.toString(),whereArgs,Contacts.PhonesColumns.TYPE + " ASC"));
+        }
+        catch (Exception e)
+        {
+            Log.e("IJetty.Cnsl", "Error retrieving phones for contact "+userId, e);
+            return null;
+        }
     }
 
-    public static void savePhone(ContentResolver resolver, ContentValues phone, String phoneId, String userId)
+    public static int savePhone(ContentResolver resolver, ContentValues phone, String phoneId, String userId)
     {
         Uri uri = Uri.withAppendedPath(Contacts.Phones.CONTENT_URI,phoneId);
-        resolver.update(uri,phone,null,null);
+        return resolver.update(uri,phone,null,null);
     }
 }
