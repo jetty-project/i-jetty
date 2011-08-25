@@ -250,7 +250,7 @@ public class ContactsJSONServlet extends HttpServlet
         writer.print("[");
         ContentValues contactMethod;
         StringBuffer buff = new StringBuffer();
-        while ((contactMethod = contactMethods.next()) != null)
+        while (contactMethods != null && (contactMethod = contactMethods.next()) != null)
         {
             String id = contactMethod.getAsString(android.provider.BaseColumns._ID);
             String data = contactMethod.getAsString(Contacts.ContactMethodsColumns.DATA);
@@ -275,7 +275,7 @@ public class ContactsJSONServlet extends HttpServlet
         ContentValues phone;
         writer.print("[ ");
         StringBuffer buff = new StringBuffer();
-        while ((phone = phones.next()) != null)
+        while (phones != null && (phone = phones.next()) != null)
         {
             String id = phone.getAsString(android.provider.BaseColumns._ID);
             String label = phone.getAsString(Contacts.PhonesColumns.LABEL);
@@ -298,8 +298,6 @@ public class ContactsJSONServlet extends HttpServlet
         {
             String id = values.getAsString(android.provider.BaseColumns._ID);
             String name = values.getAsString(Contacts.PeopleColumns.DISPLAY_NAME);
-            String title = null;
-            String company = null;
             String notes = values.getAsString(Contacts.PeopleColumns.NOTES);
             Integer i = values.getAsInteger(Contacts.PeopleColumns.STARRED);
             boolean starred = (i == null?false:i.intValue() > 0);
@@ -310,10 +308,7 @@ public class ContactsJSONServlet extends HttpServlet
             writer.print("\"id\": \"" + id + "\", ");
             writer.print("\"starred\": " + Boolean.toString(starred) + ", ");
             writer.print("\"voicemail\": " + Boolean.toString(voicemail));
-            if (company != null)
-            {
-                writer.print(", \"company\": \"" + company.replace("'","\\'") + "\"");
-            }
+           
 
             if (notes != null)
             {
@@ -377,27 +372,32 @@ public class ContactsJSONServlet extends HttpServlet
     protected void getContact (PrintWriter writer, HttpServletRequest request, HttpServletResponse response, String who) throws ServletException, IOException
     {
         //query for the user's standard details
-        writer.print("{ \"summary\" : ");
         ContentValues values = Contact.get(getContentResolver(),who);
-        getSummary(values,writer);
+        if (values == null)
+            writer.println("{\"error\": \"No such user.\"}");
+        else
+        {
+            writer.print("{ \"summary\" : ");
+            getSummary(values,writer);
 
-        writer.print(", \"phones\" : ");
+            writer.print(", \"phones\" : ");
 
-        //query for all phone details
-        Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(),who);
-        getPhones(who,phones,writer);
-        phones.close();
+            //query for all phone details
+            Phone.PhoneCollection phones = Phone.getPhones(getContentResolver(),who);
+            getPhones(who,phones,writer);
+            phones.close();
 
-        writer.print(", \"contacts\" : ");
+            writer.print(", \"contacts\" : ");
 
-        //query for all contact details
-        ContactMethod.ContactMethodsCollection contactMethods = ContactMethod.getContactMethods(getContentResolver(),who);
-        getContactMethods(who,contactMethods,writer);
-        contactMethods.close();
+            //query for all contact details
+            ContactMethod.ContactMethodsCollection contactMethods = ContactMethod.getContactMethods(getContentResolver(),who);
+            getContactMethods(who,contactMethods,writer);
+            contactMethods.close();
 
-        writer.print(", \"version\": " + __VERSION);
+            writer.print(", \"version\": " + __VERSION);
 
-        writer.print(" }");
+            writer.print(" }");
+        }
     }
 
     private void getContacts (Contact.ContactCollection users, PrintWriter writer, int pgSize)

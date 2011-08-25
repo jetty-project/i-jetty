@@ -88,13 +88,11 @@ public class Contact
     public static String create(ContentResolver resolver, ContentValues values)
     {
         if (resolver == null)
-        {
             return null;
-        }
+
         if (values == null)
-        {
             return null;
-        }
+ 
         //Uri uri = Contacts.People.createPersonInMyContactsGroup(resolver,values);
         Uri uri = resolver.insert(Contacts.People.CONTENT_URI, values);
         return String.valueOf(ContentUris.parseId(uri));
@@ -103,9 +101,7 @@ public class Contact
     public static ContentValues cursorToUserValues(Cursor cursor)
     {
         if (cursor == null)
-        {
             return null;
-        }
 
         ContentValues values = new ContentValues();
         String val;
@@ -137,14 +133,14 @@ public class Contact
      * @param resolver
      * @param id
      */
-    public static void delete(ContentResolver resolver, String id)
+    public static int delete(ContentResolver resolver, String id)
     {
         if (id == null)
         {
-            return;
+            return 0;
         }
 
-        resolver.delete(Uri.withAppendedPath(Contacts.People.CONTENT_URI,id),null,null);
+        return resolver.delete(Uri.withAppendedPath(Contacts.People.CONTENT_URI,id),null,null);
     }
 
     /**
@@ -159,18 +155,30 @@ public class Contact
     public static ContentValues get(ContentResolver resolver, String id)
     {
         if (id == null)
-        {
             return null;
+
+        String[] whereArgs = new String[]{ id };
+        Cursor cursor = null;
+        try
+        {
+            cursor = resolver.query(Contacts.People.CONTENT_URI,baseProjection,
+                                    "people." + android.provider.BaseColumns._ID + " = ?",
+                                    whereArgs,Contacts.PeopleColumns.NAME + " ASC");
+            if (cursor.moveToFirst())
+            {
+                ContentValues values = cursorToUserValues(cursor);
+                return values;
+            }
+            else
+                return null;
+        }
+        finally
+        {
+            if (cursor != null)
+                cursor.close();
         }
 
-        String[] whereArgs = new String[]
-        { id };
-        Cursor cursor = resolver.query(Contacts.People.CONTENT_URI,baseProjection,"people." + android.provider.BaseColumns._ID + " = ?",whereArgs,
-                Contacts.PeopleColumns.NAME + " ASC");
-        cursor.moveToFirst();
-        ContentValues values = cursorToUserValues(cursor);
-        cursor.close();
-        return values;
+       
     }
 
     /**
