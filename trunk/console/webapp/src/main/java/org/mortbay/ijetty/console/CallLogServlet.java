@@ -52,7 +52,7 @@ public class CallLogServlet extends HttpServlet
 
     public Map<Integer, String> _logTypeMap = new HashMap<Integer, String>();
     private ContentResolver resolver;
-
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     public CallLogServlet ()
     {
@@ -61,36 +61,6 @@ public class CallLogServlet extends HttpServlet
         _logTypeMap.put(Integer.valueOf(CallLog.Calls.MISSED_TYPE), __MISSED);
     }
 
-
-    protected void doContent(PrintWriter writer, HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException
-    {
-        String[] projection = new String[]
-                                         {
-                CallLog.Calls.DATE,
-                CallLog.Calls.TYPE,
-                CallLog.Calls.DURATION,
-                CallLog.Calls.NEW,
-                CallLog.Calls.NUMBER,
-                CallLog.Calls.CACHED_NUMBER_TYPE,
-                CallLog.Calls.CACHED_NAME
-                                         };
-        Cursor cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, null, null, null);
-        String[] cols = cursor.getColumnNames();
-
-        String csv = request.getParameter("csv");
-        if ((csv != null) && (Integer.parseInt(csv.trim()) >= 1))
-        {
-            formatCSV(cols, cursor, writer);
-        }
-        else
-        {
-            writer.println("<h1 class='pageheader'>Call Log</h1><div id='content'>");
-            formatCallLog(cols, cursor, writer);
-            writer.println("<p><small><a href='?csv=1'>Download as CSV</a></small></p>");
-            writer.println("</div>");
-        }
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -114,6 +84,46 @@ public class CallLogServlet extends HttpServlet
             HTMLHelper.doMenuBar(writer, request, response);
             doContent(writer, request, response);
             HTMLHelper.doFooter (writer, request, response);
+        }
+    }
+
+
+    protected void doContent(PrintWriter writer, HttpServletRequest request,
+                             HttpServletResponse response) throws ServletException, IOException
+    {
+        String[] projection = new String[]
+                                         {
+                                          CallLog.Calls.DATE,
+                                          CallLog.Calls.TYPE,
+                                          CallLog.Calls.DURATION,
+                                          CallLog.Calls.NEW,
+                                          CallLog.Calls.NUMBER,
+                                          CallLog.Calls.CACHED_NUMBER_TYPE,
+                                          CallLog.Calls.CACHED_NAME
+                                         };
+        Cursor cursor = null;
+        try
+        {
+            cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, null, null, null);
+            String[] cols = cursor.getColumnNames();
+
+            String csv = request.getParameter("csv");
+            if ((csv != null) && (Integer.parseInt(csv.trim()) >= 1))
+            {
+                formatCSV(cols, cursor, writer);
+            }
+            else
+            {
+                writer.println("<h1 class='pageheader'>Call Log</h1><div id='content'>");
+                formatCallLog(cols, cursor, writer);
+                writer.println("<p><small><a href='?csv=1'>Download as CSV</a></small></p>");
+                writer.println("</div>");
+            }
+        }
+        finally
+        {
+            if (cursor != null)
+                cursor.close();
         }
     }
 
@@ -154,10 +164,9 @@ public class CallLogServlet extends HttpServlet
                 for (int i=0;i<colNames.length;i++)
                 {
                     writer.println("<td"+style+">");
-                    String val=cursor.getString(i);
                     if (colNames[i].equals(CallLog.Calls.DATE))
                     {
-                        String date = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date (cursor.getInt(i)*1000));
+                        String date = dateFormat.format(new java.util.Date (cursor.getLong(i)));
                         writer.println(date);
                     }
                     else if (colNames[i].equals(CallLog.Calls.NEW))
@@ -207,6 +216,7 @@ public class CallLogServlet extends HttpServlet
                     }
                     else
                     {
+                        String val = cursor.getString(i);
                         writer.println((val==null?"&nbsp;":val));
                     }
                     writer.println("</td>");
