@@ -30,10 +30,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.CallLog;
+import android.provider.Contacts;
+import android.util.Log;
 
 public class CallLogServlet extends HttpServlet
 {
+    private static final String TAG = "IJetty.Cnsl";
+    
     private static final long serialVersionUID = 1L;
     public static final String __ACKNOWLEDGED = "Acknowledged";
     public static final String __DURATION = "Duration (secs)";
@@ -175,7 +180,25 @@ public class CallLogServlet extends HttpServlet
                         String name = cursor.getString(i);
                         if (name != null)
                         {
-                            writer.println(name==null?"&nbsp;":"<a href='/console/contacts/'>"+name+"</a>");
+                            Cursor pcursor = null;
+                            try
+                            {
+                                Uri uri = Uri.withAppendedPath(Contacts.People.CONTENT_FILTER_URI, name);
+                                Log.i(TAG, uri.toString());
+                                pcursor = resolver.query(uri, new String[] {Contacts.People._ID}, null, null, null);
+                                if (pcursor != null && pcursor.moveToFirst())
+                                {
+                                    Integer id = pcursor.getInt(pcursor.getColumnIndex(Contacts.People._ID));
+                                    writer.println(name==null?"&nbsp;":"<a href='/console/contacts/?id="+id+"'>"+name+"</a>");
+                                }
+                                else
+                                    writer.println(name==null?"&nbsp;":"<a href='/console/contacts/'>"+name+"</a>");
+                            }
+                            finally
+                            {
+                                if (pcursor != null)
+                                    pcursor.close();
+                            }          
                         }
                         else
                         {
