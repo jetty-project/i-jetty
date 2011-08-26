@@ -263,7 +263,10 @@ var Contacts =
            Contacts.refreshContacts();
         },
         
-     
+        sendEmail: function (addr)
+        {
+        	window.location.replace("ma"+"i"+"lto:"+addr);
+        },
       
         
         cancelEdit: function ()
@@ -381,10 +384,15 @@ var Contacts =
             typeSelect += "</select>";
             
             var typeLabel = "<input type='txt' id='contact-type-label-"+address.id+"' name='contact-type-label-"+address.id+"' value='"+address.label+"' style='visibility: "+(address.type=="0"?"visible":"hidden")+";' length='12'/>";
-        
+
             html +=kindSelect+typeSelect+typeLabel+"</td><td><input type='text' name='contact-val-"+address.id+"' style='width: 120px;' length='12' value='"+address.data+"'/>";
             if ("x" != address.id)
-                html += "&nbsp;<input type='checkbox' name='contact-del-"+address.id+"' value='del'>Delete</input>";
+            {
+            	html += "&nbsp;&nbsp;<input type='checkbox' name='contact-del-"+address.id+"' value='del'>Delete</input>";     
+            	if (address.kind == 1)
+            		html += "&nbsp;&nbsp;<button onClick='Contacts.sendEmail(\""+address.data+"\"); return false;'>Send Email</button>";
+            	
+            }
             
             html +="</td></tr>";
             return html;
