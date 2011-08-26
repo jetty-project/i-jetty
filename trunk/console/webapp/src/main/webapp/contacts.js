@@ -70,6 +70,21 @@ var Contacts =
         	Contacts.getContacts();
         },
         
+        getIdByName: function (name)
+        {
+        	if (!Contacts.contacts)
+        		return -1;
+        	
+        	var i;
+        	var id = -1;
+        	for (i=0;i<Contacts.contacts.length;i++)
+        	{
+        		if (Contacts.contacts[i].name.equals(name))
+        			id = Contacts.contacts[i].id;
+        	}
+        	return id;
+        },
+        
         getContacts: function (successfn, errfn)
         {
             var uri =  "/console/rest/contacts/?pgStart="+Contacts.page_pos+"&pgSize="+Contacts.page_size;
