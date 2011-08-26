@@ -163,17 +163,13 @@ public class IJetty extends Activity
             sendProgressUpdate(10);
 
             
-            //set the directory into which all webapps should be unpacked
-            //on deployment. Note this is a "work" directory, so the contents
-            //will not be deleted each time on undeploy.
-            File workDir = new File(jettyDir, __WORK_DIR);
-            if (!workDir.exists())
-            {
-                boolean made = workDir.mkdirs();
-                Log.i(TAG, "Made "+workDir+": "+made);
-            }
-            else
-                Log.i(TAG, workDir+" exists");
+            //Do not make a work directory to preserve unpacked
+            //webapps - this seems to clash with Android when
+            //out-of-date webapps are deleted and then re-unpacked
+            //on a jetty restart: Android remembers where the dex
+            //file of the old webapp was installed, but it's now
+            //been replaced by a new file of the same name. Strangely,
+            //this does not seem to affect webapps unpacked to tmp?
 
 
             //make jetty/tmp
