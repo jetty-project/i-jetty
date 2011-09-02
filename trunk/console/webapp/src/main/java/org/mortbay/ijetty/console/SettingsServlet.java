@@ -30,50 +30,67 @@ import android.provider.Settings;
 
 public class SettingsServlet extends HttpServlet
 {
-    private static final long serialVersionUID = 1L;
-    private static final String __HUMAN_ID = "ID";
     private ContentResolver resolver;
+    android.content.Context androidContext;
+    
 
-
-    protected void doContent(PrintWriter writer, HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException
+    protected void doJSON (PrintWriter writer, HttpServletRequest request,
+            HttpServletResponse response) 
     {
-
-        writer.println("<h1 class='pageheader'>System Settings</h1><div id='content'>");
-        Cursor cursor = getContentResolver().query(Settings.System.CONTENT_URI, null, null, null, null);
-        String[] cols = cursor.getColumnNames();
-        int i = 0;
-
-        for (String col : cols)
+        Cursor cursor = null;
+        try
         {
-            if (i == 0)
+            writer.println("{ \"settings\": {");
+            writer.println("    \"headings\": [");
+            cursor = getContentResolver().query(Settings.System.CONTENT_URI, null, null, null, Settings.System.NAME+" ASC");
+            if (cursor != null && cursor.getColumnNames() != null)
             {
-                cols[i] = __HUMAN_ID;
+                for (int i=0;i<cursor.getColumnNames().length; i++)
+                {
+                    writer.print("\""+cursor.getColumnNames()[i]+"\"");
+                    if (i<cursor.getColumnNames().length -1)
+                        writer.println(",");
+                }
             }
-            else
+            writer.println("              ],");
+            writer.println("    \"rows\": [");
+            while (cursor != null && cursor.moveToNext())
             {
-                // Make first letter uppercase
-                cols[i] = col.substring(0, 1).toUpperCase() + col.substring(1);
+                writer.println("        [");
+                for (int i = 0; i < cursor.getColumnNames().length; i++)
+                {
+                    String val = cursor.getString(i);
+                    writer.print("\""+val+"\"");
+                    if (i < cursor.getColumnNames().length-1)
+                        writer.println(",");
+                }
+                writer.println("        ]");
+                if (!cursor.isLast())
+                    writer.println(",");
             }
-
-            i++;
+            writer.println("          ]");
+            
+            writer.println("         }");
+            writer.println("}");
         }
-
-        HTMLHelper.formatTable(cols, cursor, writer);
-        writer.println("</div>");
+        finally
+        {
+            if (cursor != null)
+                cursor.close();
+        }
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        response.setContentType("text/html");
+        response.setContentType("text/json");
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter writer = response.getWriter();
-        HTMLHelper.doHeader(writer, request, response);
-        HTMLHelper.doMenuBar(writer, request, response);
-        doContent(writer, request, response);
-        HTMLHelper.doFooter (writer, request, response);
+        doJSON(writer, request, response);
+       
     }
+    
+
 
 
     public ContentResolver getContentResolver()
@@ -86,6 +103,7 @@ public class SettingsServlet extends HttpServlet
     {
         super.init(config);
         resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
+        androidContext = (android.content.Context)config.getServletContext().getAttribute("org.mortbay.ijetty.context");
     }
 
 }
