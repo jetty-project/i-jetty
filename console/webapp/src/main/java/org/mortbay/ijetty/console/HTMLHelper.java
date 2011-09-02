@@ -28,9 +28,9 @@ import android.database.Cursor;
 public class HTMLHelper
 {
     private static String[] _navBarLabels =
-    { "Contacts", "System Settings", "Call Logs", "Network", "Media" };
+    { "Contacts", "System Settings", "Call Logs", "Network", "Media", "Finder" };
     private static String[] _navBarItems =
-    { "/console/contacts/index.html", "/console/settings/", "/console/calls/", "/console/network/", "/console/media/" };
+    { "/console/contacts/index.html", "/console/settings/", "/console/calls/", "/console/network/", "/console/media/", "/console/finder/index.html" };
     private static String[] _phrases =
     { "Now with 100% more awesome.", "Better than cake before dinner!", "Chuck Norris approves.", "werkin teh intarwebz sinse 1841", "It's lemon-y fresh!",
             "More amazing than a potato.", "All the cool kids are doing it!", "Open sauce, eh?", "<code>Nothing happens.</code>" };

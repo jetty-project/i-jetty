@@ -82,6 +82,13 @@ hr {
     width: 400px;
 }
 
+img.map {
+	float:left;
+	clear:both;
+	margin-top:2em;
+	margin-bottom:2em;
+}
+
 #content {
     padding: 1em;
     font-size: 85%;
