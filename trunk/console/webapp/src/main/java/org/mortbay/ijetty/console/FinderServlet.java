@@ -131,13 +131,6 @@ public class FinderServlet extends HttpServlet
         resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
         androidContext = (android.content.Context)config.getServletContext().getAttribute("org.mortbay.ijetty.context");
         locationManager = (LocationManager)androidContext.getSystemService(Context.LOCATION_SERVICE);
-
-        //for testing - REMOVE IT
-        Location gloc = new Location(LocationManager.GPS_PROVIDER);
-        gloc.setLatitude(-33.80491);
-        gloc.setLongitude(151.28394);
-        gloc.setTime(System.currentTimeMillis());
-        providerLocations.put(LocationManager.GPS_PROVIDER,gloc);
     }
 
 

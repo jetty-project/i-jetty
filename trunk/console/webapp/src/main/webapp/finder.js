@@ -35,6 +35,7 @@ var Finder =
                      	else
                      	{
                      		Finder.location = response.location;
+                     		Finder.tracks.push(Finder.location);
                      		Finder.renderLocation(); 
                      	}
                      }
@@ -209,15 +210,13 @@ var Finder =
             html+="</p>";
          
             
-            /* TODO work out where to get an android image that is accessible from the net
-            var h = document.URL;
-            var i = document.URL.substring("/console");
-            h = h.substring(0, i+8);
-            h += "/android.jpg";
+            /* Android image that is accessible from the net at
+             * http://tinyurl.com/3aqxbxy
+             * 
             */
             var url = "http://maps.googleapis.com/maps/api/staticmap?";
             url += "zoom=15&size=400x400&sensor=false&maptype=hybrid";
-            url += "&markers=color:green%7clabel:A%7c"+Finder.location.lat+","+Finder.location.long;
+            url += "&markers=icon:http://tinyurl.com/3gvyf2f%7c"+Finder.location.lat+","+Finder.location.long;
             
             html += "<img id=\"map\" class=\"map\"/>";
                     
