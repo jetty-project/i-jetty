@@ -30,10 +30,11 @@
     <div id="page">
         <h1 class="pageheader">Finder</h1>
         <div id="content">
-            <form method='POST' action='/console/rest/finder?action=ring' target='hidden-target' onSubmit='return true;'>
+ 
+           <h2>Quick Find</h2>
+           <form method='POST' action='/console/rest/finder?action=ring' target='hidden-target' onSubmit='return true;'>
               <button type='submit'>Ring My Device</button>
            </form> 
-           <h2>Quick Find</h2>
            <button onClick="Finder.lastLocation();return false;">Last Device Location</button>           
            <h3>Tracking</h3>
            <button onClick="Finder.trackLocation();return false;">Start Tracking Device Location</button>
