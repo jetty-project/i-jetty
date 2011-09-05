@@ -34,9 +34,17 @@ var Finder =
                      		alert(response.error);
                      	else
                      	{
-                     		Finder.location = response.location;
-                     		Finder.tracks.push(Finder.location);
-                     		Finder.renderLocation(); 
+                     		if (response.location)
+                     		{
+                     		    if (response.location.lat != Finder.location.lat &&
+                     		        response.location.long != Finder.location.long &&
+                     		        response.location.time != Finder.location.time)
+                     		    {
+                     		        Finder.location = response.location;
+                     		        Finder.tracks.push(Finder.location);
+                     		        Finder.renderLocation(); 
+                     		    }
+                     		}
                      	}
                      }
                      else
@@ -156,8 +164,18 @@ var Finder =
                     		alert(response.error);
                     	else
                     	{
-                    		Finder.location = response.location;
-                    		Finder.renderLocation(); 
+                    	    if (response.location)
+                    	    {
+                    	        if (response.location.lat != Finder.location.lat &&
+                    	                response.location.long != Finder.location.long &&
+                    	                response.location.time != Finder.location.time)
+                    	        {
+                    	            Finder.location = response.location;
+                    	            Finder.tracks.push(Finder.location);
+                    	            Finder.renderLocation(); 
+                    	        }
+                    	    }
+
                     	}
                     }
                     else
@@ -186,6 +204,10 @@ var Finder =
         	Finder.tracks = [];
         	Finder.location = {};
         	Finder.tracking = true;
+        	$("#last").attr("disabled", "true");
+        	$("#up").removeAttr("disabled");
+        	//disable lastLocation
+        	//enable updateLocation
         	Finder.startTrack();
         },
         
@@ -196,6 +218,10 @@ var Finder =
         	Finder.tracking = false;
         	$("#location").html("");
         	Finder.stopTrack();
+        	//enable lastLocation
+        	$("#last").removeAttr("disabled");
+        	//disable updateLocation
+        	$("#up").attr("disabled", "true");
         },
         
         renderLocation: function ()
@@ -209,17 +235,31 @@ var Finder =
             html+= "<br/><b>At local time:</b>&nbsp;"+new Date(Finder.location.time).toLocaleString();
             html+="</p>";
          
-            
+
             /* Android image that is accessible from the net at
-             * http://tinyurl.com/3aqxbxy
+             * http://tinyurl.com/3gvyf2f
              * 
-            */
-            var url = "http://maps.googleapis.com/maps/api/staticmap?";
-            url += "zoom=15&size=400x400&sensor=false&maptype=hybrid";
-            url += "&markers=icon:http://tinyurl.com/3gvyf2f%7c"+Finder.location.lat+","+Finder.location.long;
-            
+             */
+            if (Finder.location)
+            {
+                var url = "http://maps.googleapis.com/maps/api/staticmap?";
+                url += "size=512x512&sensor=false&maptype=hybrid";
+                url += "&markers=icon:http://tinyurl.com/3gvyf2f%7c"+Finder.location.lat+","+Finder.location.long;
+                if (Finder.tracks && Finder.tracks.length > 0)
+                {
+                    url += "&path=color:0xa4c639%7c";
+                    for (var i=0;i<Finder.tracks.length;i++)
+                    {
+                        url += Finder.tracks[i].lat+","+Finder.tracks[i].long;
+                        if (i < Finder.tracks.length -1)
+                            url += "%7c";
+                    }
+                }
+                else
+                    url += "&zoom=15";
+            }
             html += "<img id=\"map\" class=\"map\"/>";
-                    
+
             $("#location").append(html);
             $("#map")[0].src = url;
         }
