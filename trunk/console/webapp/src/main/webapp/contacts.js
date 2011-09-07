@@ -113,14 +113,7 @@ var Contacts =
                 },
                 error: function(xhr, reason, exception) 
                 {             	
-                    if (!errfn)
-                    {
-                        alert("Get Contacts Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
-                    }
-                    else
-                    {
-                        errfn (xhr, reason, exception);
-                    }
+                    Contacts.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try fully reloading the page.");
                 }
             });
             return false; 
@@ -157,8 +150,8 @@ var Contacts =
                     Contacts.renderContact();
                 },
                 error: function(xhr, reason, exception) 
-                { 
-                    alert("Get Contacts Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                {   
+                    Contacts.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try fully reloading the page.");
                 }
             });
             return false;
@@ -252,7 +245,7 @@ var Contacts =
                         },
                         error: function(xhr, reason, exception) 
                         { 
-                            alert("Delete request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                            Contacts.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try fully reloading the page.");
                         }
                     });
         },
@@ -435,6 +428,13 @@ var Contacts =
             
             // make it sortable
             $("#user").tablesorter({sortList: [[2,0]],  headers: { 0: { sorter: false}, 1: {sorter: false}}});
+        },
+        
+        renderError: function (msg)
+        {
+            $("#userinfo").html(""); //get rid of any previous user details
+            $("#contacts").html(""); //get rid of any previous contacts
+            $("#userinfo").html("<p class='error'>"+msg+"</p>");
         }
   
 };

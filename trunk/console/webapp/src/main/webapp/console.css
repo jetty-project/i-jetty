@@ -168,6 +168,12 @@ p.singline {
 	margin-bottom: 2px;	
 }
 
+.error {
+	color: red;
+	font-weight: bold;
+}
+
+
 #contacts {
   float: left;
 }
