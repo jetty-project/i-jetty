@@ -5,7 +5,11 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Exchanger;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -38,21 +42,25 @@ public class FinderServlet extends HttpServlet
     public static final String LAST_GPS_LOCATION = "org.mortbay.ijetty.console.lastGPSLocation";
     public static final String NETWORK_LISTENER = "org.mortbay.ijetty.console.networkListener";
     public static final String GPS_LISTENER = "org.mortbay.ijetty.console.gpsListener";
-    public static final String LOCATION_MANAGER = "org.mortbay.ijetty.console.locationManager";
-    public static final long TIMEOUT = 30000; //wait up to 30sec
+    public static final String LAST_TRACKER_REQUEST_TIME = "org.mortbay.ijetty.console.lastTrackerRequestTime";
+    public static final long CONTINUATION_TIMEOUT = 5000L; //wait up to 5sec to get a location when enabling tracking
+    public static final long INTER_REQUEST_TIMEOUT = 1000L * 60 * 5; //10 mins without requests
     android.content.Context androidContext;
     ContentResolver resolver;
     LocationManager locationManager;
     public Map<String,Location> providerLocations = Collections.synchronizedMap(new HashMap<String,Location>());
-    Thread gpsLooper;
-    Thread networkLooper;
-    AtomicInteger trackers = new AtomicInteger();
-    
+    public Object sync = new Object();
+    LooperThread gpsLooper;
+    LooperThread networkLooper;
+    Thread controlThread;
+    AtomicBoolean tracking = new AtomicBoolean();
+
 
     class LooperThread extends Thread 
     {
         String provider;
         Looper looper;
+        AsyncLocationListener listener;
         
         public LooperThread (String provider)
         {
@@ -65,20 +73,47 @@ public class FinderServlet extends HttpServlet
         {
             Looper.prepare();
             looper = Looper.myLooper();
-            LocationManager manager = (LocationManager)androidContext.getSystemService(Context.LOCATION_SERVICE);
-            AsyncLocationListener listener = new AsyncLocationListener(provider);
-            manager.requestLocationUpdates(provider, 60000L, 0F, listener, Looper.getMainLooper()); //Get an update every 60 secs
+            listener = new AsyncLocationListener(provider);
+            locationManager.requestLocationUpdates(provider, 60000L, 0F, listener, looper); //Get an update every 60 secs
             Log.d(TAG, "Requested location updates for "+provider);
             Looper.loop();
         }
-      
-        
+
+
         public void quit ()
         {
-           looper.quit();
+            locationManager.removeUpdates(listener);
+            looper.quit();
         }
     }
     
+    
+    
+    class ControlThread extends Thread
+    {
+        public ControlThread()
+        {
+            super("Looper-Control");
+            setDaemon(true);
+        }
+        
+        public void run()
+        {
+            try
+            {
+                while (true)
+                {
+                    checkInterRequestGap();
+                    Thread.currentThread().sleep(60000);
+                }
+            }
+            catch (InterruptedException e)
+            {
+                //Finish loop
+                return;
+            }
+        }
+    }
     
     public class AsyncLocationListener implements LocationListener
     {
@@ -88,12 +123,22 @@ public class FinderServlet extends HttpServlet
         {
             this.provider = provider;
         }
-      
+
 
         public void onLocationChanged(Location location)
         {
             Log.d(TAG, "location change: "+location);
-            providerLocations.put(provider, location);
+            synchronized (sync)
+            {
+                try {
+                providerLocations.put(provider, location);
+                Log.d(TAG, "put location");
+                sync.notify();
+                Log.d(TAG, "notified");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         public void onStatusChanged(String provider, int status, Bundle extras)
@@ -131,13 +176,16 @@ public class FinderServlet extends HttpServlet
         resolver = (ContentResolver)getServletContext().getAttribute("org.mortbay.ijetty.contentResolver");
         androidContext = (android.content.Context)config.getServletContext().getAttribute("org.mortbay.ijetty.context");
         locationManager = (LocationManager)androidContext.getSystemService(Context.LOCATION_SERVICE);
+        controlThread = new ControlThread();
+        controlThread.start();
     }
 
 
     public void startTrackers()
     {
-        synchronized (providerLocations)
+        synchronized (sync)
         {
+            tracking.set(true);
             if (gpsLooper == null)
             {
                 gpsLooper = new LooperThread(LocationManager.GPS_PROVIDER);
@@ -167,10 +215,13 @@ public class FinderServlet extends HttpServlet
     
     public void stopTrackers()
     {
-        synchronized (providerLocations)
+        Log.d(TAG, "Stopping trackers");
+        synchronized (sync)
         { 
+            tracking.set(false);
             if (networkLooper != null)
             {
+                Log.d(TAG, "Stopping network looper");
                 ((LooperThread)networkLooper).quit();
                 networkLooper.interrupt();
                 networkLooper = null;
@@ -178,10 +229,35 @@ public class FinderServlet extends HttpServlet
 
             if (gpsLooper != null)
             {
+                Log.d(TAG, "Stopping gps looper");
                 ((LooperThread)gpsLooper).quit();
                 gpsLooper.interrupt();
                 gpsLooper = null;
             }
+            
+            getServletContext().removeAttribute(LAST_TRACKER_REQUEST_TIME); //reset last request time
+            providerLocations.clear(); //empty the known locations
+        }
+    }
+    
+    
+    
+    public void checkInterRequestGap ()
+    {
+        synchronized (sync)
+        {
+            Long lastTrackerRequestTime = (Long)getServletContext().getAttribute(LAST_TRACKER_REQUEST_TIME);
+            
+            if (lastTrackerRequestTime == null)
+                return;
+            long gap = System.currentTimeMillis() - lastTrackerRequestTime.longValue();
+            if (gap > INTER_REQUEST_TIMEOUT)
+            {
+                Log.d(TAG, "ControlThread stopping trackers: request gap = "+gap);
+                stopTrackers();
+            }
+            else
+                Log.d(TAG, "ControlThread, gap too small: "+gap);
         }
     }
 
@@ -189,7 +265,8 @@ public class FinderServlet extends HttpServlet
     @Override
     public void destroy()
     {
-        stopTrackers();        
+        stopTrackers();  
+        controlThread.interrupt();
         super.destroy();
     }
 
@@ -200,7 +277,7 @@ public class FinderServlet extends HttpServlet
         Location lastGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         Location lastNetwork = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         
-        synchronized (providerLocations)
+        synchronized (sync)
         {
             Location gps = providerLocations.get(LocationManager.GPS_PROVIDER);
             Location network = providerLocations.get(LocationManager.NETWORK_PROVIDER);
@@ -233,14 +310,27 @@ public class FinderServlet extends HttpServlet
             sendLocation(response,l);
             return;
         }
-        
+
         if (action.equalsIgnoreCase("update"))
         {
-            Location l = getLocation();
-            sendLocation(response,l);
+            Location l = null;
+            synchronized (sync)
+            {
+                if (!tracking.get())
+                {
+                    //not tracking
+                    sendError(response, "Not tracking");
+                    return;
+                }
+                //update time of request
+                getServletContext().setAttribute(LAST_TRACKER_REQUEST_TIME, new Long(System.currentTimeMillis()));
+                l = getLocation();
+            }  
+
+            sendLocation (response, l);
             return;
         }
-        
+
     }
     
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
@@ -262,54 +352,46 @@ public class FinderServlet extends HttpServlet
         
         if (action.equalsIgnoreCase("track"))
         {
-            Log.d(TAG, "FinderServlet");
-            
-            if (trackers.incrementAndGet() == 1)
+         
+            Location l = null;
+            synchronized (sync)
             {
-                startTrackers();
-            }
-            
-            final Continuation continuation = ContinuationSupport.getContinuation(request);
-            Location l = getLocation();
-            if (l == null)
-            {
-                Log.d(TAG, "No location");
-                //no location, we need to get a continuation if we can. If we already
-                //did do a continuation and we've come back, we just have to wear the
-                //null location
+                //start tracking if not already started
+                startTrackers(); 
 
-                if (continuation.isInitial())
+                //update time of last request
+                getServletContext().setAttribute(LAST_TRACKER_REQUEST_TIME, new Long(System.currentTimeMillis()));
+
+                //if no  location, wait a while to see if the tracker has got one
+                l = getLocation();
+                if (l == null)
                 {
-                    continuation.setTimeout(TIMEOUT);
-                    continuation.suspend();  
-                    Log.d(TAG, "Suspending");
-                    return;
+                    try
+                    {
+                        sync.wait(CONTINUATION_TIMEOUT);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.e(TAG, "Interrupted waiting for Location", e);
+                    } 
+                    l = getLocation();
                 }
             }
             
-            //We are expired or resumed, did we find a location?
             sendLocation (response, l);
-
             return;
         }
         
         if (action.equalsIgnoreCase("stopTrack"))
         {
-            //decrease the count of users tracking the device, when its 0, stop the loop
-            if (trackers.decrementAndGet() <= 0)
-            {
-                Log.d(TAG, "Stopping trackers");
-                stopTrackers();
-            }
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("text/json");
-            PrintWriter writer = response.getWriter();
-            StringBuffer buff = new StringBuffer();
-            buff.append("{}");
-            writer.println(buff.toString());
+            Log.i(TAG, "Stopping trackers");
+            stopTrackers(); //stop the trackers
+            sendEmpty(response);
             return;
         }
     }
+    
+    
     
     
     public void ring () 
@@ -326,7 +408,7 @@ public class FinderServlet extends HttpServlet
     {
         //Go for finest grained location via GPS first
         Location l;
-        synchronized (providerLocations)
+        synchronized (sync)
         {
             Location gps = providerLocations.get(LocationManager.GPS_PROVIDER);
             Location network = providerLocations.get(LocationManager.NETWORK_PROVIDER);
@@ -365,6 +447,24 @@ public class FinderServlet extends HttpServlet
     }
     
     
+    public void sendError (HttpServletResponse response, String error)  throws IOException
+    {
+        response.setContentType("text/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        PrintWriter writer = response.getWriter();
+        StringBuffer buff = new StringBuffer();
+        jsonError(buff, error);
+        writer.println(buff.toString());
+    }
+    
+    public void sendEmpty (HttpServletResponse response)  throws IOException
+    {
+        response.setContentType("text/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        PrintWriter writer = response.getWriter();
+        writer.println("{}");
+    }
+    
     private void asJson (StringBuffer buff, Location location)
     {
         if (buff == null)
@@ -391,6 +491,5 @@ public class FinderServlet extends HttpServlet
         buff.setLength(0);
         buff.append("{ \"error\": \""+err+"\"}");
     }
-
     
 }
