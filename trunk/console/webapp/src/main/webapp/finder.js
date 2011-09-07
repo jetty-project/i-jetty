@@ -31,7 +31,11 @@ var Finder =
                      if (!successfn)
                      {
                      	if (response.error)
-                     		alert(response.error);
+                     	{
+                     	    if ("Not tracking" == response.error)
+                     	        Finder.stopTrackLocation(); //stop tracking on ui
+                     		Finder.renderError(response.error);
+                     	}
                      	else
                      	{
                      		if (response.location)
@@ -161,7 +165,7 @@ var Finder =
                     if (!successfn)
                     {
                     	if (response.error)
-                    		alert(response.error);
+                    		Finder.renderError(response.error);
                     	else
                     	{
                     	    if (response.location)
@@ -206,8 +210,8 @@ var Finder =
         	Finder.tracking = true;
         	$("#last").attr("disabled", "true");
         	$("#up").removeAttr("disabled");
-        	//disable lastLocation
-        	//enable updateLocation
+        	$("#start").attr("disabled", "true");
+        	$("#stop").removeAttr("disabled");
         	Finder.startTrack();
         },
         
@@ -218,11 +222,17 @@ var Finder =
         	Finder.tracking = false;
         	$("#location").html("");
         	Finder.stopTrack();
-        	//enable lastLocation
         	$("#last").removeAttr("disabled");
-        	//disable updateLocation
         	$("#up").attr("disabled", "true");
+        	$("#start").removeAttr("disabled");
+        	$("#stop").attr("disabled", "true");
         },
+        
+        renderError: function(err)
+        {
+            $("#location").html("<b>"+err+"</b>"); //get rid of any previous location
+        },
+        
         
         renderLocation: function ()
         {
