@@ -95,6 +95,9 @@ public class DefaultHandler extends org.eclipse.jetty.server.handler.DefaultHand
                     writer.write(" [stopped]");
                 writer.write("</li>\n");
             }
+            
+            if (i == handlers.length -1)
+                writer.write("</ul>\n");
         }
         
         if (i == 0)
