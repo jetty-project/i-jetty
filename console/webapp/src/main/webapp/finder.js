@@ -55,15 +55,14 @@ var Finder =
                          successfn(response);
                  },
                  error: function(xhr, reason, exception) 
-                 {             	
-                     if (!errfn)
-                     {
-                         alert("Settings Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
-                     }
+                 {   
+                     /*
+                     if (xhr.getResponseHeader("Content-Type") == "text/html" || xhr.status == 0)
+                         window.location.reload();
                      else
-                     {
-                         errfn (xhr, reason, exception);
-                     }
+                         alert("Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
+                     */ 
+                     Finder.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try reloading the page.");
                  }
              });
              return false; 
@@ -100,14 +99,7 @@ var Finder =
                  },
                  error: function(xhr, reason, exception) 
                  {             	
-                     if (!errfn)
-                     {
-                         alert("Settings Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
-                     }
-                     else
-                     {
-                         errfn (xhr, reason, exception);
-                     }
+                     Finder.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try reloading the page.");
                  }
              });
              return false; 
@@ -135,15 +127,8 @@ var Finder =
                          successfn(response);
                  },
                  error: function(xhr, reason, exception) 
-                 {             	
-                     if (!errfn)
-                     {
-                         alert("Settings Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
-                     }
-                     else
-                     {
-                         errfn (xhr, reason, exception);
-                     }
+                 {                       
+                     Finder.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try reloading the page.");
                  }
              });
              return false; 
@@ -186,15 +171,8 @@ var Finder =
                         successfn(response);
                 },
                 error: function(xhr, reason, exception) 
-                {             	
-                    if (!errfn)
-                    {
-                        alert("Settings Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
-                    }
-                    else
-                    {
-                        errfn (xhr, reason, exception);
-                    }
+                {  
+                    Finder.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try reloading the page.");
                 }
             });
             return false; 
@@ -230,7 +208,11 @@ var Finder =
         
         renderError: function(err)
         {
-            $("#location").html("<b>"+err+"</b>"); //get rid of any previous location
+            $("#location").html("<p class='error'>"+err+"</p>"); //get rid of any previous location
+            $("#up").attr("disabled", "true"); //disable all the buttons
+            $("#start").remove("disabled", "true");
+            $("#stop").attr("disabled", "true");
+            $("#ring").attr("disabled", "true");
         },
         
         

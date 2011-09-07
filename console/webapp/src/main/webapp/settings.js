@@ -49,14 +49,8 @@ var Settings =
                 },
                 error: function(xhr, reason, exception) 
                 {             	
-                    if (!errfn)
-                    {
-                        alert("Settings Request failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception); 
-                    }
-                    else
-                    {
-                        errfn (xhr, reason, exception);
-                    }
+                   Settings.renderError("Sorry but the request failed. Perhaps you restarted i-jetty or there was a temporary network problem. Please try reloading the page.");
+
                 }
             });
             return false; 
@@ -69,7 +63,7 @@ var Settings =
         
         renderSettings: function ()
         {
-            $("#settings").html(""); //get rid of any previous contacts
+            $("#settings").html(""); //get rid of any previous
             var html = ""; 
             $("#pg-head").html("System Settings");
             
@@ -94,6 +88,13 @@ var Settings =
   
             // make it sortable
             $("#stbl").tablesorter({sortList: [[1,0]], headers: { 2: {sorter:false}}});
+        },
+        
+        
+        renderError: function (msg)
+        {
+            $("#settings").html(""); //get rid of any previous
+            $("#settings").html("<p class='error'>"+msg+"</p>");
         }
   
 };

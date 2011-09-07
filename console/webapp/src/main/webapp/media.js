@@ -63,10 +63,8 @@ var Media =
                 },
                 error: function(xhr, reason, exception) 
                 { 
-                    errormsg = "GET media list for " + type + " failed, status: "+(xhr && xhr.status)+" reason: "+reason+" exception: "+ exception;
-                    alert(errormsg);
-                    $("#" + type).empty();
-                    $("#" + type).append ("<strong>Failed to get " + type + "!</strong><br />Error:<br /><pre>" + errormsg + "</pre>");
+                    $("#" + type+"-"+location).empty();
+                    $("#" + type+"-"+location).append ("<p class='error'>Failed to get " + type + "! Perhaps i-jetty is not running or there is a temporary network failure. Try doing a full page reload.</p>");
                 }
             });
             return false; 
