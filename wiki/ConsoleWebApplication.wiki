@@ -40,3 +40,13 @@ The defaults are:
      login:    admin
      password: admin
 }}}
+
+To change the password, you will need to edit the file /sdcard/jetty/etc/realm.properties.
+
+The format of this file is:
+
+{{{
+<username>: <password>[,<rolename> ...]
+}}}
+
+The password can be in the clear, obfuscated or checksummed. You can follow the instructions on http://wiki.eclipse.org/Jetty/Tutorial/Passwords to generate obfuscated or checksummed passwords.
