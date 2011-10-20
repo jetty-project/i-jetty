@@ -80,7 +80,19 @@
 	</filter-mapping>
 	<filter-mapping>
 	  <filter-name>CacheFilter</filter-name>
-	  <url-pattern>*/*</url-pattern>
+	  <url-pattern>/rest/*</url-pattern>
+	  <url-pattern>/contacts/</url-pattern>
+	  <url-pattern>/contacts</url-pattern>
+	  <url-pattern>/contacts/index.html</url-pattern>
+	  <url-pattern>/finder/</url-pattern>
+	  <url-pattern>/finder</url-pattern>	  
+	  <url-pattern>/finder/index.html</url-pattern>
+	  <url-pattern>/media/</url-pattern>
+	  <url-pattern>/media</url-pattern>	  
+	  <url-pattern>/media/index.html</url-pattern>
+	  <url-pattern>/settings/</url-pattern>	  
+	  <url-pattern>/settings</url-pattern>
+	  <url-pattern>/settings/index.html</url-pattern>
 	</filter-mapping>
 	
     <security-constraint>

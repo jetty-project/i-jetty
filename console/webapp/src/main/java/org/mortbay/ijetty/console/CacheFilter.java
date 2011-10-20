@@ -17,8 +17,7 @@ public class CacheFilter implements Filter
 
     public void init(FilterConfig filterConfig) throws ServletException
     {
-        // TODO Auto-generated method stub
-
+       
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException
@@ -26,17 +25,8 @@ public class CacheFilter implements Filter
         try
         {
             HttpServletRequest httpRequest = (HttpServletRequest)request;
-            
-            //Do not cache: any restful request
-            
-            
-            String path = httpRequest.getServletPath();
-            System.err.println(path);
-            if (path.contains("rest"))
-            {
-                ((HttpServletResponse)response).setHeader("Cache-Control", "no-store");
-            }
-            
+            System.err.println("Setting no-store header");
+            ((HttpServletResponse)response).setHeader("Cache-Control", "no-store");       
         }
         finally
         {
@@ -46,8 +36,7 @@ public class CacheFilter implements Filter
 
     public void destroy()
     {
-        // TODO Auto-generated method stub
-
+      
     }
 
 }

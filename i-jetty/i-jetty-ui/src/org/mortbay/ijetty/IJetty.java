@@ -106,6 +106,7 @@ public class IJetty extends Activity
     private ProgressDialog progressDialog;
     private Thread progressThread;
     private Handler handler;
+    private BroadcastReceiver bcastReceiver;
     
     class ConsoleScrollTask implements Runnable
     {
@@ -397,6 +398,19 @@ public class IJetty extends Activity
             }
         }
     }
+    
+    
+    
+
+    @Override
+    protected void onDestroy()
+    {
+        if (bcastReceiver != null)
+            unregisterReceiver(bcastReceiver);
+        super.onDestroy();
+    }
+    
+    
 
     @Override
     public void onCreate(Bundle icicle)
@@ -416,7 +430,8 @@ public class IJetty extends Activity
         filter.addAction(__STOP_ACTION);
         filter.addCategory("default");
 
-        registerReceiver(new BroadcastReceiver()
+        bcastReceiver = 
+        new BroadcastReceiver()
         {
 
             public void onReceive(Context context, Intent intent)
@@ -448,9 +463,9 @@ public class IJetty extends Activity
                 }                   
             }
             
-        }, filter);
+        };
        
-
+        registerReceiver(bcastReceiver, filter);
      
 
         // Watch for button clicks.

@@ -14,7 +14,7 @@
   </modules>
   <properties>
      <android.version>1.6_r2</android.version>
-     <jetty.version>7.5.0.RC0</jetty.version>
+     <jetty.version>7.4.0-SNAPSHOT</jetty.version>
      <servlet.version>2.5-20081211</servlet.version>
   </properties>
 </project>
