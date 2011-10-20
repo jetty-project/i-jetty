@@ -5,11 +5,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Exchanger;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -17,26 +13,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.continuation.Continuation;
-import org.eclipse.jetty.continuation.ContinuationSupport;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
-import android.media.Ringtone;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 
 public class FinderServlet extends HttpServlet
 {
+    
     private static final String TAG = "IJetty.Cnsl";
     public static final String LAST_NETWORK_LOCATION = "org.mortbay.ijetty.console.lastNetworkLocation";
     public static final String LAST_GPS_LOCATION = "org.mortbay.ijetty.console.lastGPSLocation";
@@ -45,6 +37,7 @@ public class FinderServlet extends HttpServlet
     public static final String LAST_TRACKER_REQUEST_TIME = "org.mortbay.ijetty.console.lastTrackerRequestTime";
     public static final long CONTINUATION_TIMEOUT = 5000L; //wait up to 5sec to get a location when enabling tracking
     public static final long INTER_REQUEST_TIMEOUT = 1000L * 60 * 5; //10 mins without requests
+    public static final int DEFAULT_RING_SEC = 10;
     android.content.Context androidContext;
     ContentResolver resolver;
     LocationManager locationManager;
@@ -54,7 +47,59 @@ public class FinderServlet extends HttpServlet
     LooperThread networkLooper;
     Thread controlThread;
     AtomicBoolean tracking = new AtomicBoolean();
+    MediaListener mediaListener;
+    MediaPlayer mediaPlayer;
+    
+    
+    class StopperThread extends Thread
+    {
+       
+        public void run ()
+        {
+            try
+            {
+                Thread.currentThread().sleep(10000);
+                if (mediaPlayer != null)
+                    mediaPlayer.stop();          
+            }
+            catch (InterruptedException e)
+            {
+                Log.i(TAG, "Interruped waiting to stop mediaplayer ringtone");
+            }
+            finally
+            {
+                //release the resources
+                if (mediaPlayer != null)
+                {
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+            }
+        }
+    }
+    
+    class MediaListener implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener
+    {
 
+        public void onPrepared(MediaPlayer mp)
+        {
+            mp.start();
+            StopperThread stopper = new StopperThread();
+            stopper.start();
+        }
+
+        public void onCompletion(MediaPlayer mp)
+        {
+            mp.stop();
+        }
+
+        public boolean onError(MediaPlayer mp, int what, int extra)
+        {
+            mp.stop();
+            return false;
+        }
+
+    }
 
     class LooperThread extends Thread 
     {
@@ -127,15 +172,18 @@ public class FinderServlet extends HttpServlet
 
         public void onLocationChanged(Location location)
         {
-            Log.d(TAG, "location change: "+location);
+            Log.d(TAG, "Provider: "+provider+" location change: "+location);
             synchronized (sync)
             {
-                try {
-                providerLocations.put(provider, location);
-                Log.d(TAG, "put location");
-                sync.notify();
-                Log.d(TAG, "notified");
-                } catch (Exception e) {
+                try 
+                {
+                    providerLocations.put(provider, location);
+                    Log.d(TAG, "put location");
+                    sync.notifyAll();
+                    Log.d(TAG, "notified All");
+                } 
+                catch (Exception e) 
+                {
                     e.printStackTrace();
                 }
             }
@@ -268,6 +316,12 @@ public class FinderServlet extends HttpServlet
         stopTrackers();  
         controlThread.interrupt();
         super.destroy();
+        if (mediaPlayer != null)
+        {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
 
@@ -344,7 +398,7 @@ public class FinderServlet extends HttpServlet
         
         if (action.equalsIgnoreCase("ring"))
         {
-            ring();
+            ring(request.getParameter("sec"));
             response.setStatus(HttpServletResponse.SC_OK);
             
             return;
@@ -394,13 +448,41 @@ public class FinderServlet extends HttpServlet
     
     
     
-    public void ring () 
+    public void ring (String sec) 
     {
-        Uri uri = RingtoneManager.getActualDefaultRingtoneUri(androidContext, RingtoneManager.TYPE_RINGTONE);
-        System.err.println("Uri="+uri);
-        Ringtone tone = RingtoneManager.getRingtone(androidContext, uri);
-        if (!tone.isPlaying())
-            tone.play();
+        int seconds = DEFAULT_RING_SEC;
+        if (sec != null)
+        {
+            sec = sec.trim();
+            if (!"".equals(sec))
+                seconds = Integer.valueOf(sec);
+        }
+        
+        if (mediaPlayer == null)
+        {
+            Uri uri = RingtoneManager.getActualDefaultRingtoneUri(androidContext, RingtoneManager.TYPE_RINGTONE);
+            mediaListener = new MediaListener();
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try
+            {
+                mediaPlayer.setDataSource(androidContext, uri);
+                mediaPlayer.setOnPreparedListener(mediaListener);
+                mediaPlayer.setOnCompletionListener(mediaListener);
+                mediaPlayer.setOnErrorListener(mediaListener);
+            }
+            catch (Exception e)
+            {
+                Log.i(TAG, "Error preparing ring", e);
+            }
+        }
+       
+        if (!mediaPlayer.isPlaying())
+        {
+            mediaPlayer.prepareAsync();
+        }
+        else
+            Log.i(TAG, "Ring already playing");
     }
     
     
@@ -416,7 +498,9 @@ public class FinderServlet extends HttpServlet
             if (gps != null)
             {
                 if (network == null)
+                {
                     l = gps;
+                }
                 else
                 {
                     if (network.getTime() > gps.getTime())
@@ -441,7 +525,7 @@ public class FinderServlet extends HttpServlet
         PrintWriter writer = response.getWriter();
         StringBuffer buff = new StringBuffer();
 
-        asJson(buff, getLocation());
+        asJson(buff, location);
 
         writer.println(buff.toString());
     }

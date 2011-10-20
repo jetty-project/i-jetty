@@ -46,8 +46,8 @@ var Finder =
                      		    {
                      		        Finder.location = response.location;
                      		        Finder.tracks.push(Finder.location);
-                     		        Finder.renderLocation(); 
                      		    }
+                                Finder.renderLocation(); 
                      		}
                      	}
                      }
@@ -84,7 +84,7 @@ var Finder =
                      if (!successfn)
                      {
                      	if (response.error)
-                     		alert(response.error);
+                     		Finder.renderError(response.error);
                      	else
                      	{
                      		if (response.location)
@@ -178,11 +178,18 @@ var Finder =
             return false; 
         },
         
+        showLastLocation: function ()
+        {
+            $("#location").html("<img src='../spinner.gif'/>");
+            Finder.lastLocation();
+        },
+        
         trackLocation: function ()
         {
         	if (Finder.tracking)
         		return; //already tracking
         	$("#location").html("");
+        	$("#location").html("<img src='../spinner.gif'/>");
         	Finder.tracks = [];
         	Finder.location = {};
         	Finder.tracking = true;
@@ -206,13 +213,19 @@ var Finder =
         	$("#stop").attr("disabled", "true");
         },
         
+        updateTrackLocation: function ()
+        {
+            $("#location").html("<img src='../spinner.gif'/>"); 
+            Finder.update();
+        },
+        
         renderError: function(err)
         {
             $("#location").html("<p class='error'>"+err+"</p>"); //get rid of any previous location
-            $("#up").attr("disabled", "true"); //disable all the buttons
-            $("#start").remove("disabled", "true");
-            $("#stop").attr("disabled", "true");
-            $("#ring").attr("disabled", "true");
+            //$("#up").attr("disabled", "true"); 
+            //$("#start").remove("disabled", "true");
+            //$("#stop").attr("disabled", "true");
+            //$("#ring").attr("disabled", "true");
         },
         
         

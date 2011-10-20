@@ -35,10 +35,10 @@
            <form method='POST' action='/console/rest/finder?action=ring' target='hidden-target' onSubmit='return true;'>
               <button type='submit' id='ring'>Ring My Device</button>
            </form> 
-           <button id='last' onClick="Finder.lastLocation();return false;">Last Device Location</button>           
+           <button id='last' onClick="Finder.showLastLocation();return false;">Last Device Location</button>           
            <h3>Tracking</h3>
            <button id='start' onClick="Finder.trackLocation();return false;">Start Tracking Device Location</button>
-           <button id='up' disabled onClick="Finder.update();return false;">Update Location</button>  
+           <button id='up' disabled onClick="Finder.updateTrackLocation();return false;">Update Location</button>  
            <button id='stop' disabled onClick="Finder.stopTrackLocation();return false;">Stop Tracking Device Location</button>
            <div id="location">
            </div>  
