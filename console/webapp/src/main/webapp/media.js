@@ -99,14 +99,14 @@ var Media =
                 
                 if (type == "image")
                 {
-                    html += "<div class='float'><a href='/console/browse/media/" + item.type + "/" + item.location + "/" + item.id + 
+                    html += "<div class='float'><a target='_blank' href='/console/browse/media/" + item.type + "/" + item.location + "/" + item.id + 
                           "'><div class='thumb'>&nbsp;<img src='/console/browse/media/" + item.type + "/" + item.location + "/thumb/" + item.id + "' alt='" + 
                           item.title + "'/>&nbsp;</div></a><p>" + item.title + "</p></div>";
                 }
                 else if (type == "audio")
                 {
                     html += "<div class='float'><a href='/console/browse/media/" + item.type + "/" + item.location + "/" + item.id + 
-                    	  "' onclick='return playMedia(this);'><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + (item.title != null && item.title.length > 20 ? item.title.slice(0,20) : item.title);
+                    	  "' ><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + (item.title != null && item.title.length > 20 ? item.title.slice(0,20) : item.title);
                     
                     if (item.artist != null || item.album != null)
                         html += "<span class='trackinfo'>";
@@ -186,30 +186,5 @@ function reloadMedia (type) {
     return false;
 }
 
-function stopMedia(elem) {
-    $("#hidden-target")[0].src = "about:blank";
-    elem.childNodes[0].childNodes[1].src = "/console/audio.png";
-    document.currentPlaying = null;
-    return false;
-}
 
-document.currentPlaying = null;
 
-function playMedia (elem) {
-    if (document.currentPlaying == elem) {
-        stopMedia(document.currentPlaying);
-        return false;
-    } else if (document.currentPlaying != null) {
-        stopMedia(document.currentPlaying);
-    }
-    
-    var href = elem.href;
-    href = href.append ("?action=embed"); //TODO REPLACE REPLACE go to embed url location for iframe
-    $("#hidden-target")[0].src = href;
-
-    
-    // music should start loading now, so change the image to a stop button
-    elem.childNodes[0].childNodes[1].src = "/console/stop.png";
-    document.currentPlaying = elem;
-    return false;
-}
