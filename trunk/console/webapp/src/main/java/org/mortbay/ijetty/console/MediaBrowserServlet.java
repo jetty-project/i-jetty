@@ -156,12 +156,14 @@ public class MediaBrowserServlet extends HttpServlet
             if ("thumb".equalsIgnoreCase(tmp.trim()))
                 isThumb = true;
             else
-                id = tmp;
+            {
+                id = removeFileExtension(tmp);  
+            }
         }
         
         if (strtok.hasMoreElements())
         {
-            id = strtok.nextToken();
+            id = removeFileExtension(strtok.nextToken());
         }
 
         String action = request.getParameter("action");
@@ -175,6 +177,17 @@ public class MediaBrowserServlet extends HttpServlet
     }
     
     
+    public String removeFileExtension (String s)
+    {
+        if (s == null || "".equals(s))
+            return s;
+
+        int i = s.indexOf('.');
+        if (i < 0)
+            return s;
+        return s.substring(0,i);
+    }
+
     
     /**
      * Get the content.
@@ -244,10 +257,30 @@ public class MediaBrowserServlet extends HttpServlet
             else
             {
                 Log.i(TAG,"Exporting original media");
+                
+                //Get the metadata to get the size
+                long size = -1;
+                Cursor c = null;
+                try
+                {
+                    c = resolver.query(content, new String[] {MediaStore.MediaColumns.SIZE}, null, null, null);
+                    if (c!= null && c.moveToFirst())
+                        size = c.getLong(c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE));
+                    
+                    System.err.println("SIZE="+size);
+                }
+                finally
+                {
+                    c.close();
+                }
+                
                 InputStream stream = null;
                 try
                 {
                     response.setContentType(resolver.getType(content));
+                    response.setHeader("connection", "close");
+                    if (size > -1)
+                        response.setContentLength((int)size);
                     stream = resolver.openInputStream(content);
                     OutputStream os = response.getOutputStream();
                     response.setStatus(HttpServletResponse.SC_OK);
@@ -292,6 +325,8 @@ public class MediaBrowserServlet extends HttpServlet
 
         String path = "/console/browse/media/" + type + "/" + location + "/" + item;
 
+        System.err.println("Embedding "+path);
+        
         writer.print("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26'");
         writer.println(" CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95'");
         writer.println(" STANDBY='Loading...' TYPE='application/x-oleobject'>");
