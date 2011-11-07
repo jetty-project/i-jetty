@@ -270,23 +270,23 @@ public class MediaRestServlet extends HttpServlet
     private void toJson(ContentValues media, Uri contenturi, StringBuilder builder, String type, String location)
     {
         builder.append("{");
-        builder.append(" 'type':").append(safeJson(type));
-        builder.append(",'location':").append(safeJson(location));
-        builder.append(",'id':").append(safeJson(media.getAsInteger(BaseColumns._ID)));
-        builder.append(",'title':").append(safeJson(media.getAsString(MediaStore.MediaColumns.TITLE)));
-        builder.append(",'displayname':").append(safeJson(media.getAsString(MediaStore.MediaColumns.DISPLAY_NAME)));
-        builder.append(",'mimetype':").append(safeJson(media.getAsString(MediaStore.MediaColumns.MIME_TYPE)));
-        builder.append(",'size':").append(safeJson(media.getAsString(MediaStore.MediaColumns.SIZE)));
+        builder.append(" \"type\":").append(safeJson(type));
+        builder.append(",\"location\":").append(safeJson(location));
+        builder.append(",\"id\":").append(safeJson(media.getAsInteger(BaseColumns._ID)));
+        builder.append(",\"title\":").append(safeJson(media.getAsString(MediaStore.MediaColumns.TITLE)));
+        builder.append(",\"displayname\":").append(safeJson(media.getAsString(MediaStore.MediaColumns.DISPLAY_NAME)));
+        builder.append(",\"mimetype\":").append(safeJson(media.getAsString(MediaStore.MediaColumns.MIME_TYPE)));
+        builder.append(",\"size\":").append(safeJson(media.getAsString(MediaStore.MediaColumns.SIZE)));
 
         if ((contenturi == MediaStore.Audio.Media.EXTERNAL_CONTENT_URI) || (contenturi == MediaStore.Audio.Media.INTERNAL_CONTENT_URI))
         {
             String tmp = media.getAsString(MediaStore.Audio.AudioColumns.ARTIST);
             if (tmp != null)
-                builder.append(",'artist':").append(safeJson(tmp));
+                builder.append(",\"artist\":").append(safeJson(tmp));
 
             tmp = media.getAsString(MediaStore.Audio.AudioColumns.ALBUM);
             if (tmp != null)
-                builder.append(",'album':").append(safeJson(tmp));
+                builder.append(",\"album\":").append(safeJson(tmp));
         }
 
         builder.append("}");
@@ -300,7 +300,7 @@ public class MediaRestServlet extends HttpServlet
     {
         if (num == null)
         {
-            return "''";
+            return "";
         }
         return num.toString();
     }
@@ -309,8 +309,8 @@ public class MediaRestServlet extends HttpServlet
     {
         if (str == null)
         {
-            return "''";
+            return "\"\"";
         }
-        return "'" + str.replaceAll("'","\\'") + "'";
+        return "\"" + str.replaceAll("'","\\'") + "\"";
     }
 }

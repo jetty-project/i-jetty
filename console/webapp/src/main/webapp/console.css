@@ -218,6 +218,12 @@ img {
     border: 0px none;
 }
 
+img.thumb {
+	width: 120px;
+	height: 120px;
+}
+	
+	
 .star:hover,
 .star:focus {
     background-position: 0 -32px !important;

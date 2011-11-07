@@ -25,7 +25,6 @@ public class CacheFilter implements Filter
         try
         {
             HttpServletRequest httpRequest = (HttpServletRequest)request;
-            System.err.println("Setting no-store header");
             ((HttpServletResponse)response).setHeader("Cache-Control", "no-store");       
         }
         finally

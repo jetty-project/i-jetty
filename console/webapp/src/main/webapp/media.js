@@ -64,6 +64,7 @@ var Media =
                 error: function(xhr, reason, exception) 
                 { 
                     $("#" + type+"-"+location).empty();
+                    $("#" + type+"-"+location).append("<p class='error'>"+reason+"</p>"+"<p class='error'>"+exception+"</p>");
                     $("#" + type+"-"+location).append ("<p class='error'>Failed to get " + type + "! Perhaps i-jetty is not running or there is a temporary network failure. Try doing a full page reload.</p>");
                 }
             });
@@ -105,7 +106,7 @@ var Media =
                 else if (type == "audio")
                 {
                     html += "<div class='float'><a href='/console/browse/media/" + item.type + "/" + item.location + "/" + item.id + 
-                    	  "' onclick='return playMedia(this);'><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + item.title;
+                    	  "' onclick='return playMedia(this);'><div class='thumb'>&nbsp;<img src='/console/audio.png' alt='" + item.title + "'/>&nbsp;</div></a><p>" + (item.title != null && item.title.length > 20 ? item.title.slice(0,20) : item.title);
                     
                     if (item.artist != null || item.album != null)
                         html += "<span class='trackinfo'>";
