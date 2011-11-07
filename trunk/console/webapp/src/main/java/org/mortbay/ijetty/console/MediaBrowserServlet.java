@@ -105,9 +105,6 @@ public class MediaBrowserServlet extends HttpServlet
     private static final long serialVersionUID = 1L;
     private static final String TAG = "MediaBrowserServlet";
 
-
-    private int __THUMB_WIDTH = 120;
-    private int __THUMB_HEIGHT = 120;
     private ContentResolver resolver;
     private Context context;
 
@@ -207,130 +204,41 @@ public class MediaBrowserServlet extends HttpServlet
 
             if (asThumb)
             {
-                //Get a thumbnail                
-                Bitmap bitmap_orig = MediaStore.Images.Media.getBitmap(resolver,content);
-                if (bitmap_orig != null)
+                //Get a thumbnail       
+                Cursor c = MediaStore.Images.Thumbnails.queryMiniThumbnail(resolver, Long.parseLong(item), MediaStore.Images.Thumbnails.MINI_KIND, null);
+                if (c != null && c.moveToFirst())
                 {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    InputStream stream = null;
-                    OutputStream os = response.getOutputStream();
-                    Bitmap bitmap = null;
-
-                    int width = bitmap_orig.getWidth();
-                    int height = bitmap_orig.getHeight();
-
-                    // If the image is too big (AND the width/height isn't 0), scale it
-                    if (((width > __THUMB_WIDTH) || (height > __THUMB_HEIGHT)) && (height != 0) && (width != 0))
+                    int i = c.getColumnIndex(MediaStore.Images.Thumbnails.DATA);
+                    String s = c.getString(i);
+                    if (s != null)
                     {
-                        float scaleWidth = 0;
-                        float scaleHeight = 0;
+                        File f = new File(s);
+                        FileInputStream fis = new FileInputStream(f);
 
-                        if (Config.LOGD)
-                        {
-                            Log.d(TAG,"orig height = " + height + ", orig width = " + width);
-                            Log.d(TAG,"__THUMB_HEIGHT = " + __THUMB_HEIGHT + ", __THUMB_WIDTH = " + __THUMB_WIDTH);
-                        }
-
-                        if (width > __THUMB_WIDTH)
-                        {
-                            scaleWidth = ((float)__THUMB_WIDTH) / width;
-                        }
-
-                        if (height > __THUMB_HEIGHT)
-                        {
-                            scaleHeight = ((float)__THUMB_HEIGHT) / height;
-                        }
-
-                        if (Config.LOGD)
-                        {
-                            Log.d(TAG,"scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth);
-                        }
-
-                        if ((scaleHeight < scaleWidth) && (scaleHeight != 0))
-                        {
-                            scaleWidth = scaleHeight;
-                        }
-                        else if ((scaleWidth < scaleHeight) && (scaleWidth != 0))
-                        {
-                            scaleHeight = scaleWidth;
-                        }
-
-                        if (scaleWidth == 0)
-                        {
-                            scaleWidth = scaleHeight;
-                        }
-
-                        if (scaleHeight == 0)
-                        {
-                            scaleHeight = scaleWidth;
-                        }
-
-                        if (Config.LOGD)
-                        {
-                            Log.d(TAG,"scaleHeight = " + scaleHeight + ", scaleWidth = " + scaleWidth + " (final)");
-                        }
-
-                        if (scaleHeight == 0)
-                        {
-                            Log.w(TAG,"scaleHeight and scaleWidth both = 0! Setting scale to 50%.");
-                            scaleHeight = 0.5f;
-                            scaleWidth = 0.5f;
-                        }
-
-                        Matrix matrix = new Matrix();
-                        matrix.postScale(scaleWidth,scaleHeight);
-
-                        // recreate the new Bitmap
-                        bitmap = Bitmap.createBitmap(bitmap_orig,0,0,width,height,matrix,true);
-                        //release original bitmap as soon as possible
-                        bitmap_orig.recycle();
-                        bitmap_orig = null;
-                      
-                
-                        //TODO - if we updated to newer Api rev level we could use this
-                        //Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(resolver, Integer.valueOf(item).intValue(), MediaStore.Images.Thumbnails.MINI_KIND, new BitmapFactory.Options());
-
-                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        OutputStream os = response.getOutputStream();
                         if (resolver.getType(content) == "image/gif")
                         {
-                            Log.i(TAG,"Original image was gif, exporting thumb as JPEG as workaround");
                             response.setContentType("image/gif");
-                            bitmap.compress(Bitmap.CompressFormat.JPEG,90,bytes);
                         }
                         else
                         {
-                            Log.i(TAG,"Exporting thumb in png format");
                             response.setContentType("image/png");
-                            bitmap.compress(Bitmap.CompressFormat.PNG,100,bytes);
                         }
 
                         try
                         {
-                            stream = new ByteArrayInputStream(bytes.toByteArray());
-                            IO.copy(stream,os);
+                            IO.copy(fis,os);
                         }
                         finally
                         {
-                            bitmap.recycle();
-                            bitmap = null;
+                            fis.close();
                         }
                     }
                     else
-                    {
-                        if ((height == 0) || (width == 0))
-                        {
-                            Log.w(TAG,"Height or width were 0; sending original image instead!");
-                        }
-                        else
-                        {
-                            Log.i(TAG,"Original was smaller than " + __THUMB_HEIGHT + "x" + __THUMB_WIDTH + ", skipping scale.");
-                        }
-                        // just return the original data from the DB
-                        response.setContentType(resolver.getType(content));
-                        stream = resolver.openInputStream(content);
-                        IO.copy(stream,os);
-                    }
+                        response.sendError(HttpServletResponse.SC_NO_CONTENT);
+                    
+                    c.close();
                 }
             }
             else
