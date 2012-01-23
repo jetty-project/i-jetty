@@ -6,7 +6,7 @@
   <groupId>org.mortbay.ijetty</groupId>
   <artifactId>console-parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.1-SNAPSHOT</version>
+  <version>3.1</version>
   <name>I-Jetty :: Console Parent</name>
   <description>Parent project for console</description>
   <modules>
