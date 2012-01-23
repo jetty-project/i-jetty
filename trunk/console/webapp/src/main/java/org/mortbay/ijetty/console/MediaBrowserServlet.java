@@ -15,7 +15,6 @@
 
 package org.mortbay.ijetty.console;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.text.ParseException;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
@@ -38,14 +36,10 @@ import org.eclipse.jetty.util.IO;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Environment;
-import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.util.Config;
 import android.util.Log;
@@ -83,6 +77,7 @@ public class MediaBrowserServlet extends HttpServlet
         {
             _file = file;
         }
+        
 
         public void onMediaScannerConnected()
         {
@@ -218,40 +213,48 @@ public class MediaBrowserServlet extends HttpServlet
             if (asThumb)
             {
                 //Get a thumbnail       
-                Cursor c = MediaStore.Images.Thumbnails.queryMiniThumbnail(resolver, Long.parseLong(item), MediaStore.Images.Thumbnails.MINI_KIND, null);
-                if (c != null && c.moveToFirst())
+                Cursor c = null;
+                try
                 {
-                    int i = c.getColumnIndex(MediaStore.Images.Thumbnails.DATA);
-                    String s = c.getString(i);
-                    if (s != null)
+                    c = MediaStore.Images.Thumbnails.queryMiniThumbnail(resolver, Long.parseLong(item), MediaStore.Images.Thumbnails.MINI_KIND, null);
+                    if (c != null && c.moveToFirst())
                     {
-                        File f = new File(s);
-                        FileInputStream fis = new FileInputStream(f);
-
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        OutputStream os = response.getOutputStream();
-                        if (resolver.getType(content) == "image/gif")
+                        int i = c.getColumnIndex(MediaStore.Images.Thumbnails.DATA);
+                        String s = c.getString(i);
+                        if (s != null)
                         {
-                            response.setContentType("image/gif");
+                            File f = new File(s);
+                            FileInputStream fis = new FileInputStream(f);
+
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            OutputStream os = response.getOutputStream();
+                            if (resolver.getType(content) == "image/gif")
+                            {
+                                response.setContentType("image/gif");
+                            }
+                            else
+                            {
+                                response.setContentType("image/png");
+                            }
+
+                            try
+                            {
+                                IO.copy(fis,os);
+                            }
+                            finally
+                            {
+                                fis.close();
+                            }
                         }
                         else
-                        {
-                            response.setContentType("image/png");
-                        }
+                            response.sendError(HttpServletResponse.SC_NO_CONTENT);
 
-                        try
-                        {
-                            IO.copy(fis,os);
-                        }
-                        finally
-                        {
-                            fis.close();
-                        }
                     }
-                    else
-                        response.sendError(HttpServletResponse.SC_NO_CONTENT);
-                    
-                    c.close();
+                }
+                finally
+                {
+                    if (c != null)
+                        c.close();
                 }
             }
             else
@@ -266,12 +269,11 @@ public class MediaBrowserServlet extends HttpServlet
                     c = resolver.query(content, new String[] {MediaStore.MediaColumns.SIZE}, null, null, null);
                     if (c!= null && c.moveToFirst())
                         size = c.getLong(c.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE));
-                    
-                    System.err.println("SIZE="+size);
                 }
                 finally
                 {
-                    c.close();
+                    if (c != null)
+                        c.close();
                 }
                 
                 InputStream stream = null;
@@ -295,7 +297,7 @@ public class MediaBrowserServlet extends HttpServlet
         }
         catch (Exception e)
         {
-            Log.w(TAG,"Failed to fetch media",e);
+            Log.i(TAG,"Failed to fetch media "+ e.getMessage());
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
@@ -324,8 +326,6 @@ public class MediaBrowserServlet extends HttpServlet
         PrintWriter writer = response.getWriter();
 
         String path = "/console/browse/media/" + type + "/" + location + "/" + item;
-
-        System.err.println("Embedding "+path);
         
         writer.print("<OBJECT ID='MediaPlayer' WIDTH='320' HEIGHT='26'");
         writer.println(" CLASSID='CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95'");
@@ -360,7 +360,7 @@ public class MediaBrowserServlet extends HttpServlet
             sdcarddir.mkdir();
 
         File output = null;
-
+        FileOutputStream stream = null;
         try
         {
             // Save file to External Storage
@@ -372,16 +372,19 @@ public class MediaBrowserServlet extends HttpServlet
 
             output = new File(sdcarddir,origName);
             Log.i(TAG,"Writing to: " + output);
-            FileOutputStream stream = new FileOutputStream(output);
-
+            stream = new FileOutputStream(output);
             out.writeTo(stream);
-            stream.close();
         }
         catch (Exception e)
         {
             Log.w(TAG,"Failed to save uploaded file",e);
             printResponse(writer,1,"Could not save uploaded file to sdcard.",-1);
             return;
+        }
+        finally
+        {
+            if (stream != null)
+                stream.close();
         }
 
         // Re-run media scanner, to re-detect media

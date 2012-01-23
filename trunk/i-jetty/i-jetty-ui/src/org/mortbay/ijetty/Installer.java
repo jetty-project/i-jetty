@@ -172,21 +172,21 @@ public class Installer
         File webapp = new File (webappsDir, webappName);
         
         if (webapp.exists())
-            deleteWebapp(webapp);
+            delete(webapp);
         Log.i(TAG, "deleted "+IJetty.__JETTY_DIR+"/"+IJetty.__WEBAPP_DIR+"/"+webappName);
         
         warFile.delete();
         Log.i(TAG, "deleted "+warFile.getAbsolutePath());
     }
 
-    public static void deleteWebapp (File webapp)
+    public static void delete (File webapp)
     {
         if (webapp.isDirectory())
         {
             File[] files = webapp.listFiles();
             for (File f:files)
             {
-                deleteWebapp(f);
+                delete(f);
             }
             webapp.delete();
         }
