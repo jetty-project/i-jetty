@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>i-jetty Console</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="/console/console.css" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <META http-equiv="Pragma" content="no-cache"/>
+    <META http-equiv="Cache-Control" content="no-cache,no-store"/>
+    <script src="/console/jquery.js"></script>
+    <script src="/console/media.js"></script>
+    
+    <style>
+        div.float {
+            float: left;
+            text-align: center;
+            margin: 6px;
+            width: 126px;
+        }
+        
+        div.thumb {
+            border: 1px solid #eeeeec;
+            padding: 3px;
+            height: 120px;
+            width: 125px;
+            
+            line-height: 120px;
+            font-size: 1em;
+        }
+        
+        div.thumb a,
+        div.thumb a img {
+            vertical-align: middle;
+        }
+        
+        div.thumb img {
+            vertical-align: middle;
+            width: 120px;
+            height: 125px;
+        }
+        
+        div.thumb:hover {
+            background-color: #eeeeec;
+        }
+        
+        div.float p {
+            text-align: center;
+            font-size:80%;
+        }
+        
+        div.spacer {
+            clear: both;
+        }
+        
+        .trackinfo {
+            color: #555753;
+            font-size: 70%;
+        }
+        
+        #images, #audio {
+            width: 75%;
+        }
+        
+        .reload-span {
+            float: right;
+            font-size: 70%;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation">
+        <ul>
+            <li><a href="/console/contacts/index.html">Contacts</a></li>
+            <li><a href="/console/settings/">System Settings</a></li>
+            <li><a href="/console/calls/">Call Logs</a></li>
+            <li><a href="/console/network/">Network</a></li>
+            <li><a href="/console/media/"><strong>Media</strong></a></li>
+            <li><a href="/console/finder/">Finder</a></li>          
+        </ul>
+    </div>
+    
+    <div id="page">
+        <h1 class="pageheader">Media</h1>
+        <div id="content">
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('image', 'internal');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Internal Images</h2>
+            <div id="image-internal">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('image', 'external');"><img src="/console/refresh.png" alt="Refresh"/></a></span>External Images</h2>
+            <div id="image-external">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('audio', 'internal');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Internal Audio</h2>
+            <div id="audio-internal">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('audio', 'external');"><img src="/console/refresh.png" alt="Refresh"/></a></span>External Audio</h2>
+            <div id="audio-external">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('video', 'internal');"><img src="/console/refresh.png" alt="Refresh"/></a></span>Internal Video</h2>
+            <div id="video-internal">Loading...</div>
+            <h2><span class="reload-span"><a href="#" onclick="return reloadMedia('video', 'external');"><img src="/console/refresh.png" alt="Refresh"/></a></span>External Video</h2>
+            <div id="video-external">Loading...</div>
+            <hr />
+            <div style="text-align:center;">
+            <h2>Upload Media to Android</h2>
+            <div id="upload">
+                <form method="post" id="uploadform" enctype="multipart/form-data" action="/console/browse/media/?action=upload" target="upload_target">
+                    <input type="file" name="fileupload" id="fileupload" /><br /><br />
+                    <input type="submit" value="Upload" />
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="footer">
+        Served up by Jetty.<br />Chuck Norris approves.
+    </div>
+    <iframe id="hidden-target" name="hidden-target" style="width: 340px; height: 48px; border: 0px none; float: right; position: fixed; bottom: 2px; right: 12px; visibility:hidden;"></iframe>
+    <iframe id="upload_target" name="upload_target" src="" style="width:0;height:0;border:0px none;display:none;"></iframe>
+</body>
+</html>

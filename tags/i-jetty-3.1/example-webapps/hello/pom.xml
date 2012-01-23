@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <parent>
+    <groupId>org.mortbay.ijetty</groupId>
+    <artifactId>example-webapps-parent</artifactId>
+    <version>3.1-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>hello</artifactId>
+  <name>I-Jetty :: Hello</name>
+  <version>3.1-SNAPSHOT</version>
+  <packaging>war</packaging>
+  <url>http://maven.apache.org</url>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+          <verbose>false</verbose>
+        </configuration>
+      </plugin>
+
+          <!-- Convert the compiled classes into a clases.dex. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <id>generate-dex</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <!-- executable>${env.ANDROID_HOME}/platform-tools/dx</executable -->
+              <executable>java</executable>
+              <arguments>
+               <!-- <argument>-JXmx1024M</argument> -->
+                <argument>-jar</argument>
+                <argument>${env.ANDROID_HOME}/platform-tools/lib/dx.jar</argument>
+                <argument>--dex</argument>
+                <argument>--verbose</argument>
+                <argument>--core-library</argument>
+                <argument>--output=${project.build.directory}/classes.dex</argument>
+                <argument>--positions=lines</argument>
+                <argument>${project.build.directory}/classes/</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copydex</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <mkdir
+                  dir="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib" />
+                <jar
+                  basedir="${project.build.directory}"
+                  update="true"
+                  includes="classes.dex"
+                  destfile="${project.build.directory}/${project.artifactId}-${project.version}/WEB-INF/lib/classes.zip" />
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>${servlet.version}</version>
+      <scope>provided</scope>
+     </dependency>
+
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>android</artifactId>
+      <version>${android.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>

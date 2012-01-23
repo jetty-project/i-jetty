@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay.ijetty</groupId>
+  <artifactId>example-webapps-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>3.1-SNAPSHOT</version>
+  <name>I-Jetty :: Example Webapps Parent</name>
+  <description>Parent project for example webapps</description>
+  <modules>
+    <module>hello</module>
+  </modules>
+  <properties>
+     <android.version>1.6_r2</android.version>
+     <jetty.version>7.5.4.v20111024</jetty.version>
+     <servlet.version>2.5-20081211</servlet.version>
+  </properties>
+</project>

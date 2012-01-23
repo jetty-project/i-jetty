@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>i-jetty Finder</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="/console/console.css" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <META http-equiv="Pragma" content="no-cache"/>
+    <META http-equiv="Cache-Control" content="no-cache,no-store"/>
+    <script src="/console/jquery.js"></script>
+    <script src="/console/finder.js"></script>
+    <style>
+        #loading {
+            padding: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation">
+        <ul>
+            <li><a href="/console/contacts/index.html"><strong>Contacts</strong></a></li>
+            <li><a href="/console/settings/index.html">System Settings</a></li>
+            <li><a href="/console/calls/">Call Logs</a></li>
+            <li><a href="/console/network/">Network</a></li>
+            <li><a href="/console/media/index.html">Media</a></li>
+            <li><a href="/console/finder/">Finder</a></li>
+        </ul>
+    </div>
+    
+    <div id="page">
+        <h1 class="pageheader">Finder</h1>
+        <div id="content">
+ 
+           <h2>Quick Find</h2>
+           <form method='POST' action='/console/rest/finder?action=ring' target='hidden-target' onSubmit='return true;'>
+              <button type='submit' id='ring'>Ring My Device</button>
+           </form> 
+           <button id='last' onClick="Finder.showLastLocation();return false;">Last Device Location</button>           
+           <h3>Tracking</h3>
+           <button id='start' onClick="Finder.trackLocation();return false;">Start Tracking Device Location</button>
+           <button id='up' disabled onClick="Finder.updateTrackLocation();return false;">Update Location</button>  
+           <button id='stop' disabled onClick="Finder.stopTrackLocation();return false;">Stop Tracking Device Location</button>
+           <div id="location">
+           </div>  
+        </div>
+    </div>
+    
+    <div id="footer">
+        Served up by Jetty.<br />Chuck Norris approves.
+    </div>
+    <iframe id="hidden-target" name="hidden-target" style="width:0px;height:0px;border:0px;visibility:hidden;"></iframe>
+</body>
+</html>

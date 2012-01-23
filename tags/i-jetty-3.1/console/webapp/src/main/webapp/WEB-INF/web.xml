@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app 
+   	xmlns="http://java.sun.com/xml/ns/javaee" 
+   	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" 
+   	version="3.0"> 
+
+  	<display-name>IJetty Console</display-name>
+  	
+	
+	<servlet>
+		<servlet-name>ContactsJSONServlet</servlet-name>
+		<servlet-class>org.mortbay.ijetty.console.ContactsJSONServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>CallLogServlet</servlet-name>
+		<servlet-class>org.mortbay.ijetty.console.CallLogServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>IPServlet</servlet-name>
+		<servlet-class>org.mortbay.ijetty.console.IPServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>SettingsServlet</servlet-name>
+		<servlet-class>org.mortbay.ijetty.console.SettingsServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>MediaBrowserServlet</servlet-name>
+		<servlet-class>org.mortbay.ijetty.console.MediaBrowserServlet</servlet-class>
+	</servlet>
+	<servlet>
+	  <servlet-name>MediaRestServlet</servlet-name>
+	  <servlet-class>org.mortbay.ijetty.console.MediaRestServlet</servlet-class>
+	</servlet>
+	<servlet>
+	  <servlet-name>FinderServlet</servlet-name>
+	  <servlet-class>org.mortbay.ijetty.console.FinderServlet</servlet-class>
+	</servlet>
+	<filter>
+	    <filter-name>MultiPart</filter-name>
+	    <filter-class>org.eclipse.jetty.servlets.MultiPartFilter</filter-class>
+	</filter>
+	<filter>
+	    <filter-name>CacheFilter</filter-name>
+	    <filter-class>org.mortbay.ijetty.console.CacheFilter</filter-class>
+	</filter>
+	
+	<servlet-mapping>
+		<servlet-name>ContactsJSONServlet</servlet-name>
+		<url-pattern>/rest/contacts/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>CallLogServlet</servlet-name>
+		<url-pattern>/calls/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SettingsServlet</servlet-name>
+		<url-pattern>/rest/settings/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>IPServlet</servlet-name>
+		<url-pattern>/network/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>MediaBrowserServlet</servlet-name>
+		<url-pattern>/browse/media/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+	    <servlet-name>MediaRestServlet</servlet-name>
+	    <url-pattern>/rest/media/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+	    <servlet-name>FinderServlet</servlet-name>
+	    <url-pattern>/rest/finder/*</url-pattern>
+	</servlet-mapping>
+	<filter-mapping>
+	    <filter-name>MultiPart</filter-name>
+	    <url-pattern>/rest/contacts/*</url-pattern>
+	    <url-pattern>/browse/media/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+	  <filter-name>CacheFilter</filter-name>
+	  <url-pattern>/rest/*</url-pattern>
+	  <url-pattern>/contacts/</url-pattern>
+	  <url-pattern>/contacts</url-pattern>
+	  <url-pattern>/contacts/index.html</url-pattern>
+	  <url-pattern>/finder/</url-pattern>
+	  <url-pattern>/finder</url-pattern>	  
+	  <url-pattern>/finder/index.html</url-pattern>
+	  <url-pattern>/media/</url-pattern>
+	  <url-pattern>/media</url-pattern>	  
+	  <url-pattern>/media/index.html</url-pattern>
+	  <url-pattern>/settings/</url-pattern>	  
+	  <url-pattern>/settings</url-pattern>
+	  <url-pattern>/settings/index.html</url-pattern>
+	</filter-mapping>
+	
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>I-Jetty Console</web-resource-name>
+        <url-pattern>/contacts/*</url-pattern>
+        <url-pattern>/media/*</url-pattern>
+        <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/calls/*</url-pattern>
+        <url-pattern>/settings/*</url-pattern>
+        <url-pattern>/network/*</url-pattern>
+        <url-pattern>/browse/*</url-pattern>
+        <url-pattern>/finder/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+        <role-name>admin</role-name>
+        <role-name>user</role-name>
+      </auth-constraint>
+    </security-constraint>
+    
+    <login-config>
+      <auth-method>FORM</auth-method>
+      <realm-name>Console</realm-name>
+      <form-login-config>
+         <form-login-page>/login.html</form-login-page>
+         <form-error-page>/loginError.html</form-error-page>
+      </form-login-config>
+    </login-config>
+    
+  <session-config>
+    <session-timeout>0</session-timeout>
+  </session-config>
+</web-app>
