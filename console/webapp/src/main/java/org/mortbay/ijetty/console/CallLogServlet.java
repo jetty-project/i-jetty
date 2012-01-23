@@ -53,6 +53,16 @@ public class CallLogServlet extends HttpServlet
     public Map<Integer, String> _logTypeMap = new HashMap<Integer, String>();
     private ContentResolver resolver;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private String[] _projection = new String[]
+                                         {
+                                          CallLog.Calls.DATE,
+                                          CallLog.Calls.TYPE,
+                                          CallLog.Calls.DURATION,
+                                          CallLog.Calls.NEW,
+                                          CallLog.Calls.NUMBER,
+                                          CallLog.Calls.CACHED_NUMBER_TYPE,
+                                          CallLog.Calls.CACHED_NAME
+                                         };
 
     public CallLogServlet ()
     {
@@ -91,20 +101,10 @@ public class CallLogServlet extends HttpServlet
     protected void doContent(PrintWriter writer, HttpServletRequest request,
                              HttpServletResponse response) throws ServletException, IOException
     {
-        String[] projection = new String[]
-                                         {
-                                          CallLog.Calls.DATE,
-                                          CallLog.Calls.TYPE,
-                                          CallLog.Calls.DURATION,
-                                          CallLog.Calls.NEW,
-                                          CallLog.Calls.NUMBER,
-                                          CallLog.Calls.CACHED_NUMBER_TYPE,
-                                          CallLog.Calls.CACHED_NAME
-                                         };
         Cursor cursor = null;
         try
         {
-            cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, null, null, null);
+            cursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, _projection, null, null, null);
             String[] cols = cursor.getColumnNames();
 
             String csv = request.getParameter("csv");
@@ -118,6 +118,7 @@ public class CallLogServlet extends HttpServlet
                 formatCallLog(cols, cursor, writer);
                 writer.println("<p><small><a href='?csv=1'>Download as CSV</a></small></p>");
                 writer.println("</div>");
+                writer.flush();
             }
         }
         finally
@@ -187,7 +188,7 @@ public class CallLogServlet extends HttpServlet
                     else if (colNames[i].equals(CallLog.Calls.CACHED_NAME))
                     {
                         String name = cursor.getString(i);
-                        if (name != null)
+                        if (name != null && (!"".equals(name.trim())))
                         {
                             Cursor pcursor = null;
                             try

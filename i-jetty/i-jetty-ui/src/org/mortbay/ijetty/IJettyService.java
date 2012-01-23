@@ -27,7 +27,6 @@ import org.mortbay.ijetty.util.IJettyToast;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.http.HttpGenerator;
-import org.eclipse.jetty.http.security.Credential;
 import org.eclipse.jetty.http.ssl.SslContextFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
@@ -37,6 +36,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.server.ssl.SslSocketConnector;
+import org.eclipse.jetty.util.security.Credential;
 
 
 import android.app.Notification;

@@ -2,8 +2,6 @@ package org.mortbay.ijetty.console;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
@@ -190,6 +188,7 @@ public class MediaRestServlet extends HttpServlet
 
         if (id != null)
         {
+            //TODO decide if we want to support this
             //Get metadata about a specific media item
             /*
             Uri uri = MediaType.getContentUriByType(type, location);
@@ -219,15 +218,11 @@ public class MediaRestServlet extends HttpServlet
             int pgStart = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
             tmp = request.getParameter(__PG_SIZE_PARAM);
             int pgSize = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
-            
-            
-            Uri mediaUri = MediaType.getContentUriByType(type, location);
-            
+                
+            Uri mediaUri = MediaType.getContentUriByType(type, location);           
             StringBuilder builder = new StringBuilder();
 
-            int total = 0;
-            //Get all of the applicable collections (ie both internal and external for a given type)
-            
+            //Get all of the applicable collections (ie both internal and external for a given type)            
             MediaCollection collection = null;
             
             writer.println ("{");
@@ -238,10 +233,8 @@ public class MediaRestServlet extends HttpServlet
                 writer.println("\"media\": ");
                 writer.print("[ ");
 
-
                 ContentValues media = null;
                 int count = pgSize;
-
 
                 while ((pgSize <= 0 || count-- > 0) && (media = collection.next()) != null)
                 {

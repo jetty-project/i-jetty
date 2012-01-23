@@ -149,18 +149,7 @@ public class IJetty extends Activity
                 boolean made = jettyDir.mkdirs();
                 Log.i(TAG,"Made " + __JETTY_DIR + ": " + made);
             }
-            else
-            {
-                Log.i(TAG,__JETTY_DIR + " exists");
-
-                // Always update if ${jetty.home}/.update exists (DEBUG)
-                File alwaysUpdate = new File(jettyDir,".update");
-                if (alwaysUpdate.exists())
-                {
-                    Log.i(TAG,"Always Update tag found " + alwaysUpdate);
-                    updateNeeded = true;
-                }
-            }
+           
             sendProgressUpdate(10);
 
             
@@ -171,6 +160,15 @@ public class IJetty extends Activity
             //file of the old webapp was installed, but it's now
             //been replaced by a new file of the same name. Strangely,
             //this does not seem to affect webapps unpacked to tmp?
+            //Original versions of i-jetty created a work directory. So
+            //we will delete it here if found to ensure webapps can be
+            //updated successfully.
+            File workDir = new File(jettyDir, __WORK_DIR);
+            if (workDir.exists())
+            {
+                Installer.delete(workDir);
+                Log.i(TAG, "removed work dir");
+            }
 
 
             //make jetty/tmp
@@ -291,6 +289,11 @@ public class IJetty extends Activity
                 Log.w(TAG, "Unable to get PackageInfo for i-jetty");
             }
 
+            //if there was a .update file indicating an update was needed, remove it now we've updated
+            File update = new File(__JETTY_DIR, ".update");
+            if (update.exists())
+                update.delete();
+            
             sendProgressUpdate(100);
         }
     };
@@ -669,20 +672,31 @@ public class IJetty extends Activity
      */
     public boolean isUpdateNeeded ()
     {        
+        //if no previous version file, assume update is required
         int storedVersion = getStoredJettyVersion();
         if (storedVersion <= 0)
             return true;
 
         try
         {
+            //if different previous version, update is required
             PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(),0);
             if (pi == null)
                 return true;
             if (pi.versionCode != storedVersion)
                 return true;
+            
+            //if /sdcard/jetty/.update file exists, then update is required
+            File alwaysUpdate = new File(__JETTY_DIR,".update");
+            if (alwaysUpdate.exists())
+            {
+                Log.i(TAG,"Always Update tag found " + alwaysUpdate);
+                return true;
+            }
         }
         catch (Exception e)
         {
+            //if any of these tests go wrong, best to assume update is true?
             return true;
         }
 
