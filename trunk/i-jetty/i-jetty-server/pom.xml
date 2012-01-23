@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.mortbay.ijetty</groupId>
     <artifactId>ijetty-parent</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>3.2-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.ijetty</groupId>
   <artifactId>i-jetty-server</artifactId>
-  <version>3.1-SNAPSHOT</version>
+  <version>3.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>I-Jetty :: Jetty Adaptations for Android</name>
   <description>Jetty Adaptations for Android</description>

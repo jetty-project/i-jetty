@@ -6,7 +6,7 @@
   <groupId>org.mortbay.ijetty</groupId>
   <artifactId>example-webapps-parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.1-SNAPSHOT</version>
+  <version>3.2-SNAPSHOT</version>
   <name>I-Jetty :: Example Webapps Parent</name>
   <description>Parent project for example webapps</description>
   <modules>
