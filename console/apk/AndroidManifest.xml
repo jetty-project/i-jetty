@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.mortbay.ijetty.console"
-  android:versionCode="31"
-  android:versionName="3.1-SNAPSHOT">
+  android:versionCode="32"
+  android:versionName="3.2-SNAPSHOT">
 
   <uses-sdk
     android:minSdkVersion="4" />
