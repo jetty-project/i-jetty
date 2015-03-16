@@ -11,7 +11,7 @@ browser.
 
 You can find more information at the i-jetty project at:
 
-   http://code.google.com/p/i-jetty/
+   http://github.com/jetty-project/i-jetty/
 
 
 Build Instructions

@@ -12,14 +12,14 @@ Building  from Source
 
 Depedencies
 -----------
-* Subversion
+* git
 * Java 1.6 
 * Maven
 
 
 Checkout source
 ---------------
-Check out the project from code.google.com:
+Check out the project from github.com:
 
     $ git clone https://github.com/jetty-project/i-jetty.git
 

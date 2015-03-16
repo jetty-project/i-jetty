@@ -536,9 +536,9 @@ public class IJetty extends Activity
         info.setText(Html.fromHtml(infoBuffer.toString())); 
 
         StringBuilder footerBuffer = new StringBuilder();
-        footerBuffer.append("<b>Project:</b> <a href=\"http://code.google.com/p/i-jetty\">http://code.google.com/p/i-jetty</a> <br/>");
-        footerBuffer.append("<b>Server:</b> http://www.eclipse.org/jetty <br/>");
-        footerBuffer.append("<b>Support:</b> http://www.intalio.com/jetty/services <br/>");
+        footerBuffer.append("<b>Project:</b> <a href=\"http://github.com/jetty-project/i-jetty\">http://github.com/jetty-project/i-jetty</a> <br/>");
+        footerBuffer.append("<b>Server:</b> http://www.eclipse.org/jetty/ <br/>");
+        footerBuffer.append("<b>Support:</b> https://webtide.com/ <br/>");
         footer.setText(Html.fromHtml(footerBuffer.toString()));
     }
 
