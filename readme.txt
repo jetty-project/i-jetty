@@ -21,7 +21,7 @@ Checkout source
 ---------------
 Check out the project from code.google.com:
 
-    $ svn checkout http://i-jetty.googlecode.com/svn/trunk/ i-jetty-read-only
+    $ git clone https://github.com/jetty-project/i-jetty.git
 
 
 Source structure
