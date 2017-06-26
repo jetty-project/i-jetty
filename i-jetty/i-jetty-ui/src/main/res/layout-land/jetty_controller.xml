@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:padding="4dip"
+  android:gravity="center_horizontal"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent">
+
+  <ImageView
+    android:src="@drawable/ijetty_logo"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:scaleType="fitXY" />
+
+  <TextView
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textAppearance="@style/small"
+    android:gravity="center"
+    android:id="@+id/info"/>
+      
+  <TextView
+     android:id="@+id/footer"
+     android:layout_width="fill_parent"
+     android:layout_height="wrap_content"
+     android:autoLink="web"/>
+     
+  <LinearLayout
+    android:padding="4dip"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+    <TableLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content">
+      <TableRow
+        android:layout_weight="1.0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+          android:id="@+id/start"
+          android:layout_weight="1.0"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/start_jetty" />
+        <Button
+          android:id="@+id/stop"
+          android:layout_weight="1.0"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/stop_jetty" />
+      </TableRow>
+      <TableRow
+        android:layout_weight="1.0"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+          android:id="@+id/config"
+          android:layout_weight="1.0"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/config_jetty" />
+        <Button
+          android:id="@+id/download"
+          android:layout_weight="1.0"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/download_webapp" />
+      </TableRow>
+    </TableLayout>
+    
+    <LinearLayout
+      android:paddingLeft="4dip"
+      android:orientation="vertical"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent">
+      <TextView
+       android:id="@+id/console_heading"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:textAppearance="@style/H1"
+       android:text="@string/console"/>  
+     
+    <ScrollView
+      android:id="@+id/consoleScroller"
+      android:scrollbars="vertical"
+      android:fillViewport="true"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+      <TextView
+        android:id="@+id/console"
+        android:textAppearance="@style/footer"
+        android:autoLink="none"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    </ScrollView>
+    </LinearLayout>
+  </LinearLayout>
+
+     
+</LinearLayout>
+
