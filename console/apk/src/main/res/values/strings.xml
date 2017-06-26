@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">I-Jetty Console Installer</string>
+    <string name="webapp_name">Console WebApp</string>
+    <string name="install">Install</string>
+    <string name="prerequisitesHeading">Prerequisites</string>
+    <string name="prerequisites">A version of I-Jetty appropriate to your Android release level must already be installed. You can download it from the Android Marketplace.</string>
+    <string name="info">This is the installer for the Console WebApp for I-Jetty, which is the port of Jetty - the popular open-source web container - for the Android environment.\n\nWhen installed into I-Jetty, this web app makes available information from your phone over the web, enabling you to browse and control your phone from your desktop browser, or any other device sharing the same LAN.\n\nFor more information about I-Jetty and other example web applications integrated with Android APIs, please visit http://github.com/jetty-project/i-jetty/.\n\nFor commercial support or custom I-Jetty developments please visit https://webtide.com/.
+</string>
+    <string name="notInstalled">I-Jetty is not installed. Please install it first.</string>
+    <string name="defaultError">An error has occurred. Unable to continue with installation.</string>
+    <string name="alreadyInstalled">A Console webapp is already installed. OK to re-install?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">Ok</string>
+    <string name="installing">Installing</string>
+    <string name="success">Installation completed successfully.</string>
+    <string name="errorExtracting">Error extracting war.</string>
+    <string name="jettyNotInstalled">Jetty is not installed.</string>
+</resources>
+
